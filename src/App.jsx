@@ -193,11 +193,13 @@ const HERO_CHIPS = [
   { label: 'Halo-Halo', chip: 'Desserts' },
 ];
 
-// "Your daily deals" cards. `img` → public/assets/deals/<img>.png
+// "Your daily deals" banners. `img` → public/assets/deals/<img>.png (full-bleed promo images)
 const DEALS = [
-  { off: '50% off', sub: '1st order', code: 'NEWPANDA', free: true, img: 'deal1' },
-  { off: 'Up to 50% off', sub: '', code: 'ADDTOCART', free: true, img: 'deal2' },
-  { off: '30% off', sub: '', cta: 'Order now', best: true, img: 'deal3' },
+  { img: 'deal1' },
+  { img: 'deal2' },
+  { img: 'deal3' },
+  { img: 'deal4' },
+  { img: 'deal5' },
 ];
 
 // "Top brands" row — restaurant ids. logo → public/assets/brands/<id>.png
@@ -281,8 +283,8 @@ function payName(p) {
   return p === 'cod' ? 'Cash on Delivery' : p === 'card' ? 'Credit / Debit Card' : 'GCash';
 }
 
-const B = '#d70f64';
-const BD = '#b00c52';
+const B = '#e8418a';
+const BD = '#cf2a72';
 const BT = '#fde7f0';
 const BG = 'rgba(215,15,100,.35)';
 
@@ -442,10 +444,11 @@ export default function App() {
         {s.screen === 'home' && (
           <>
             {/* Full-width greeting hero */}
-            <div style={{ background: `linear-gradient(115deg, ${BD} 0%, ${B} 48%, #ff5fa2 100%)`, position: 'relative', overflow: 'visible' }}>
-              <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
-                <div style={{ position: 'absolute', right: -40, top: -60, width: 360, height: 360, borderRadius: '50%', background: 'rgba(255,255,255,.08)' }} />
-                <div style={{ position: 'absolute', right: 160, bottom: -110, width: 280, height: 280, borderRadius: '50%', background: 'rgba(255,255,255,.07)' }} />
+            <div style={{ background: `linear-gradient(115deg, ${BD} 0%, ${B} 48%, #ff85b8 100%)`, position: 'relative', overflow: 'visible' }}>
+              <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+                {[820, 620, 440, 280].map(d => (
+                  <div key={d} style={{ position: 'absolute', bottom: 5 - d / 2, right: 125 - d / 2, width: d, height: d, borderRadius: '50%', background: 'rgba(255,255,255,.055)' }} />
+                ))}
               </div>
               <div style={{ maxWidth: 1240, margin: '0 auto', padding: '34px 22px 60px', position: 'relative' }}>
                 <div style={{ marginLeft: 266 }}>
@@ -507,29 +510,14 @@ export default function App() {
               {/* Right content */}
               <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 30, paddingTop: 22 }}>
 
-                {/* 25% off promo strip */}
-                <div style={{ background: '#ffe3ee', borderRadius: 16, padding: '18px 22px', display: 'flex', alignItems: 'center', gap: 16, position: 'relative', overflow: 'hidden' }}>
-                  <div style={{ fontSize: 38, flex: 'none' }}>🎁</div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 23, fontWeight: 800, letterSpacing: '-.5px', color: '#1c1c22' }}>Get 25% off</div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: B, marginTop: 2 }}>Max. discount ₱155, Min. order ₱220</div>
-                  </div>
-                  <div style={{ flex: 'none', background: BD, color: '#fff', fontWeight: 800, fontSize: 15, padding: '7px 12px', borderRadius: 9, fontVariantNumeric: 'tabular-nums' }}>43:20</div>
-                </div>
 
               {/* Your daily deals */}
               <section>
                 <h2 style={{ margin: '0 0 18px', fontSize: 26, fontWeight: 800, letterSpacing: '-.5px' }}>Your daily deals</h2>
                 <ScrollRow gap={18}>
                   {DEALS.map((d, i) => (
-                    <div key={i} style={{ flex: 'none', width: 300, height: 120, borderRadius: 14, background: B, color: '#fff', padding: 18, position: 'relative', overflow: 'hidden', cursor: 'pointer' }}>
-                      {d.best && <div style={{ fontSize: 12, fontWeight: 800 }}>♥ best seller</div>}
-                      <div style={{ fontSize: 24, fontWeight: 800, marginTop: d.best ? 4 : 0 }}>{d.off}</div>
-                      {d.sub && <div style={{ fontSize: 13, opacity: .9, marginTop: 2 }}>{d.sub}</div>}
-                      {d.code && <div style={{ display: 'inline-block', marginTop: 10, background: '#fff', color: B, fontSize: 11.5, fontWeight: 800, padding: '4px 9px', borderRadius: 7 }}>code {d.code}</div>}
-                      {d.cta && <div style={{ display: 'inline-block', marginTop: 10, background: 'rgba(255,255,255,.25)', fontSize: 11.5, fontWeight: 800, padding: '4px 11px', borderRadius: 7 }}>{d.cta} ❯</div>}
-                      {d.free && <div style={{ position: 'absolute', bottom: 14, left: 18, fontSize: 11.5, fontWeight: 700, background: 'rgba(255,255,255,.22)', padding: '3px 8px', borderRadius: 6 }}>Free delivery</div>}
-                      <Img src={`${A}/deals/${d.img}.png`} alt="deal" style={{ position: 'absolute', right: 0, top: 0, width: 130, height: 120, objectFit: 'cover' }} fallback={<div style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 54, opacity: .9 }}>🍱</div>} />
+                    <div key={i} style={{ flex: 'none', width: 272, height: 124, borderRadius: 14, overflow: 'hidden', cursor: 'pointer' }}>
+                      <Img src={`${A}/deals/${d.img}.png`} alt="deal" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} fallback={<div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 54, opacity: .9, color: '#fff' }}>🍱</div>} />
                     </div>
                   ))}
                 </ScrollRow>
@@ -873,13 +861,28 @@ function Img({ src, alt, style, fallback }) {
 // Horizontal scroller with a circular "next" arrow on the right.
 function ScrollRow({ children, gap = 18 }) {
   const ref = useRef(null);
+  const [canLeft, setCanLeft] = useState(false);
+  const [canRight, setCanRight] = useState(true);
+  const update = () => {
+    const el = ref.current;
+    if (!el) return;
+    setCanLeft(el.scrollLeft > 1);
+    setCanRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 1);
+  };
+  const arrowBase = { position: 'absolute', top: '50%', transform: 'translateY(-50%)', width: 44, height: 44, borderRadius: '50%', background: '#fff', border: '1px solid #ececef', cursor: 'pointer', fontSize: 20, color: '#1c1c22', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 14px rgba(0,0,0,.14)', transition: 'transform .1s', zIndex: 2 };
   return (
     <div style={{ position: 'relative' }}>
-      <div ref={ref} className="hide-scroll" style={{ display: 'flex', gap, overflowX: 'auto', scrollBehavior: 'smooth', paddingBottom: 4 }}>
+      <div ref={ref} onScroll={update} className="hide-scroll" style={{ display: 'flex', gap, overflowX: 'auto', scrollBehavior: 'smooth', paddingBottom: 4 }}>
         {children}
       </div>
-      <button onClick={() => ref.current?.scrollBy({ left: 320, behavior: 'smooth' })} className="scroll-arrow"
-        style={{ position: 'absolute', right: -6, top: '50%', transform: 'translateY(-50%)', width: 44, height: 44, borderRadius: '50%', background: '#fff', border: '1px solid #ececef', cursor: 'pointer', fontSize: 20, color: '#1c1c22', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 14px rgba(0,0,0,.14)', transition: 'transform .1s' }}>→</button>
+      {canLeft && (
+        <button onClick={() => ref.current?.scrollBy({ left: -320, behavior: 'smooth' })} className="scroll-arrow"
+          style={{ ...arrowBase, left: -6 }}>←</button>
+      )}
+      {canRight && (
+        <button onClick={() => ref.current?.scrollBy({ left: 320, behavior: 'smooth' })} className="scroll-arrow"
+          style={{ ...arrowBase, right: -6 }}>→</button>
+      )}
     </div>
   );
 }
