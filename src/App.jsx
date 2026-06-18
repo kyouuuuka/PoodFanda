@@ -1,4 +1,4 @@
-import { useReducer, useRef, useState } from 'react';
+import { useReducer, useRef, useState, useEffect } from 'react';
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -76,26 +76,6 @@ const RAW = [
     { name: 'Mashed Potato', desc: 'Creamy mash with savory gravy', price: 45, cat: 'Sides', emoji: '🥔' },
     { name: 'Buttermilk Biscuit', desc: 'Soft, flaky biscuit with honey', price: 49, cat: 'Sides', emoji: '🧈' },
     { name: 'Mountain Dew (Regular)', desc: 'Ice-cold citrus soda', price: 55, cat: 'Drinks', emoji: '🥤' },
-  ]},
-  { id: 'maxs', name: "Max's Restaurant", emoji: '🍽️', color: '#6b1f2a', tagline: 'The house that fried chicken built', rating: 4.6, time: '30–45 min', fee: 59, cuisines: ['Filipino'], menu: [
-    { name: "Max's Fried Chicken (Quarter)", desc: 'Sarap-to-the-bones golden fried chicken', price: 285, cat: 'Specialties', emoji: '🍗', badge: 'Bestseller' },
-    { name: 'Kare-Kare (Beef)', desc: 'Oxtail in peanut sauce with bagoong', price: 365, cat: 'Specialties', emoji: '🍲' },
-    { name: 'Crispy Pata', desc: 'Deep-fried pork leg, crackling skin', price: 545, cat: 'Specialties', emoji: '🍖' },
-    { name: 'Sizzling Sisig', desc: 'Chopped pork on a sizzling plate', price: 255, cat: 'Specialties', emoji: '🔥', badge: 'Popular' },
-    { name: 'Lumpiang Sariwa', desc: 'Fresh vegetable spring roll with peanut sauce', price: 155, cat: 'Appetizers', emoji: '🌯' },
-    { name: 'Chicken Sotanghon Soup', desc: 'Comforting glass-noodle chicken soup', price: 145, cat: 'Appetizers', emoji: '🍜' },
-    { name: 'Caramel Bar', desc: 'Signature layered caramel cake', price: 95, cat: 'Desserts', emoji: '🍰' },
-    { name: 'Halo-Halo', desc: "Max's loaded shaved-ice classic", price: 125, cat: 'Desserts', emoji: '🍧' },
-  ]},
-  { id: 'goldi', name: 'Goldilocks', emoji: '🍰', color: '#8a1f3c', tagline: 'Cakes & Pinoy classics', rating: 4.5, time: '25–40 min', fee: 39, cuisines: ['Desserts', 'Filipino'], menu: [
-    { name: 'Mocha Chiffon Cake (Slice)', desc: 'Light chiffon with mocha icing', price: 85, cat: 'Cakes', emoji: '🍰', badge: 'Bestseller' },
-    { name: 'Ube Cake (Slice)', desc: 'Purple yam chiffon with ube icing', price: 95, cat: 'Cakes', emoji: '🎂' },
-    { name: 'Brazo de Mercedes (Slice)', desc: 'Soft meringue roll with custard', price: 95, cat: 'Cakes', emoji: '🍮' },
-    { name: 'Leche Flan', desc: 'Rich caramel custard', price: 99, cat: 'Cakes', emoji: '🍮' },
-    { name: 'Polvoron (3pc)', desc: 'Buttery powdered milk candy', price: 65, cat: 'Pinoy Delicacies', emoji: '🍬' },
-    { name: 'Pancit Bihon (Solo Bilao)', desc: 'Stir-fried rice noodles with veggies', price: 145, cat: 'Pinoy Eats', emoji: '🍜', badge: 'Popular' },
-    { name: 'Dinuguan', desc: 'Savory pork blood stew', price: 125, cat: 'Pinoy Eats', emoji: '🍛' },
-    { name: 'Embutido', desc: 'Filipino-style steamed meatloaf', price: 135, cat: 'Pinoy Eats', emoji: '🥩' },
   ]},
   { id: 'shakeys', name: "Shakey's", emoji: '🍕', color: '#d2122e', tagline: 'Pizza, Mojos & good times', rating: 4.6, time: '30–50 min', fee: 49, cuisines: ['Pizza'], menu: [
     { name: "Manager's Choice Pizza", desc: 'Loaded with all the best toppings', price: 489, cat: 'Pizza', emoji: '🍕', badge: 'Bestseller' },
@@ -202,8 +182,8 @@ const DEALS = [
   { img: 'deal5' },
 ];
 
-// "Top brands" row — restaurant ids. logo → public/assets/brands/<id>.png
-const TOP_BRANDS = ['jb', 'chowking', 'potato', 'kfc', 'bonchon', 'greenwich', 'mcdo', 'shakeys'];
+// "Top brands" row — restaurant ids. logo → public/assets/brands/<id>.webp
+const TOP_BRANDS = ['jb', 'chowking', 'kfc', 'bonchon', 'greenwich', 'mcdo', 'shakeys', 'inasal', 'armynavy'];
 
 // ─── State ───────────────────────────────────────────────────────────────────
 
@@ -290,8 +270,22 @@ const BG = 'rgba(215,15,100,.35)';
 
 // ─── App ─────────────────────────────────────────────────────────────────────
 
+// Tracks viewport width so inline styles can react to screen size.
+function useViewport() {
+  const [w, setW] = useState(typeof window !== 'undefined' ? window.innerWidth : 1280);
+  useEffect(() => {
+    const on = () => setW(window.innerWidth);
+    window.addEventListener('resize', on);
+    return () => window.removeEventListener('resize', on);
+  }, []);
+  return w;
+}
+
 export default function App() {
   const [s, dispatch] = useReducer(reducer, init);
+  const vw = useViewport();
+  const compact = vw < 980;   // tablet & below — hide left filters, stack hero
+  const narrow = vw < 640;    // phone — trim header, full-width search, 1-col grid
   const toastTimer = useRef(null);
 
   function toast(msg) {
@@ -350,7 +344,12 @@ export default function App() {
         *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
         ::-webkit-scrollbar{height:6px;width:8px;}
         ::-webkit-scrollbar-thumb{background:rgba(0,0,0,.16);border-radius:999px;}
-        .rest-card:hover{transform:translateY(-4px);}
+        .rest-img{transition:transform .3s ease;}
+        .rest-card:hover .rest-img{transform:scale(1.07);}
+        .brand-item{position:relative;}
+        .brand-item:hover{z-index:2;}
+        .brand-logo{transition:transform .2s ease, filter .2s ease;}
+        .brand-item:hover .brand-logo{transform:scale(1.12);filter:drop-shadow(0 4px 8px rgba(0,0,0,.15));}
         .hide-scroll::-webkit-scrollbar{display:none;}
         .hide-scroll{scrollbar-width:none;}
         .scroll-arrow:hover{transform:translateY(-50%) scale(1.08);}
@@ -384,7 +383,7 @@ export default function App() {
               </svg>
               <span style={{ fontWeight: 800, fontSize: 23, letterSpacing: '-.6px', color: '#ff2b85', transform: 'translateY(-3px)' }}>poodfanda</span>
             </div>
-            <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', display: 'flex', alignItems: 'center', gap: 6, color: '#1c1c22', fontSize: 14, fontWeight: 600, flex: 'none' }}>
+            <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', display: compact ? 'none' : 'flex', alignItems: 'center', gap: 6, color: '#1c1c22', fontSize: 14, fontWeight: 600, flex: 'none' }}>
               <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                   <path fillRule="evenodd" clipRule="evenodd" d="M12.3224 2C16.9186 2 20.6446 5.72596 20.6446 10.3222C20.6446 11.8203 20.2487 13.226 19.5559 14.4404L18.4715 15.8911C17.8726 16.5162 16.6838 17.706 14.9052 19.4602L13.0213 21.313C12.6322 21.6947 12.0092 21.6946 11.6203 21.3128L7.91833 17.6571L6.59648 16.3282C6.2846 16.0104 5.78156 15.3801 5.08734 14.4375C4.3955 13.2238 4.00024 11.8192 4.00024 10.3222C4.00024 5.72596 7.72621 2 12.3224 2ZM12.3224 3.5C8.55463 3.5 5.50024 6.55439 5.50024 10.3222C5.50024 11.4141 5.75604 12.466 6.23886 13.4136L6.37241 13.66L6.96356 14.5436L7.18196 14.7804L7.77128 15.385C8.23371 15.8535 8.88147 16.5011 9.70239 17.3151C10.6866 18.2861 11.4247 19.0143 11.9168 19.4998C11.9577 19.5401 11.9986 19.5805 12.0395 19.6209C12.1953 19.7745 12.4456 19.7745 12.6013 19.6209L12.6754 19.5478L15.3017 16.9571L17.2047 15.0461C17.3404 14.9068 17.4503 14.7925 17.5337 14.7039L17.6874 14.534L18.2724 13.659L18.4049 13.4158C18.84 12.5624 19.0911 11.6245 19.1369 10.6487L19.1446 10.3222C19.1446 6.55439 16.0902 3.5 12.3224 3.5ZM12.3224 6.75C14.3935 6.75 16.0724 8.42893 16.0724 10.5C16.0724 12.5711 14.3935 14.25 12.3224 14.25C10.2513 14.25 8.57241 12.5711 8.57241 10.5C8.57241 8.42893 10.2513 6.75 12.3224 6.75ZM12.3224 8.25C11.0798 8.25 10.0724 9.25736 10.0724 10.5C10.0724 11.7426 11.0798 12.75 12.3224 12.75C13.5651 12.75 14.5724 11.7426 14.5724 10.5C14.5724 9.25736 13.5651 8.25 12.3224 8.25Z" />
@@ -397,15 +396,15 @@ export default function App() {
               <svg aria-hidden="true" focusable="false" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path fillRule="evenodd" clipRule="evenodd" d="M12 11.5C13.933 11.5 15.5 9.933 15.5 8C15.5 6.067 13.933 4.5 12 4.5C10.067 4.5 8.50001 6.067 8.50001 8C8.50001 9.933 10.067 11.5 12 11.5ZM10.0566 14.2045C10.679 14.071 11.33 14.0001 12 14C12.0003 14 12.0007 14 12.001 14C12.6709 14 13.3218 14.0708 13.9442 14.2042C17.1008 14.881 19.5251 17.1688 19.9907 20.0041C20.0802 20.5491 19.6241 21 19.0718 21H4.93021C4.37792 21 3.92177 20.5491 4.01127 20.0041C4.47684 17.1692 6.90063 14.8815 10.0566 14.2045ZM10.1743 12.6562C8.31584 11.9269 7.00001 10.1171 7.00001 8C7.00001 5.23858 9.23858 3 12 3C14.7614 3 17 5.23858 17 8C17 10.1169 15.6845 11.9265 13.8263 12.656C13.2609 12.8779 12.6452 12.9999 12.001 13C12.0007 13 12.0003 13 12 13C11.3557 13 10.7399 12.8781 10.1743 12.6562ZM18.3216 19.5C17.5644 17.2951 15.1351 15.5 12.001 15.5C8.86687 15.5 6.43759 17.2951 5.6804 19.5H18.3216Z" />
               </svg>
-              Profile <span style={{ fontSize: 11, opacity: .7 }}>▾</span>
+              {!narrow && <>Profile <span style={{ fontSize: 11, opacity: .7 }}>▾</span></>}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 14, fontWeight: 700, color: '#1c1c22', cursor: 'default', flex: 'none' }}>
+            <div style={{ display: narrow ? 'none' : 'flex', alignItems: 'center', gap: 5, fontSize: 14, fontWeight: 700, color: '#1c1c22', cursor: 'default', flex: 'none' }}>
               <svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path fillRule="evenodd" clipRule="evenodd" d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12ZM10.6635 19.3813C9.79267 18.1369 9.11658 16.9361 8.65036 15.75H5.50337C6.58707 17.6234 8.45784 18.9845 10.6635 19.3813ZM4.84335 14.25H8.17237C7.98964 13.4966 7.89523 12.7442 7.8931 11.9853C7.891 11.2379 7.97842 10.4952 8.15242 9.75H4.84335C4.62027 10.4603 4.5 11.2161 4.5 12C4.5 12.7839 4.62027 13.5397 4.84335 14.25ZM5.50337 8.25H8.61663C9.06884 7.07159 9.72906 5.8752 10.586 4.63309C8.41405 5.04747 6.57436 6.39858 5.50337 8.25ZM18.4966 15.75C17.4415 17.574 15.6402 18.9124 13.5102 19.3479C14.3698 18.1154 15.038 16.9255 15.5 15.75H18.4966ZM19.1566 14.25H15.978C16.1608 13.4966 16.2552 12.7442 16.2573 11.9853C16.2594 11.2379 16.172 10.4952 15.998 9.75H19.1566C19.3797 10.4603 19.5 11.2161 19.5 12C19.5 12.7839 19.3797 13.5397 19.1566 14.25ZM18.4966 8.25H15.5338C15.0859 7.08283 14.4339 5.89803 13.5888 4.66862C15.6845 5.12065 17.4545 6.44847 18.4966 8.25ZM12.0752 5.12312C12.8682 6.22942 13.4764 7.26325 13.9116 8.25H10.2388C10.674 7.26325 11.2822 6.22942 12.0752 5.12312ZM9.69994 9.75H14.4504C14.6591 10.5113 14.7593 11.2505 14.7573 11.981C14.7552 12.7258 14.6467 13.4775 14.4269 14.25H9.72354C9.50364 13.4775 9.39519 12.7258 9.3931 11.981C9.39105 11.2505 9.49129 10.5113 9.69994 9.75ZM10.2783 15.75H13.8721C13.4389 16.7093 12.8428 17.7109 12.0752 18.7788C11.3076 17.7109 10.7115 16.7093 10.2783 15.75Z" />
               </svg>
               EN ▾
             </div>
-            <button className="btn-icon" style={{ width: 38, height: 38, borderRadius: '50%', background: 'transparent', border: 'none', cursor: 'pointer', color: '#1c1c22', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none', transition: 'background .15s' }}>
+            <button className="btn-icon" style={{ width: 38, height: 38, borderRadius: '50%', background: 'transparent', border: 'none', cursor: 'pointer', color: '#1c1c22', display: narrow ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none', transition: 'background .15s' }}>
               <svg aria-hidden="true" focusable="false" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path fillRule="evenodd" d="M18.338 4.438c2.764 1.316 4.015 4.757 2.795 7.686-1.548 3.243-4.436 5.835-8.665 7.776-.254.114-.543.13-.807.05l-.13-.05c-4.228-1.94-7.116-4.533-8.664-7.776-1.22-2.93.031-6.37 2.795-7.686 1.89-.9 3.826-.315 5.378.855.112.084.246.195.403.333l.286.257a.4.4 0 00.542 0l.315-.283c.145-.125.27-.228.374-.307 1.555-1.171 3.49-1.754 5.378-.855zm-.644 1.355c-1.178-.56-2.506-.3-3.831.699l-.151.12c-.115.096-.258.222-.427.376-.207.19-.553.467-1.038.83a.4.4 0 01-.487-.007 99.836 99.836 0 00-.909-.708l-.13-.11-.158-.143a7.024 7.024 0 00-.426-.36c-1.323-.997-2.652-1.258-3.83-.697-2.032.966-2.972 3.553-2.086 5.685 1.335 2.798 3.822 5.087 7.52 6.863l.259.122.259-.121c3.561-1.711 5.998-3.895 7.34-6.493l.149-.301c.888-2.133.034-4.627-1.867-5.66l-.187-.095z" />
               </svg>
@@ -422,8 +421,8 @@ export default function App() {
             </button>
           </div>
           {/* Nav row: tabs · search */}
-          <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 22px', display: 'flex', alignItems: 'flex-end', gap: 18 }}>
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 26, flex: 'none' }}>
+          <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 22px', display: 'flex', alignItems: 'flex-end', gap: 18, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: narrow ? 16 : 26, flex: 'none', overflowX: 'auto' }} className="hide-scroll">
               {[[NavIcons.delivery, 'Delivery', true], [NavIcons.pickup, 'Pick-up', false], [NavIcons.pandamart, 'pandamart', false], [NavIcons.shops, 'Shops', false]].map(([icon, label, active]) => (
                 <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 7, paddingBottom: 12, borderBottom: `2.5px solid ${active ? '#1c1c22' : 'transparent'}`, cursor: 'pointer', fontWeight: active ? 800 : 600, fontSize: 15, color: active ? '#1c1c22' : '#8a8a93' }}>
                   <span style={{ display: 'inline-flex' }}>{icon}</span>{label}
@@ -431,8 +430,10 @@ export default function App() {
               ))}
             </div>
             <div style={{ flex: 1 }} />
-            <div style={{ display: 'flex', alignItems: 'center', gap: 9, background: '#f1f1f3', borderRadius: 999, padding: '11px 18px', width: 420, maxWidth: '45%', alignSelf: 'center', marginBottom: 8 }}>
-              <span style={{ fontSize: 15, opacity: .55 }}>🔍</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 9, background: '#f1f1f3', borderRadius: 999, padding: '11px 18px', width: narrow ? '100%' : 420, maxWidth: narrow ? '100%' : '45%', alignSelf: 'center', marginBottom: narrow ? 12 : 8 }}>
+              <span style={{ display: 'inline-flex', opacity: .55, flex: 'none' }}>
+                <svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" fillRule="evenodd" clipRule="evenodd" d="M10.5 2C15.1944 2 19 5.80558 19 10.5C19 12.4076 18.3716 14.1684 17.3106 15.5867C17.2902 15.614 17.2661 15.6455 17.2383 15.6811C17.1139 15.8403 17.1279 16.0674 17.2708 16.2102L20.8386 19.7747C21.1316 20.0675 21.1318 20.5424 20.839 20.8354C20.5728 21.1018 20.1562 21.1261 19.8625 20.9084L19.7783 20.8358L16.2103 17.2705C16.0675 17.1279 15.8408 17.114 15.6817 17.2381C15.655 17.2588 15.6311 17.2772 15.6099 17.2932C14.1876 18.3648 12.418 19 10.5 19C5.80558 19 2 15.1944 2 10.5C2 5.80558 5.80558 2 10.5 2ZM10.5 3.5C6.63401 3.5 3.5 6.63401 3.5 10.5C3.5 14.366 6.63401 17.5 10.5 17.5C14.366 17.5 17.5 14.366 17.5 10.5C17.5 6.63401 14.366 3.5 10.5 3.5Z" /></svg>
+              </span>
               <input value={s.q} onChange={e => dispatch({ type: 'SET_Q', v: e.target.value })}
                 placeholder="Search for restaurants, cuisines, and dishes"
                 style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%', font: 'inherit', fontSize: 14.5, color: '#1c1c22' }} />
@@ -450,9 +451,9 @@ export default function App() {
                   <div key={d} style={{ position: 'absolute', bottom: 5 - d / 2, right: 125 - d / 2, width: d, height: d, borderRadius: '50%', background: 'rgba(255,255,255,.055)' }} />
                 ))}
               </div>
-              <div style={{ maxWidth: 1240, margin: '0 auto', padding: '34px 22px 60px', position: 'relative' }}>
-                <div style={{ marginLeft: 266 }}>
-                  <h1 style={{ margin: 0, color: '#fff', fontSize: 34, fontWeight: 800, letterSpacing: '-.8px' }}>Good Afternoon</h1>
+              <div style={{ maxWidth: 1240, margin: '0 auto', padding: narrow ? '26px 22px 40px' : '34px 22px 60px', position: 'relative' }}>
+                <div style={{ marginLeft: compact ? 0 : 266 }}>
+                  <h1 style={{ margin: 0, color: '#fff', fontSize: narrow ? 27 : 34, fontWeight: 800, letterSpacing: '-.8px' }}>Good Afternoon</h1>
                   <p style={{ margin: '6px 0 0', color: 'rgba(255,255,255,.95)', fontSize: 18, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 7 }}>Ready for something you&apos;ll love? <span style={{ opacity: .8, fontSize: 15 }}>ⓘ</span></p>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginTop: 22, flexWrap: 'wrap' }}>
                     <button onClick={() => dispatch({ type: 'SET_CHIP', v: 'All' })} className="hero-chip"
@@ -469,6 +470,7 @@ export default function App() {
                   </div>
                 </div>
               </div>
+              {!compact && (
               <Img src={`${A}/mascot.png`} alt="" style={{ position: 'absolute', right: 48, bottom: 0, width: 230, height: 196, objectFit: 'contain' }}
                 fallback={
                   <div style={{ position: 'absolute', right: 80, bottom: 40, width: 168, height: 168, zIndex: 20 }}>
@@ -478,12 +480,13 @@ export default function App() {
                     ))}
                   </div>
                 } />
+              )}
             </div>
 
             <main style={{ maxWidth: 1240, margin: '0 auto', padding: '0 22px 24px', display: 'flex', gap: 26, alignItems: 'flex-start' }}>
 
-              {/* Left filters — floats up over the hero */}
-              <aside style={{ width: 240, flex: 'none', marginTop: -150, position: 'sticky', top: 132, alignSelf: 'flex-start' }}>
+              {/* Left filters — floats up over the hero (hidden on tablet & below) */}
+              <aside style={{ display: compact ? 'none' : 'block', width: 240, flex: 'none', marginTop: -150, position: 'sticky', top: 132, alignSelf: 'flex-start' }}>
                 <div style={{ background: '#fff', borderRadius: 16, padding: 20, boxShadow: '0 8px 28px rgba(20,20,30,.14)', maxHeight: 'calc(100vh - 150px)', overflowY: 'auto' }}>
                   <div style={{ fontWeight: 800, fontSize: 19, marginBottom: 16 }}>Filters</div>
                   <div style={{ fontSize: 13, fontWeight: 700, color: '#8a8a93', marginBottom: 8 }}>Sort by</div>
@@ -531,9 +534,9 @@ export default function App() {
                     const r = RESTAURANTS.find(x => x.id === id);
                     if (!r) return null;
                     return (
-                      <div key={id} onClick={() => { dispatch({ type: 'OPEN_REST', id }); window.scrollTo(0, 0); }}
+                      <div key={id} onClick={() => { dispatch({ type: 'OPEN_REST', id }); window.scrollTo(0, 0); }} className="brand-item"
                         style={{ flex: 'none', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
-                        <Img src={`${A}/brands/${id}.png`} alt={r.name} style={{ width: 64, height: 64, borderRadius: 12, objectFit: 'cover', background: '#f1f1f3' }}
+                        <Img src={`${A}/brands/${id}.webp`} alt={r.name} className="brand-logo" style={{ width: 64, height: 64, objectFit: 'contain' }}
                           fallback={<div style={{ width: 64, height: 64, borderRadius: 12, background: r.grad, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 30 }}>{r.emoji}</div>} />
                         <div>
                           <div style={{ fontWeight: 800, fontSize: 15 }}>{r.name}</div>
@@ -559,14 +562,16 @@ export default function App() {
                     <div style={{ fontSize: 14, marginTop: 4 }}>Try a different search or category.</div>
                   </div>
                 ) : (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))', gap: 24 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: narrow ? '1fr' : 'repeat(auto-fill,minmax(280px,1fr))', gap: narrow ? 18 : 24 }}>
                     {visibleRestaurants.map((r, i) => (
                       <div key={r.id} onClick={() => { dispatch({ type: 'OPEN_REST', id: r.id }); window.scrollTo(0, 0); }} className="rest-card"
                         style={{ cursor: 'pointer', transition: 'transform .16s ease' }}>
                         <div style={{ position: 'relative', height: 168, borderRadius: 14, overflow: 'hidden' }}>
-                          <Img src={`${A}/restaurants/${r.id}.jpg`} alt={r.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                            fallback={<div style={{ width: '100%', height: '100%', background: r.grad, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 66 }}>{r.emoji}</div>} />
-                          <div style={{ position: 'absolute', top: 12, right: 12, width: 32, height: 32, borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, boxShadow: '0 2px 8px rgba(0,0,0,.15)' }}>🤍</div>
+                          <Img src={`${A}/restaurants/${r.id}.webp`} alt={r.name} className="rest-img" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                            fallback={<div className="rest-img" style={{ width: '100%', height: '100%', background: r.grad, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 66 }}>{r.emoji}</div>} />
+                          <div style={{ position: 'absolute', top: 12, right: 12, width: 28, height: 28, borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1c1c22', boxShadow: '0 2px 8px rgba(0,0,0,.15)' }}>
+                            <svg aria-hidden="true" focusable="false" width="19" height="19" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" fillRule="evenodd" clipRule="evenodd" d="M12.6217 2.82875C14.6366 3.8152 15.5488 6.39602 14.6592 8.59316C13.5308 11.0256 11.4249 12.9696 8.3415 14.4254C8.15614 14.5107 7.94533 14.5229 7.75273 14.4618L7.65776 14.425C4.57478 12.9693 2.46912 11.0254 1.34078 8.59316C0.451161 6.39602 1.36338 3.8152 3.37828 2.82875C4.83682 2.11468 6.33306 2.64718 7.49473 3.62706C7.55809 3.68051 7.63615 3.75107 7.72889 3.83874L7.72892 3.83871C7.88199 3.98341 8.11731 3.98336 8.27032 3.8386C8.34183 3.77095 8.40276 3.71543 8.45314 3.67203C9.62526 2.66225 11.1429 2.10474 12.6217 2.82875ZM11.8696 4.45404C11.1697 4.11137 10.2881 4.36724 9.41854 5.19403L9.24485 5.36699L8.28326 6.36823C8.12801 6.52989 7.87475 6.53148 7.71758 6.37179C7.71631 6.3705 7.71504 6.36919 7.71378 6.36787L6.75338 5.36542C5.83294 4.40468 4.87775 4.08814 4.13039 4.45404C2.96994 5.02217 2.42026 6.5773 2.92018 7.81797C3.76446 9.63786 5.30414 11.1633 7.59598 12.391L7.82073 12.5071C7.93328 12.5652 8.06585 12.5655 8.17856 12.5077C8.30589 12.4425 8.40456 12.391 8.47457 12.353C10.6006 11.2014 12.0681 9.79624 12.9017 8.18989L13.0437 7.90114C13.5554 6.63747 13.0778 5.16307 12.024 4.53751L11.8696 4.45404Z" /></svg>
+                          </div>
                           {i % 3 === 0 && <div style={{ position: 'absolute', bottom: 12, right: 12, background: '#3b3b44', color: '#fff', fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 6 }}>Ad</div>}
                         </div>
                         <div style={{ padding: '12px 2px 0' }}>
@@ -601,6 +606,7 @@ export default function App() {
           <main>
             <div style={{ position: 'relative', height: 196, background: R.grad, overflow: 'hidden' }}>
               <div style={{ position: 'absolute', right: 24, bottom: -18, fontSize: 150, opacity: .22 }}>{R.emoji}</div>
+              <Img src={`${A}/restaurants/${R.id}.webp`} alt={R.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} fallback={null} />
               <button onClick={() => { dispatch({ type: 'GO_HOME' }); window.scrollTo(0, 0); }} className="back-btn"
                 style={{ position: 'absolute', top: 16, left: 16, width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,.92)', border: 'none', cursor: 'pointer', fontSize: 22, fontWeight: 700, color: '#1c1c22', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 3px 10px rgba(0,0,0,.18)', transition: 'transform .1s' }}>‹</button>
             </div>
@@ -852,10 +858,10 @@ export default function App() {
 }
 
 // Local image with graceful fallback — shows `fallback` until the file exists at `src`.
-function Img({ src, alt, style, fallback }) {
+function Img({ src, alt, style, fallback, className }) {
   const [err, setErr] = useState(false);
   if (err || !src) return fallback;
-  return <img src={src} alt={alt} style={style} onError={() => setErr(true)} />;
+  return <img src={src} alt={alt} style={style} className={className} onError={() => setErr(true)} />;
 }
 
 // Horizontal scroller with a circular "next" arrow on the right.
@@ -872,7 +878,7 @@ function ScrollRow({ children, gap = 18 }) {
   const arrowBase = { position: 'absolute', top: '50%', transform: 'translateY(-50%)', width: 44, height: 44, borderRadius: '50%', background: '#fff', border: '1px solid #ececef', cursor: 'pointer', fontSize: 20, color: '#1c1c22', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 14px rgba(0,0,0,.14)', transition: 'transform .1s', zIndex: 2 };
   return (
     <div style={{ position: 'relative' }}>
-      <div ref={ref} onScroll={update} className="hide-scroll" style={{ display: 'flex', gap, overflowX: 'auto', scrollBehavior: 'smooth', paddingBottom: 4 }}>
+      <div ref={ref} onScroll={update} className="hide-scroll" style={{ display: 'flex', gap, overflowX: 'auto', scrollBehavior: 'smooth', padding: '10px 0' }}>
         {children}
       </div>
       {canLeft && (
