@@ -1,4 +1,4 @@
-import { useReducer, useEffect, useRef } from 'react';
+import { useReducer, useRef, useState } from 'react';
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -150,7 +150,58 @@ const RESTAURANTS = RAW.map(r => {
   return { ...r, grad, menu };
 });
 
-const CHIPS = ['All', 'Chicken', 'Burgers', 'Pizza', 'Filipino', 'Korean', 'Snacks', 'Desserts'];
+// Asset base — drop images into public/assets/… and they appear automatically.
+const A = '/assets';
+
+// Nav tab icons. Inherit color via currentColor from the tab's text color.
+const NavIcons = {
+  delivery: (
+    <svg aria-hidden="true" focusable="false" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path fillRule="evenodd" clipRule="evenodd" d="M14.4729 5C14.0587 5 13.7229 5.33566 13.7229 5.74971C13.7229 6.16376 14.0587 6.49941 14.4729 6.49941H17.1729C17.2833 6.49941 17.3729 6.58896 17.3729 6.69941V9.38586C17.3729 9.42859 17.3592 9.4702 17.3338 9.50458L14.154 13.8153C14.1163 13.8664 14.0566 13.8965 13.9931 13.8965H10.3729C10.2624 13.8965 10.1729 13.807 10.1729 13.6965V9.69816C10.1729 9.28411 9.83708 8.94846 9.42287 8.94846H6.02287C5.01565 8.94846 4.19446 9.18295 3.55495 9.62085C2.91419 10.0596 2.51456 10.6624 2.28321 11.297C1.833 12.5318 1.99469 13.9438 2.25118 14.8503C2.34251 15.1731 2.63726 15.3959 2.97287 15.3959H3.57306C3.52524 15.6066 3.5 15.8259 3.5 16.0511C3.5 17.6797 4.82076 18.9999 6.45 18.9999C8.07924 18.9999 9.4 17.6797 9.4 16.0511C9.4 15.8259 9.37476 15.6066 9.32694 15.3959H14.3718C14.6736 15.3959 14.9574 15.2527 15.1365 15.0099L18.6875 10.196C18.8079 10.0328 18.8729 9.83526 18.8729 9.63243V5.94963C18.8729 5.42516 18.4475 5 17.9229 5H14.4729ZM7.74379 15.3959H5.15621C5.05631 15.5927 5 15.8153 5 16.0511C5 16.8516 5.64919 17.5005 6.45 17.5005C7.25081 17.5005 7.9 16.8516 7.9 16.0511C7.9 15.8153 7.84369 15.5927 7.74379 15.3959ZM8.67287 13.8565C8.67287 13.8786 8.65496 13.8965 8.63287 13.8965H3.57325C3.46237 13.2317 3.45914 12.4506 3.69253 11.8104C3.83701 11.4141 4.06488 11.0892 4.40266 10.8579C4.74169 10.6257 5.25009 10.4479 6.02287 10.4479H8.63287C8.65496 10.4479 8.67287 10.4658 8.67287 10.4879V13.8565Z" />
+      <path d="M4.52344 5.99961C4.10922 5.99961 3.77344 6.3354 3.77344 6.74961C3.77344 7.16382 4.10922 7.49961 4.52344 7.49961H9.42344C9.83765 7.49961 10.1734 7.16382 10.1734 6.74961C10.1734 6.3354 9.83765 5.99961 9.42344 5.99961H4.52344Z" />
+      <path fillRule="evenodd" clipRule="evenodd" d="M16.0957 16.0512C16.0957 14.4225 17.4165 13.1023 19.0457 13.1023C20.6749 13.1023 21.9957 14.4225 21.9957 16.0512C21.9957 17.6798 20.6749 19 19.0457 19C17.4165 19 16.0957 17.6798 16.0957 16.0512ZM19.0457 14.6017C18.2449 14.6017 17.5957 15.2507 17.5957 16.0512C17.5957 16.8517 18.2449 17.5006 19.0457 17.5006C19.8465 17.5006 20.4957 16.8517 20.4957 16.0512C20.4957 15.2507 19.8465 14.6017 19.0457 14.6017Z" />
+    </svg>
+  ),
+  pickup: (
+    <svg aria-hidden="true" focusable="false" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path fillRule="evenodd" clipRule="evenodd" d="M10.978 7.6715C11.3804 7.76979 11.6269 8.17567 11.5286 8.57805L10.4015 13.1922C10.1984 14.0233 10.5609 14.8897 11.2953 15.3287L12.4349 16.0098C13.5296 16.6641 14.4352 17.592 15.0627 18.7022L16.1529 20.631C16.3567 20.9916 16.2296 21.4492 15.869 21.653C15.5084 21.8568 15.0509 21.7297 14.8471 21.3691L13.7569 19.4403C13.2574 18.5566 12.5366 17.8181 11.6654 17.2974L10.5258 16.6162C9.22642 15.8396 8.5851 14.3067 8.94431 12.8362L10.0714 8.2221C10.1697 7.81972 10.5756 7.57321 10.978 7.6715Z" />
+      <path fillRule="evenodd" clipRule="evenodd" d="M14.3325 8.36177C14.7402 8.43496 15.0114 8.8248 14.9382 9.23249L14.2 9.09997C14.9382 9.23249 14.9382 9.23239 14.9382 9.23249L14.9375 9.23651L14.9357 9.24613L14.9292 9.2815C14.9235 9.31205 14.9151 9.35628 14.9042 9.41253C14.8824 9.52499 14.8502 9.68571 14.8085 9.8813C14.7253 10.2717 14.6033 10.8048 14.4485 11.3723C14.2945 11.9371 14.1041 12.5502 13.882 13.0954C13.6695 13.6168 13.3926 14.1679 13.0302 14.5302C12.7373 14.8231 12.2625 14.8231 11.9696 14.5302C11.6767 14.2373 11.6767 13.7624 11.9696 13.4695C12.1072 13.3319 12.2928 13.0205 12.4929 12.5294C12.6833 12.0621 12.8554 11.5127 13.0014 10.9776C13.1466 10.445 13.2622 9.9407 13.3415 9.56861C13.381 9.38297 13.4114 9.2312 13.4317 9.12647C13.4419 9.07413 13.4496 9.0336 13.4546 9.00653L13.4602 8.97626L13.4615 8.96909L13.4618 8.96757C13.535 8.55993 13.9249 8.28859 14.3325 8.36177Z" />
+      <path fillRule="evenodd" clipRule="evenodd" d="M13.2 5.8999C13.7523 5.8999 14.2 5.45219 14.2 4.8999C14.2 4.34762 13.7523 3.8999 13.2 3.8999C12.6477 3.8999 12.2 4.34762 12.2 4.8999C12.2 5.45219 12.6477 5.8999 13.2 5.8999ZM13.2 7.3999C14.5807 7.3999 15.7 6.28061 15.7 4.8999C15.7 3.51919 14.5807 2.3999 13.2 2.3999C11.8193 2.3999 10.7 3.51919 10.7 4.8999C10.7 6.28061 11.8193 7.3999 13.2 7.3999Z" />
+      <path fillRule="evenodd" clipRule="evenodd" d="M10.7518 9.03582C8.43465 8.66945 7.3 10.1419 7.3 11.3C7.3 11.7142 6.96421 12.05 6.55 12.05C6.13579 12.05 5.8 11.7142 5.8 11.3C5.8 9.12931 7.85651 7.04201 11.0211 7.55986L11.0491 7.56444L14.3767 8.37112C14.7793 8.46871 15.0265 8.87416 14.9289 9.27671C14.8313 9.67926 14.4259 9.92649 14.0233 9.8289L10.7518 9.03582Z" />
+      <path fillRule="evenodd" clipRule="evenodd" d="M14.9319 9.72425C14.9407 9.52054 14.95 9.30432 14.95 9.0999C14.95 8.68569 14.6142 8.3499 14.2 8.3499C13.7858 8.3499 13.45 8.68569 13.45 9.0999C13.45 9.26992 13.4422 9.45254 13.4332 9.66234C13.4322 9.68501 13.4312 9.708 13.4302 9.73132C13.4204 9.96302 13.4104 10.2211 13.4138 10.4846C13.4206 11.006 13.4791 11.6116 13.7361 12.1827C14.0036 12.7772 14.4656 13.2886 15.1906 13.638C15.8945 13.9773 16.8156 14.1499 18 14.1499C18.4142 14.1499 18.75 13.8141 18.75 13.3999C18.75 12.9857 18.4142 12.6499 18 12.6499C16.9444 12.6499 16.2705 12.4934 15.8419 12.2868C15.4344 12.0904 15.2264 11.8393 15.1039 11.5671C14.9709 11.2715 14.9194 10.9063 14.9137 10.4652C14.9109 10.2474 14.919 10.0264 14.9289 9.79504C14.9298 9.77164 14.9309 9.74803 14.9319 9.72425Z" />
+      <path fillRule="evenodd" clipRule="evenodd" d="M8.95777 16.366C9.3355 16.536 9.50392 16.98 9.33394 17.3578L9.15059 17.7652C8.64057 18.8986 7.93609 19.934 7.06905 20.8244L6.43735 21.4732C6.14839 21.77 5.67356 21.7763 5.37679 21.4873C5.08002 21.1984 5.07368 20.7235 5.36265 20.4268L5.99434 19.778C6.73926 19.013 7.34452 18.1234 7.78271 17.1497L7.96606 16.7422C8.13604 16.3645 8.58004 16.1961 8.95777 16.366Z" />
+    </svg>
+  ),
+  pandamart: (
+    <svg aria-hidden="true" focusable="false" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M14 2C15.1046 2 16 2.89543 16 4V4.8C16 4.91046 16.0895 5 16.2 5H18C19.1046 5 20 5.89543 20 7V20C20 21.1046 19.1046 22 18 22H6C4.89543 22 4 21.1046 4 20V7C4 5.89543 4.89543 5 6 5H7.8C7.91046 5 8 4.91046 8 4.8V4C8 2.89543 8.89543 2 10 2H14ZM18.291 16.5H5.702L5.64885 16.5072C5.56422 16.5305 5.50203 16.608 5.5019 16.7L5.50011 20.3L5.50718 20.3532C5.52572 20.4209 5.57901 20.4743 5.64672 20.4929L5.7 20.5H18.2919L18.3451 20.4929C18.4298 20.4696 18.4919 20.392 18.4919 20.3L18.491 16.7L18.4839 16.6468C18.4605 16.5622 18.383 16.5 18.291 16.5ZM7.79936 6.50806H5.70806L5.65491 6.5152C5.57028 6.5385 5.50809 6.61605 5.50794 6.70806L5.50312 14.8L5.51018 14.8532C5.52871 14.9209 5.58201 14.9743 5.64972 14.9929L5.703 15H18.291L18.3442 14.9929C18.4288 14.9696 18.491 14.892 18.491 14.8L18.4919 6.70806L18.4848 6.65489C18.4615 6.57024 18.384 6.50806 18.2919 6.50806H16.1994L16.146 6.51526C16.0613 6.53865 15.9992 6.61625 15.9994 6.70829L16 7.25L15.9932 7.35177C15.9435 7.71785 15.6297 8 15.25 8L15.1482 7.99315C14.7822 7.94349 14.5 7.6297 14.5 7.25L14.4994 6.70782C14.4992 6.59745 14.4097 6.50806 14.2994 6.50806H9.69936L9.64596 6.51526C9.56134 6.53865 9.49925 6.61625 9.49936 6.70829L9.5 7.25L9.49315 7.35177C9.44349 7.71785 9.1297 8 8.75 8C8.33579 8 8 7.66421 8 7.25L7.99936 6.70782C7.99922 6.59745 7.90972 6.50806 7.79936 6.50806ZM14 3.5H10C9.75454 3.5 9.55039 3.67688 9.50806 3.91012L9.5 4V4.8C9.5 4.91046 9.58954 5 9.7 5H14.3C14.4105 5 14.5 4.91046 14.5 4.8V4C14.5 3.75454 14.3231 3.55039 14.0899 3.50806L14 3.5Z" />
+    </svg>
+  ),
+  shops: (
+    <svg aria-hidden="true" focusable="false" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path fillRule="evenodd" clipRule="evenodd" d="M21.2585 11.1816L21.2573 19.6567C21.2573 20.3522 20.7369 20.9243 20.07 20.9931L19.9347 21H4.0644C3.37964 21 2.81642 20.4714 2.7487 19.7941L2.74187 19.6567L2.74152 11.1824C2.28063 10.667 1.99976 9.98246 1.99976 9.23132L2.00695 9.02552L2.02848 8.82077L2.68496 4.15331C2.77183 3.53567 3.2637 3.0663 3.86401 3.00646L3.9942 3H20.0049C20.6192 3 21.1463 3.42819 21.2895 4.02333L21.3142 4.15331L21.9707 8.82077C22.0958 9.71058 21.8095 10.5637 21.2585 11.1816ZM10.677 19.5H13.3221V15.8955C13.3221 15.2464 12.8688 14.7048 12.2661 14.5795L12.1348 14.5592L11.9996 14.5522C11.3148 14.5522 10.7516 15.0808 10.6839 15.7582L10.677 15.8955V19.5ZM19.7583 11.9525L19.7573 19.5H14.8221V15.8955C14.8221 14.5372 13.8714 13.3811 12.5713 13.1109L12.5338 13.1031L12.2885 13.0651L12.038 13.0522H11.9996C10.5176 13.0522 9.33304 14.1915 9.19132 15.6089L9.18758 15.6463L9.17705 15.8583V19.5H4.24186L4.24155 11.953C4.34993 11.9777 4.46088 11.9961 4.57404 12.0078L4.6125 12.0118L4.81947 12.0224H5.12242C5.9724 12.0224 6.72457 11.6476 7.23825 11.0605C7.69253 11.5794 8.33373 11.9321 9.06539 12.0075L9.10385 12.0115L9.31607 12.0224H9.88353C10.7335 12.0224 11.4857 11.6476 11.9994 11.0605C12.4536 11.5794 13.0948 11.9321 13.8265 12.0075L13.865 12.0115L14.0772 12.0224H14.6446C15.4946 12.0224 16.2468 11.6476 16.7605 11.0605C17.2147 11.5794 17.8559 11.9321 18.5876 12.0075L18.6261 12.0115L18.8383 12.0224H19.1412C19.2735 12.0224 19.4055 12.0129 19.5364 11.9939C19.6116 11.983 19.6856 11.9691 19.7583 11.9525ZM8.03155 5.04175C8.03155 4.80435 8.22102 4.6119 8.45476 4.61194H10.7824C11.0161 4.61198 11.2056 4.80441 11.2057 5.04179L11.2061 9.1791L11.1992 9.31645C11.1315 9.99381 10.5683 10.5224 9.88353 10.5224H9.35452L9.21929 10.5155C8.5524 10.4467 8.03199 9.87461 8.03199 9.1791L8.03155 5.04175ZM17.5538 5.04175C17.5538 4.80435 17.7432 4.6119 17.977 4.61194H19.4086C19.6192 4.61194 19.7977 4.76924 19.8275 4.98101L20.3996 9.04873L20.4115 9.18035C20.4377 9.83419 19.9725 10.4149 19.321 10.5094C19.2615 10.5181 19.2014 10.5224 19.1412 10.5224H18.8767L18.7415 10.5155C18.0746 10.4467 17.5542 9.87461 17.5542 9.1791L17.5538 5.04175ZM3.58679 9.23132L3.59398 9.09418L4.15793 5.07347C4.19507 4.80867 4.41831 4.61194 4.68165 4.61194H5.9155C6.20765 4.61199 6.44448 4.85252 6.44456 5.14925L6.44495 9.1791L6.43812 9.31645C6.3704 9.99381 5.80718 10.5224 5.12242 10.5224H4.85792L4.72795 10.5157C4.08698 10.4496 3.58679 9.89979 3.58679 9.23132ZM12.7931 9.1791L12.7927 5.04175C12.7927 4.80435 12.9821 4.6119 13.2159 4.61194H15.5435C15.7772 4.61198 15.9667 4.80441 15.9668 5.04179L15.9672 9.1791L15.9603 9.31645C15.8926 9.99381 15.3294 10.5224 14.6446 10.5224H14.1156L13.9804 10.5155C13.3135 10.4467 12.7931 9.87461 12.7931 9.1791Z" />
+    </svg>
+  ),
+};
+
+// Quick cuisine chips shown inside the greeting hero. `chip` filters the restaurant grid.
+const HERO_CHIPS = [
+  { label: 'Milk Tea', chip: 'All' },
+  { label: 'Burgers', chip: 'Burgers' },
+  { label: 'Coffee', chip: 'All' },
+  { label: 'Filipino', chip: 'Filipino' },
+  { label: 'Halo-Halo', chip: 'Desserts' },
+];
+
+// "Your daily deals" cards. `img` → public/assets/deals/<img>.png
+const DEALS = [
+  { off: '50% off', sub: '1st order', code: 'NEWPANDA', free: true, img: 'deal1' },
+  { off: 'Up to 50% off', sub: '', code: 'ADDTOCART', free: true, img: 'deal2' },
+  { off: '30% off', sub: '', cta: 'Order now', best: true, img: 'deal3' },
+];
+
+// "Top brands" row — restaurant ids. logo → public/assets/brands/<id>.png
+const TOP_BRANDS = ['jb', 'chowking', 'potato', 'kfc', 'bonchon', 'greenwich', 'mcdo', 'shakeys'];
 
 // ─── State ───────────────────────────────────────────────────────────────────
 
@@ -293,10 +344,16 @@ export default function App() {
         @keyframes checkPop{0%{transform:scale(0);opacity:0}55%{transform:scale(1.18);opacity:1}100%{transform:scale(1)}}
         @keyframes ringPulse{0%{transform:scale(.8);opacity:.55}70%{opacity:0}100%{transform:scale(1.7);opacity:0}}
         @keyframes modalIn{from{transform:translateY(24px) scale(.97);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+        @keyframes sparkle{0%,100%{transform:scale(.5) rotate(0deg);opacity:.25}50%{transform:scale(1.15) rotate(22deg);opacity:1}}
         *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
         ::-webkit-scrollbar{height:6px;width:8px;}
         ::-webkit-scrollbar-thumb{background:rgba(0,0,0,.16);border-radius:999px;}
-        .rest-card:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(20,20,30,.13) !important;}
+        .rest-card:hover{transform:translateY(-4px);}
+        .hide-scroll::-webkit-scrollbar{display:none;}
+        .hide-scroll{scrollbar-width:none;}
+        .scroll-arrow:hover{transform:translateY(-50%) scale(1.08);}
+        .hero-chip:hover{filter:brightness(.95);}
+        .ghost-btn:hover{background:#f5f5f6 !important;}
         .btn-brand:hover{filter:brightness(1.07);}
         .btn-brand:active{transform:scale(.985);}
         .btn-icon:hover{background:#e7e7ea !important;}
@@ -314,93 +371,241 @@ export default function App() {
 
         {/* Header */}
         <header style={{ position: 'sticky', top: 0, zIndex: 40, background: '#fff', boxShadow: '0 1px 0 rgba(0,0,0,.07),0 4px 18px rgba(0,0,0,.03)' }}>
-          <div style={{ maxWidth: 1140, margin: '0 auto', padding: '11px 18px', display: 'flex', alignItems: 'center', gap: 16 }}>
+          {/* Top bar: logo · address · auth · cart */}
+          <div style={{ position: 'relative', maxWidth: 1240, margin: '0 auto', padding: '12px 22px', display: 'flex', alignItems: 'center', gap: 18 }}>
             <div onClick={() => { dispatch({ type: 'RESET_HOME' }); window.scrollTo(0, 0); }}
               style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer', flex: 'none' }}>
-              <div style={{ width: 34, height: 34, borderRadius: 11, background: B, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, boxShadow: `0 4px 12px ${BG}` }}>🛵</div>
-              <div style={{ fontWeight: 800, fontSize: 20, letterSpacing: '-.5px' }}>Pood<span style={{ color: B }}>Fanda</span></div>
+              <svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="28" height="28" aria-hidden="true" focusable="false">
+                <path d="M35 0H5C2.24 0 0 2.24 0 5v30c0 2.76 2.24 5 5 5h30c2.76 0 5-2.24 5-5V5c0-2.76-2.24-5-5-5Z" fill="#ff2b85" />
+                <path d="M14.58 17.53c.41-.04.71-.4.68-.81a.756.756 0 0 0-.81-.68c-.39.03-.68.35-.68.74.02.43.38.76.81.75Zm10.44-1.33c.12-.09.25-.14.4-.16.43-.02.79.32.81.75 0 .41-.33.75-.75.75s-.75-.33-.75-.75c0-.23.11-.45.29-.59Z" fill="#fff" />
+                <path fillRule="evenodd" clipRule="evenodd" d="M33.51 14.52v-.03c-.15-.3-.1-.65.12-.9a4.983 4.983 0 0 0 .89-4.78c-.06-.19-.34-.24-.61-.29-.26-.05-.52-.09-.62-.26-.09-.15-.06-.38 0-.63.02-.07.03-.13.04-.2.05-.26.07-.51-.06-.64s-.28-.26-.42-.37l-.09-.07c-1-.74-2.23-1.1-3.47-1.03-1.08.05-2.23.41-3.06 1.14-.4.29-.92.37-1.39.22l-.07-.02c-.84-.3-1.7-.52-2.58-.66a14.28 14.28 0 0 0-6.95.66h-.05c-.45.18-.96.1-1.35-.19-1.55-1.37-4.68-1.71-6.72.01-2.23 1.88-2.36 5.17-.71 7.1.22.25.26.6.12.9-.98 2-1.5 4.2-1.51 6.43 0 7.97 6.72 13.77 15 13.77 8.28 0 15-5.8 15-13.77 0-2.22-.52-4.41-1.49-6.41 0 0 0 .02-.01.02h-.01ZM19.9 20.19c1.19 0 2.15.26 2.15.72 0 .46-.96 1.5-2.15 1.5s-2.15-1.04-2.15-1.5c0-.46.96-.72 2.15-.72ZM7.86 11.8a.578.578 0 0 1-.18-.2c-.02-.03-.04-.07-.06-.1-.36-.66-.45-1.44-.23-2.16.42-1.41 1.92-2.24 3.35-2.05.37.05.74.17 1.07.35.14.08.26.17.37.28.04.04.08.09.1.15.02.09 0 .18-.07.25-.06.06-.14.11-.22.15-1.37.8-2.49 1.95-3.52 3.14-.17.19-.35.37-.61.19Zm3.66 11.33c-1.24-.14-2.32-1.45-2.73-2.77-.18-.58-.61-3.26 1.31-5.2.64-.64 1.54-1.21 2.79-1.59.41-.1.82-.15 1.24-.15.62 0 1.36.1 1.95.53 1.24.91 1.26 2.44.52 3.23s-2.4 2.59-2.83 4.06c-.42 1.47-1.01 2.04-2.26 1.9 0 0 .01-.01.01 0v-.01Zm8.4 4.43h-.04c-2.39-.01-4.32-1.7-4.32-3.4 0-.59.26-.89.89-.73.37.09 1.89.48 3.27.48h.35c1.35 0 2.82-.37 3.24-.48h.03c.64-.16.89.14.89.72 0 1.7-1.93 3.39-4.32 3.4h.01v.01Zm11.09-7.22c-.41 1.32-1.49 2.63-2.73 2.77-1.24.14-1.83-.42-2.26-1.9-.43-1.47-2.09-3.28-2.83-4.07-.74-.78-.72-2.32.52-3.23.58-.43 1.33-.53 1.95-.53.42 0 .83.05 1.24.15 1.25.38 2.15.94 2.79 1.58 1.92 1.94 1.49 4.62 1.31 5.2 0 0 .01.03 0 .03h.01Zm1.37-8.84-.06.1a.86.86 0 0 1-.18.2c-.26.18-.44 0-.61-.19-1.03-1.19-2.15-2.34-3.52-3.14a1.07 1.07 0 0 1-.22-.15.33.33 0 0 1-.08-.25c.02-.06.05-.11.1-.15.11-.11.23-.21.37-.28.33-.18.7-.3 1.07-.35 1.43-.19 2.93.64 3.35 2.05.21.72.13 1.5-.23 2.16h.01Z" fill="#fff" />
+              </svg>
+              <span style={{ fontWeight: 800, fontSize: 23, letterSpacing: '-.6px', color: '#ff2b85', transform: 'translateY(-3px)' }}>poodfanda</span>
             </div>
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 9, background: '#f1f1f3', borderRadius: 13, padding: '10px 14px', maxWidth: 540 }}>
+            <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', display: 'flex', alignItems: 'center', gap: 6, color: '#1c1c22', fontSize: 14, fontWeight: 600, flex: 'none' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path fillRule="evenodd" clipRule="evenodd" d="M12.3224 2C16.9186 2 20.6446 5.72596 20.6446 10.3222C20.6446 11.8203 20.2487 13.226 19.5559 14.4404L18.4715 15.8911C17.8726 16.5162 16.6838 17.706 14.9052 19.4602L13.0213 21.313C12.6322 21.6947 12.0092 21.6946 11.6203 21.3128L7.91833 17.6571L6.59648 16.3282C6.2846 16.0104 5.78156 15.3801 5.08734 14.4375C4.3955 13.2238 4.00024 11.8192 4.00024 10.3222C4.00024 5.72596 7.72621 2 12.3224 2ZM12.3224 3.5C8.55463 3.5 5.50024 6.55439 5.50024 10.3222C5.50024 11.4141 5.75604 12.466 6.23886 13.4136L6.37241 13.66L6.96356 14.5436L7.18196 14.7804L7.77128 15.385C8.23371 15.8535 8.88147 16.5011 9.70239 17.3151C10.6866 18.2861 11.4247 19.0143 11.9168 19.4998C11.9577 19.5401 11.9986 19.5805 12.0395 19.6209C12.1953 19.7745 12.4456 19.7745 12.6013 19.6209L12.6754 19.5478L15.3017 16.9571L17.2047 15.0461C17.3404 14.9068 17.4503 14.7925 17.5337 14.7039L17.6874 14.534L18.2724 13.659L18.4049 13.4158C18.84 12.5624 19.0911 11.6245 19.1369 10.6487L19.1446 10.3222C19.1446 6.55439 16.0902 3.5 12.3224 3.5ZM12.3224 6.75C14.3935 6.75 16.0724 8.42893 16.0724 10.5C16.0724 12.5711 14.3935 14.25 12.3224 14.25C10.2513 14.25 8.57241 12.5711 8.57241 10.5C8.57241 8.42893 10.2513 6.75 12.3224 6.75ZM12.3224 8.25C11.0798 8.25 10.0724 9.25736 10.0724 10.5C10.0724 11.7426 11.0798 12.75 12.3224 12.75C13.5651 12.75 14.5724 11.7426 14.5724 10.5C14.5724 9.25736 13.5651 8.25 12.3224 8.25Z" />
+                </svg>
+              </span>
+              <span>New address 1006 Ongpin St Manila 1003</span>
+            </div>
+            <div style={{ flex: 1 }} />
+            <div className="ghost-btn" style={{ display: 'flex', alignItems: 'center', gap: 7, flex: 'none', borderRadius: 12, padding: '8px 14px', fontWeight: 700, fontSize: 14.5, color: '#1c1c22', cursor: 'pointer', transition: 'all .15s' }}>
+              <svg aria-hidden="true" focusable="false" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fillRule="evenodd" clipRule="evenodd" d="M12 11.5C13.933 11.5 15.5 9.933 15.5 8C15.5 6.067 13.933 4.5 12 4.5C10.067 4.5 8.50001 6.067 8.50001 8C8.50001 9.933 10.067 11.5 12 11.5ZM10.0566 14.2045C10.679 14.071 11.33 14.0001 12 14C12.0003 14 12.0007 14 12.001 14C12.6709 14 13.3218 14.0708 13.9442 14.2042C17.1008 14.881 19.5251 17.1688 19.9907 20.0041C20.0802 20.5491 19.6241 21 19.0718 21H4.93021C4.37792 21 3.92177 20.5491 4.01127 20.0041C4.47684 17.1692 6.90063 14.8815 10.0566 14.2045ZM10.1743 12.6562C8.31584 11.9269 7.00001 10.1171 7.00001 8C7.00001 5.23858 9.23858 3 12 3C14.7614 3 17 5.23858 17 8C17 10.1169 15.6845 11.9265 13.8263 12.656C13.2609 12.8779 12.6452 12.9999 12.001 13C12.0007 13 12.0003 13 12 13C11.3557 13 10.7399 12.8781 10.1743 12.6562ZM18.3216 19.5C17.5644 17.2951 15.1351 15.5 12.001 15.5C8.86687 15.5 6.43759 17.2951 5.6804 19.5H18.3216Z" />
+              </svg>
+              Profile <span style={{ fontSize: 11, opacity: .7 }}>▾</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 14, fontWeight: 700, color: '#1c1c22', cursor: 'default', flex: 'none' }}>
+              <svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fillRule="evenodd" clipRule="evenodd" d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12ZM10.6635 19.3813C9.79267 18.1369 9.11658 16.9361 8.65036 15.75H5.50337C6.58707 17.6234 8.45784 18.9845 10.6635 19.3813ZM4.84335 14.25H8.17237C7.98964 13.4966 7.89523 12.7442 7.8931 11.9853C7.891 11.2379 7.97842 10.4952 8.15242 9.75H4.84335C4.62027 10.4603 4.5 11.2161 4.5 12C4.5 12.7839 4.62027 13.5397 4.84335 14.25ZM5.50337 8.25H8.61663C9.06884 7.07159 9.72906 5.8752 10.586 4.63309C8.41405 5.04747 6.57436 6.39858 5.50337 8.25ZM18.4966 15.75C17.4415 17.574 15.6402 18.9124 13.5102 19.3479C14.3698 18.1154 15.038 16.9255 15.5 15.75H18.4966ZM19.1566 14.25H15.978C16.1608 13.4966 16.2552 12.7442 16.2573 11.9853C16.2594 11.2379 16.172 10.4952 15.998 9.75H19.1566C19.3797 10.4603 19.5 11.2161 19.5 12C19.5 12.7839 19.3797 13.5397 19.1566 14.25ZM18.4966 8.25H15.5338C15.0859 7.08283 14.4339 5.89803 13.5888 4.66862C15.6845 5.12065 17.4545 6.44847 18.4966 8.25ZM12.0752 5.12312C12.8682 6.22942 13.4764 7.26325 13.9116 8.25H10.2388C10.674 7.26325 11.2822 6.22942 12.0752 5.12312ZM9.69994 9.75H14.4504C14.6591 10.5113 14.7593 11.2505 14.7573 11.981C14.7552 12.7258 14.6467 13.4775 14.4269 14.25H9.72354C9.50364 13.4775 9.39519 12.7258 9.3931 11.981C9.39105 11.2505 9.49129 10.5113 9.69994 9.75ZM10.2783 15.75H13.8721C13.4389 16.7093 12.8428 17.7109 12.0752 18.7788C11.3076 17.7109 10.7115 16.7093 10.2783 15.75Z" />
+              </svg>
+              EN ▾
+            </div>
+            <button className="btn-icon" style={{ width: 38, height: 38, borderRadius: '50%', background: 'transparent', border: 'none', cursor: 'pointer', color: '#1c1c22', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none', transition: 'background .15s' }}>
+              <svg aria-hidden="true" focusable="false" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fillRule="evenodd" d="M18.338 4.438c2.764 1.316 4.015 4.757 2.795 7.686-1.548 3.243-4.436 5.835-8.665 7.776-.254.114-.543.13-.807.05l-.13-.05c-4.228-1.94-7.116-4.533-8.664-7.776-1.22-2.93.031-6.37 2.795-7.686 1.89-.9 3.826-.315 5.378.855.112.084.246.195.403.333l.286.257a.4.4 0 00.542 0l.315-.283c.145-.125.27-.228.374-.307 1.555-1.171 3.49-1.754 5.378-.855zm-.644 1.355c-1.178-.56-2.506-.3-3.831.699l-.151.12c-.115.096-.258.222-.427.376-.207.19-.553.467-1.038.83a.4.4 0 01-.487-.007 99.836 99.836 0 00-.909-.708l-.13-.11-.158-.143a7.024 7.024 0 00-.426-.36c-1.323-.997-2.652-1.258-3.83-.697-2.032.966-2.972 3.553-2.086 5.685 1.335 2.798 3.822 5.087 7.52 6.863l.259.122.259-.121c3.561-1.711 5.998-3.895 7.34-6.493l.149-.301c.888-2.133.034-4.627-1.867-5.66l-.187-.095z" />
+              </svg>
+            </button>
+            <button onClick={() => dispatch({ type: 'OPEN_CART' })} className="btn-icon"
+              style={{ position: 'relative', width: 38, height: 38, borderRadius: '50%', background: 'transparent', border: 'none', cursor: 'pointer', color: '#1c1c22', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none', transition: 'background .15s' }}>
+              <svg aria-hidden="true" focusable="false" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fillRule="evenodd" clipRule="evenodd" d="M3 4.25a.75.75 0 000 1.5h1.34a.5.5 0 01.49.402l1.873 9.367A2.25 2.25 0 008.948 17.25H17.5a.75.75 0 000-1.5H8.948a.75.75 0 01-.735-.602l-.17-.853 9.31-.97a2.25 2.25 0 001.97-1.74l1.06-4.594A1.25 1.25 0 0019.166 4.5H6.44l-.14-.7A2 2 0 004.34 4.25H3zm3.74 1.75l1.2 6.002 9.06-.945a.75.75 0 00.657-.58l1.013-4.477H6.74z" />
+                <path d="M9 20.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM16.5 20.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
+              </svg>
+              {t.count > 0 && (
+                <span key={s.pulse} style={{ position: 'absolute', top: -2, right: -2, background: B, color: '#fff', borderRadius: 999, minWidth: 19, height: 19, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, padding: '0 5px', animation: 'pop .35s ease' }}>{t.count}</span>
+              )}
+            </button>
+          </div>
+          {/* Nav row: tabs · search */}
+          <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 22px', display: 'flex', alignItems: 'flex-end', gap: 18 }}>
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 26, flex: 'none' }}>
+              {[[NavIcons.delivery, 'Delivery', true], [NavIcons.pickup, 'Pick-up', false], [NavIcons.pandamart, 'pandamart', false], [NavIcons.shops, 'Shops', false]].map(([icon, label, active]) => (
+                <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 7, paddingBottom: 12, borderBottom: `2.5px solid ${active ? '#1c1c22' : 'transparent'}`, cursor: 'pointer', fontWeight: active ? 800 : 600, fontSize: 15, color: active ? '#1c1c22' : '#8a8a93' }}>
+                  <span style={{ display: 'inline-flex' }}>{icon}</span>{label}
+                </div>
+              ))}
+            </div>
+            <div style={{ flex: 1 }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 9, background: '#f1f1f3', borderRadius: 999, padding: '11px 18px', width: 420, maxWidth: '45%', alignSelf: 'center', marginBottom: 8 }}>
               <span style={{ fontSize: 15, opacity: .55 }}>🔍</span>
               <input value={s.q} onChange={e => dispatch({ type: 'SET_Q', v: e.target.value })}
-                placeholder="Search Jollibee, KFC, pizza, halo-halo…"
+                placeholder="Search for restaurants, cuisines, and dishes"
                 style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%', font: 'inherit', fontSize: 14.5, color: '#1c1c22' }} />
             </div>
-            <button onClick={() => dispatch({ type: 'OPEN_CART' })} className="btn-brand"
-              style={{ display: 'flex', alignItems: 'center', gap: 9, background: B, color: '#fff', border: 'none', borderRadius: 13, padding: '11px 15px', font: 'inherit', fontWeight: 700, fontSize: 14, cursor: 'pointer', flex: 'none', transition: 'filter .15s,transform .1s' }}>
-              <span style={{ fontSize: 16 }}>🛒</span>
-              {t.count > 0 ? (
-                <>
-                  <span key={s.pulse} style={{ background: '#fff', color: B, borderRadius: 999, minWidth: 20, height: 20, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, padding: '0 5px', animation: 'pop .35s ease' }}>{t.count}</span>
-                  <span style={{ fontVariantNumeric: 'tabular-nums' }}>{peso(t.total)}</span>
-                </>
-              ) : <span>Cart</span>}
-            </button>
           </div>
         </header>
 
         {/* Home */}
         {s.screen === 'home' && (
-          <main style={{ maxWidth: 1140, margin: '0 auto', padding: 18 }}>
-            <div style={{ background: `linear-gradient(110deg,${B},${BD})`, color: '#fff', borderRadius: 20, padding: '22px 24px', display: 'flex', alignItems: 'center', gap: 18, marginBottom: 22, overflow: 'hidden', position: 'relative' }}>
-              <div style={{ fontSize: 46, flex: 'none' }}>🛵</div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-.4px' }}>Free delivery all weekend</div>
-                <div style={{ fontSize: 14, opacity: .92, marginTop: 3 }}>No delivery fee on McDonald&apos;s PH, Greenwich & Bonchon. Sarap mag-order. 🎉</div>
+          <>
+            {/* Full-width greeting hero */}
+            <div style={{ background: `linear-gradient(115deg, ${BD} 0%, ${B} 48%, #ff5fa2 100%)`, position: 'relative', overflow: 'visible' }}>
+              <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+                <div style={{ position: 'absolute', right: -40, top: -60, width: 360, height: 360, borderRadius: '50%', background: 'rgba(255,255,255,.08)' }} />
+                <div style={{ position: 'absolute', right: 160, bottom: -110, width: 280, height: 280, borderRadius: '50%', background: 'rgba(255,255,255,.07)' }} />
               </div>
-              <div style={{ position: 'absolute', right: -30, top: -30, width: 140, height: 140, borderRadius: '50%', background: 'rgba(255,255,255,.10)' }} />
-            </div>
-
-            <div style={{ display: 'flex', gap: 9, overflowX: 'auto', padding: '2px 0 14px' }}>
-              {CHIPS.map(c => {
-                const active = c === s.chip;
-                return (
-                  <button key={c} onClick={() => dispatch({ type: 'SET_CHIP', v: c })} className="chip-btn"
-                    style={{ flex: 'none', padding: '9px 16px', borderRadius: 999, border: `1.5px solid ${active ? B : '#e7e7ea'}`, background: active ? B : '#fff', color: active ? '#fff' : '#54545c', font: 'inherit', fontWeight: 700, fontSize: 13.5, cursor: 'pointer', transition: 'all .15s' }}>
-                    {c}
-                  </button>
-                );
-              })}
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', margin: '6px 2px 14px' }}>
-              <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800, letterSpacing: '-.4px' }}>{s.chip === 'All' ? 'All restaurants' : s.chip}</h2>
-              <span style={{ fontSize: 13, color: '#8a8a93', fontWeight: 600 }}>{visibleRestaurants.length} {visibleRestaurants.length === 1 ? 'place' : 'places'}</span>
-            </div>
-
-            {visibleRestaurants.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '70px 20px', color: '#8a8a93' }}>
-                <div style={{ fontSize: 46 }}>🍽️</div>
-                <div style={{ fontWeight: 700, fontSize: 17, color: '#1c1c22', marginTop: 10 }}>No restaurants found</div>
-                <div style={{ fontSize: 14, marginTop: 4 }}>Try a different search or category.</div>
-              </div>
-            ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))', gap: 18 }}>
-                {visibleRestaurants.map(r => (
-                  <div key={r.id} onClick={() => { dispatch({ type: 'OPEN_REST', id: r.id }); window.scrollTo(0, 0); }} className="rest-card"
-                    style={{ background: '#fff', borderRadius: 18, overflow: 'hidden', cursor: 'pointer', boxShadow: '0 1px 3px rgba(20,20,30,.07)', transition: 'transform .16s ease,box-shadow .16s ease' }}>
-                    <div style={{ position: 'relative', height: 138, background: r.grad, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <div style={{ fontSize: 62, filter: 'drop-shadow(0 6px 10px rgba(0,0,0,.22))' }}>{r.emoji}</div>
-                      {r.fee === 0 && (
-                        <div style={{ position: 'absolute', top: 12, left: 12, background: '#fff', color: B, fontSize: 11, fontWeight: 800, padding: '5px 10px', borderRadius: 999, letterSpacing: '.3px', boxShadow: '0 2px 8px rgba(0,0,0,.12)' }}>FREE DELIVERY</div>
-                      )}
-                    </div>
-                    <div style={{ padding: '14px 16px 16px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'flex-start' }}>
-                        <h3 style={{ margin: 0, fontSize: 17, fontWeight: 800, letterSpacing: '-.3px' }}>{r.name}</h3>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 3, background: BT, color: BD, padding: '3px 8px', borderRadius: 9, fontSize: 12.5, fontWeight: 800, flex: 'none' }}>★ {r.rating.toFixed(1)}</div>
-                      </div>
-                      <p style={{ margin: '5px 0 0', color: '#8a8a93', fontSize: 13 }}>{r.tagline}</p>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginTop: 11, color: '#54545c', fontSize: 12.5, fontWeight: 600 }}>
-                        <span>🕒 {r.time}</span><span style={{ opacity: .4 }}>•</span>
-                        <span>{r.fee === 0 ? 'Free delivery' : `₱${r.fee} fee`}</span>
-                      </div>
-                    </div>
+              <div style={{ maxWidth: 1240, margin: '0 auto', padding: '34px 22px 60px', position: 'relative' }}>
+                <div style={{ marginLeft: 266 }}>
+                  <h1 style={{ margin: 0, color: '#fff', fontSize: 34, fontWeight: 800, letterSpacing: '-.8px' }}>Good Afternoon</h1>
+                  <p style={{ margin: '6px 0 0', color: 'rgba(255,255,255,.95)', fontSize: 18, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 7 }}>Ready for something you&apos;ll love? <span style={{ opacity: .8, fontSize: 15 }}>ⓘ</span></p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginTop: 22, flexWrap: 'wrap' }}>
+                    <button onClick={() => dispatch({ type: 'SET_CHIP', v: 'All' })} className="hero-chip"
+                      style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(255,255,255,.92)', border: 'none', cursor: 'pointer', fontSize: 17, color: B, display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}>↻</button>
+                    {HERO_CHIPS.map(c => {
+                      const active = c.chip !== 'All' && c.chip === s.chip;
+                      return (
+                        <button key={c.label} onClick={() => { dispatch({ type: 'SET_CHIP', v: c.chip }); document.getElementById('all-rests')?.scrollIntoView({ behavior: 'smooth' }); }} className="hero-chip"
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 18px', borderRadius: 999, border: 'none', background: active ? '#1c1c22' : 'rgba(255,255,255,.92)', color: active ? '#fff' : '#1c1c22', font: 'inherit', fontWeight: 700, fontSize: 14, cursor: 'pointer', transition: 'all .15s' }}>
+                          <span style={{ color: active ? '#ff8fbd' : B }}>✦</span>{c.label}
+                        </button>
+                      );
+                    })}
                   </div>
-                ))}
+                </div>
               </div>
-            )}
+              <Img src={`${A}/mascot.png`} alt="" style={{ position: 'absolute', right: 48, bottom: 0, width: 230, height: 196, objectFit: 'contain' }}
+                fallback={
+                  <div style={{ position: 'absolute', right: 80, bottom: 40, width: 168, height: 168, zIndex: 20 }}>
+                    <img src="https://images.dhmedia.io/image/foodpanda/web-acquisition/fp/illu_personalised_cuisines.png" alt="" style={{ width: '150%', height: '150%', objectFit: 'contain', position: 'relative', zIndex: 1 }} />
+                    {[{ left: 65, top: 44, size: 20, delay: 0 }, { left: 122, top: 22, size: 30, delay: .35 }, { left: 168, top: 58, size: 18, delay: .7 }].map((sp, i) => (
+                      <span key={i} style={{ position: 'absolute', left: sp.left, top: sp.top, fontSize: sp.size, color: '#ffc83d', zIndex: 2, animation: `sparkle 1.6s ease-in-out ${sp.delay}s infinite` }}>✦</span>
+                    ))}
+                  </div>
+                } />
+            </div>
+
+            <main style={{ maxWidth: 1240, margin: '0 auto', padding: '0 22px 24px', display: 'flex', gap: 26, alignItems: 'flex-start' }}>
+
+              {/* Left filters — floats up over the hero */}
+              <aside style={{ width: 240, flex: 'none', marginTop: -150, position: 'sticky', top: 132, alignSelf: 'flex-start' }}>
+                <div style={{ background: '#fff', borderRadius: 16, padding: 20, boxShadow: '0 8px 28px rgba(20,20,30,.14)', maxHeight: 'calc(100vh - 150px)', overflowY: 'auto' }}>
+                  <div style={{ fontWeight: 800, fontSize: 19, marginBottom: 16 }}>Filters</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#8a8a93', marginBottom: 8 }}>Sort by</div>
+                  {['Relevance', 'Fastest Delivery', 'Distance', 'Top rated'].map((o, i) => (
+                    <label key={o} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', fontSize: 14, cursor: 'pointer' }}>
+                      <span style={{ width: 18, height: 18, borderRadius: '50%', border: `2px solid ${i === 0 ? B : '#cfcfd6'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}>
+                        {i === 0 && <span style={{ width: 9, height: 9, borderRadius: '50%', background: B }} />}
+                      </span>
+                      {o}
+                    </label>
+                  ))}
+                  <div style={{ height: 1, background: '#f1f1f3', margin: '15px 0' }} />
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#8a8a93', marginBottom: 11 }}>Quick filters</div>
+                  <span style={{ display: 'inline-block', border: '1.5px solid #d9d9de', borderRadius: 999, padding: '7px 15px', fontSize: 13.5, fontWeight: 700, cursor: 'pointer' }}>Ratings 4+</span>
+                  <div style={{ height: 1, background: '#f1f1f3', margin: '15px 0' }} />
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#8a8a93', marginBottom: 11 }}>Offers</div>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, cursor: 'pointer' }}>
+                    <span style={{ width: 18, height: 18, borderRadius: 5, border: '2px solid #cfcfd6', flex: 'none' }} />
+                    Accepts vouchers
+                  </label>
+                </div>
+              </aside>
+
+              {/* Right content */}
+              <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 30, paddingTop: 22 }}>
+
+                {/* 25% off promo strip */}
+                <div style={{ background: '#ffe3ee', borderRadius: 16, padding: '18px 22px', display: 'flex', alignItems: 'center', gap: 16, position: 'relative', overflow: 'hidden' }}>
+                  <div style={{ fontSize: 38, flex: 'none' }}>🎁</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 23, fontWeight: 800, letterSpacing: '-.5px', color: '#1c1c22' }}>Get 25% off</div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: B, marginTop: 2 }}>Max. discount ₱155, Min. order ₱220</div>
+                  </div>
+                  <div style={{ flex: 'none', background: BD, color: '#fff', fontWeight: 800, fontSize: 15, padding: '7px 12px', borderRadius: 9, fontVariantNumeric: 'tabular-nums' }}>43:20</div>
+                </div>
+
+              {/* Your daily deals */}
+              <section>
+                <h2 style={{ margin: '0 0 18px', fontSize: 26, fontWeight: 800, letterSpacing: '-.5px' }}>Your daily deals</h2>
+                <ScrollRow gap={18}>
+                  {DEALS.map((d, i) => (
+                    <div key={i} style={{ flex: 'none', width: 300, height: 120, borderRadius: 14, background: B, color: '#fff', padding: 18, position: 'relative', overflow: 'hidden', cursor: 'pointer' }}>
+                      {d.best && <div style={{ fontSize: 12, fontWeight: 800 }}>♥ best seller</div>}
+                      <div style={{ fontSize: 24, fontWeight: 800, marginTop: d.best ? 4 : 0 }}>{d.off}</div>
+                      {d.sub && <div style={{ fontSize: 13, opacity: .9, marginTop: 2 }}>{d.sub}</div>}
+                      {d.code && <div style={{ display: 'inline-block', marginTop: 10, background: '#fff', color: B, fontSize: 11.5, fontWeight: 800, padding: '4px 9px', borderRadius: 7 }}>code {d.code}</div>}
+                      {d.cta && <div style={{ display: 'inline-block', marginTop: 10, background: 'rgba(255,255,255,.25)', fontSize: 11.5, fontWeight: 800, padding: '4px 11px', borderRadius: 7 }}>{d.cta} ❯</div>}
+                      {d.free && <div style={{ position: 'absolute', bottom: 14, left: 18, fontSize: 11.5, fontWeight: 700, background: 'rgba(255,255,255,.22)', padding: '3px 8px', borderRadius: 6 }}>Free delivery</div>}
+                      <Img src={`${A}/deals/${d.img}.png`} alt="deal" style={{ position: 'absolute', right: 0, top: 0, width: 130, height: 120, objectFit: 'cover' }} fallback={<div style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 54, opacity: .9 }}>🍱</div>} />
+                    </div>
+                  ))}
+                </ScrollRow>
+              </section>
+
+              {/* Top brands */}
+              <section>
+                <h2 style={{ margin: '0 0 18px', fontSize: 26, fontWeight: 800, letterSpacing: '-.5px' }}>Top brands</h2>
+                <ScrollRow gap={16}>
+                  {TOP_BRANDS.map(id => {
+                    const r = RESTAURANTS.find(x => x.id === id);
+                    if (!r) return null;
+                    return (
+                      <div key={id} onClick={() => { dispatch({ type: 'OPEN_REST', id }); window.scrollTo(0, 0); }}
+                        style={{ flex: 'none', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
+                        <Img src={`${A}/brands/${id}.png`} alt={r.name} style={{ width: 64, height: 64, borderRadius: 12, objectFit: 'cover', background: '#f1f1f3' }}
+                          fallback={<div style={{ width: 64, height: 64, borderRadius: 12, background: r.grad, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 30 }}>{r.emoji}</div>} />
+                        <div>
+                          <div style={{ fontWeight: 800, fontSize: 15 }}>{r.name}</div>
+                          <div style={{ fontSize: 13, color: '#8a8a93', marginTop: 2 }}>{r.time.split('–')[0]} min</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </ScrollRow>
+              </section>
+
+              {/* All restaurants */}
+              <section id="all-rests">
+                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 18 }}>
+                  <h2 style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: '-.5px' }}>{s.chip === 'All' ? 'All restaurants' : s.chip}</h2>
+                  <span style={{ fontSize: 13, color: '#8a8a93', fontWeight: 600 }}>{visibleRestaurants.length} {visibleRestaurants.length === 1 ? 'place' : 'places'}</span>
+                </div>
+
+                {visibleRestaurants.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '70px 20px', color: '#8a8a93' }}>
+                    <div style={{ fontSize: 46 }}>🍽️</div>
+                    <div style={{ fontWeight: 700, fontSize: 17, color: '#1c1c22', marginTop: 10 }}>No restaurants found</div>
+                    <div style={{ fontSize: 14, marginTop: 4 }}>Try a different search or category.</div>
+                  </div>
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))', gap: 24 }}>
+                    {visibleRestaurants.map((r, i) => (
+                      <div key={r.id} onClick={() => { dispatch({ type: 'OPEN_REST', id: r.id }); window.scrollTo(0, 0); }} className="rest-card"
+                        style={{ cursor: 'pointer', transition: 'transform .16s ease' }}>
+                        <div style={{ position: 'relative', height: 168, borderRadius: 14, overflow: 'hidden' }}>
+                          <Img src={`${A}/restaurants/${r.id}.jpg`} alt={r.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                            fallback={<div style={{ width: '100%', height: '100%', background: r.grad, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 66 }}>{r.emoji}</div>} />
+                          <div style={{ position: 'absolute', top: 12, right: 12, width: 32, height: 32, borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, boxShadow: '0 2px 8px rgba(0,0,0,.15)' }}>🤍</div>
+                          {i % 3 === 0 && <div style={{ position: 'absolute', bottom: 12, right: 12, background: '#3b3b44', color: '#fff', fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 6 }}>Ad</div>}
+                        </div>
+                        <div style={{ padding: '12px 2px 0' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'flex-start' }}>
+                            <h3 style={{ margin: 0, fontSize: 17, fontWeight: 800, letterSpacing: '-.3px' }}>{r.name}</h3>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 3, color: '#1c1c22', fontSize: 13.5, fontWeight: 800, flex: 'none' }}>
+                              <span style={{ color: '#f5a623' }}>★</span> {r.rating.toFixed(1)}
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 5, color: '#8a8a93', fontSize: 13, fontWeight: 600 }}>
+                            <span>From {r.time.split('–')[0]} min</span><span style={{ opacity: .5 }}>•</span>
+                            <span>₱</span><span style={{ opacity: .5 }}>•</span>
+                            <span>{r.cuisines[0]}</span>
+                          </div>
+                          <div style={{ marginTop: 7, fontSize: 13, fontWeight: 600, color: '#54545c' }}>
+                            🛵 <span style={{ textDecoration: 'line-through', opacity: .55 }}>₱{r.fee || 39}</span> <span style={{ color: B, fontWeight: 700 }}>Free for first order</span>
+                          </div>
+                          {i % 3 === 2 && <div style={{ display: 'inline-block', marginTop: 8, background: BT, color: BD, fontSize: 12, fontWeight: 800, padding: '4px 9px', borderRadius: 7 }}>🏷 Up to 30% off</div>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            </div>
           </main>
+          </>
         )}
 
         {/* Restaurant */}
@@ -655,6 +860,27 @@ export default function App() {
         )}
       </div>
     </>
+  );
+}
+
+// Local image with graceful fallback — shows `fallback` until the file exists at `src`.
+function Img({ src, alt, style, fallback }) {
+  const [err, setErr] = useState(false);
+  if (err || !src) return fallback;
+  return <img src={src} alt={alt} style={style} onError={() => setErr(true)} />;
+}
+
+// Horizontal scroller with a circular "next" arrow on the right.
+function ScrollRow({ children, gap = 18 }) {
+  const ref = useRef(null);
+  return (
+    <div style={{ position: 'relative' }}>
+      <div ref={ref} className="hide-scroll" style={{ display: 'flex', gap, overflowX: 'auto', scrollBehavior: 'smooth', paddingBottom: 4 }}>
+        {children}
+      </div>
+      <button onClick={() => ref.current?.scrollBy({ left: 320, behavior: 'smooth' })} className="scroll-arrow"
+        style={{ position: 'absolute', right: -6, top: '50%', transform: 'translateY(-50%)', width: 44, height: 44, borderRadius: '50%', background: '#fff', border: '1px solid #ececef', cursor: 'pointer', fontSize: 20, color: '#1c1c22', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 14px rgba(0,0,0,.14)', transition: 'transform .1s' }}>→</button>
+    </div>
   );
 }
 
