@@ -165,13 +165,31 @@ const NavIcons = {
 };
 
 // Quick cuisine chips shown inside the greeting hero. `chip` filters the restaurant grid.
-const HERO_CHIPS = [
+// HERO_POOL is the full set of recommendations; the randomize button picks 5 at random.
+const HERO_POOL = [
   { label: 'Milk Tea', chip: 'All' },
   { label: 'Burgers', chip: 'Burgers' },
   { label: 'Coffee', chip: 'All' },
   { label: 'Filipino', chip: 'Filipino' },
   { label: 'Halo-Halo', chip: 'Desserts' },
+  { label: 'Chicken', chip: 'Chicken' },
+  { label: 'Pizza', chip: 'Pizza' },
+  { label: 'Korean', chip: 'Korean' },
+  { label: 'Snacks', chip: 'Snacks' },
+  { label: 'Rice Meals', chip: 'All' },
+  { label: 'Desserts', chip: 'Desserts' },
+  { label: 'Pasta', chip: 'All' },
 ];
+const HERO_CHIPS = HERO_POOL.slice(0, 5);
+
+function shuffleHero() {
+  const pool = [...HERO_POOL];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, 5);
+}
 
 // "Your daily deals" banners. `img` → public/assets/deals/<img>.png (full-bleed promo images)
 const DEALS = [
@@ -202,6 +220,9 @@ const init = {
   pulse: 0,
   pending: null,
   lastOrder: null,
+  favorites: [],
+  heroChips: HERO_CHIPS,
+  heroPulse: 0,
 };
 
 function reducer(s, a) {
@@ -213,6 +234,12 @@ function reducer(s, a) {
     case 'SET_PAY': return { ...s, payment: a.v };
     case 'OPEN_REST': return { ...s, screen: 'restaurant', activeRid: a.id, menuCat: 'All', menuQ: '' };
     case 'GO_HOME': return { ...s, screen: 'home' };
+    case 'SHUFFLE_HERO': return { ...s, heroChips: shuffleHero(), heroPulse: s.heroPulse + 1 };
+    case 'OPEN_FAV': return { ...s, screen: 'favorites', cartOpen: false };
+    case 'TOGGLE_FAV': {
+      const has = s.favorites.includes(a.id);
+      return { ...s, favorites: has ? s.favorites.filter(x => x !== a.id) : [...s.favorites, a.id] };
+    }
     case 'RESET_HOME': return { ...s, screen: 'home', activeRid: null, q: '', chip: 'All', cartOpen: false };
     case 'OPEN_CART': return { ...s, cartOpen: true };
     case 'CLOSE_CART': return { ...s, cartOpen: false };
@@ -304,6 +331,12 @@ export default function App() {
     toast(it.name.replace(/\s*\(.*?\)/g, '') + ' added');
   }
 
+  function toggleFav(id) {
+    const wasFav = s.favorites.includes(id);
+    dispatch({ type: 'TOGGLE_FAV', id });
+    toast(wasFav ? 'Removed from favorites' : 'Added to favorites');
+  }
+
   function placeOrder() {
     const t = computeTotals(s.cart, s.cartRid);
     const r = RESTAURANTS.find(x => x.id === s.cartRid);
@@ -331,6 +364,7 @@ export default function App() {
   });
 
   const R = s.activeRid ? RESTAURANTS.find(x => x.id === s.activeRid) : null;
+  const favRestaurants = RESTAURANTS.filter(r => s.favorites.includes(r.id));
 
   return (
     <>
@@ -341,6 +375,8 @@ export default function App() {
         @keyframes ringPulse{0%{transform:scale(.8);opacity:.55}70%{opacity:0}100%{transform:scale(1.7);opacity:0}}
         @keyframes modalIn{from{transform:translateY(24px) scale(.97);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
         @keyframes sparkle{0%,100%{transform:scale(.5) rotate(0deg);opacity:.25}50%{transform:scale(1.15) rotate(22deg);opacity:1}}
+        @keyframes chipIn{from{transform:translateX(26px);opacity:0}to{transform:translateX(0);opacity:1}}
+        @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
         *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
         ::-webkit-scrollbar{height:6px;width:8px;}
         ::-webkit-scrollbar-thumb{background:rgba(0,0,0,.16);border-radius:999px;}
@@ -361,6 +397,8 @@ export default function App() {
         .back-btn:active{transform:scale(.92);}
         .add-btn:hover{border-color:${B} !important;}
         .add-btn:active{transform:scale(.88);}
+        .fav-btn:hover{transform:scale(1.12);}
+        .fav-btn:active{transform:scale(.85);}
         .pay-opt:hover{border-color:${B} !important;}
         .chip-btn:hover{border-color:${B} !important;}
         .stepper-dec:active,.stepper-inc:active{transform:scale(.85);}
@@ -368,7 +406,7 @@ export default function App() {
         .modal-new:active{transform:scale(.97);}
       `}</style>
 
-      <div style={{ minHeight: '100vh', background: '#f5f5f6', paddingBottom: 40 }}>
+      <div style={{ minHeight: '100vh', background: '#f5f5f6', paddingBottom: s.screen === 'favorites' ? 0 : 40 }}>
 
         {/* Header */}
         <header style={{ position: 'sticky', top: 0, zIndex: 40, background: '#fff', boxShadow: '0 1px 0 rgba(0,0,0,.07),0 4px 18px rgba(0,0,0,.03)' }}>
@@ -404,10 +442,14 @@ export default function App() {
               </svg>
               EN ▾
             </div>
-            <button className="btn-icon" style={{ width: 38, height: 38, borderRadius: '50%', background: 'transparent', border: 'none', cursor: 'pointer', color: '#1c1c22', display: narrow ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none', transition: 'background .15s' }}>
+            <button onClick={() => { dispatch({ type: 'OPEN_FAV' }); window.scrollTo(0, 0); }} className="btn-icon" aria-label="Favourites"
+              style={{ position: 'relative', width: 38, height: 38, borderRadius: '50%', background: 'transparent', border: 'none', cursor: 'pointer', color: s.screen === 'favorites' ? B : '#1c1c22', display: narrow ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none', transition: 'background .15s,color .15s' }}>
               <svg aria-hidden="true" focusable="false" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path fillRule="evenodd" d="M18.338 4.438c2.764 1.316 4.015 4.757 2.795 7.686-1.548 3.243-4.436 5.835-8.665 7.776-.254.114-.543.13-.807.05l-.13-.05c-4.228-1.94-7.116-4.533-8.664-7.776-1.22-2.93.031-6.37 2.795-7.686 1.89-.9 3.826-.315 5.378.855.112.084.246.195.403.333l.286.257a.4.4 0 00.542 0l.315-.283c.145-.125.27-.228.374-.307 1.555-1.171 3.49-1.754 5.378-.855zm-.644 1.355c-1.178-.56-2.506-.3-3.831.699l-.151.12c-.115.096-.258.222-.427.376-.207.19-.553.467-1.038.83a.4.4 0 01-.487-.007 99.836 99.836 0 00-.909-.708l-.13-.11-.158-.143a7.024 7.024 0 00-.426-.36c-1.323-.997-2.652-1.258-3.83-.697-2.032.966-2.972 3.553-2.086 5.685 1.335 2.798 3.822 5.087 7.52 6.863l.259.122.259-.121c3.561-1.711 5.998-3.895 7.34-6.493l.149-.301c.888-2.133.034-4.627-1.867-5.66l-.187-.095z" />
               </svg>
+              {s.favorites.length > 0 && (
+                <span style={{ position: 'absolute', top: -2, right: -2, background: B, color: '#fff', borderRadius: 999, minWidth: 19, height: 19, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, padding: '0 5px' }}>{s.favorites.length}</span>
+              )}
             </button>
             <button onClick={() => dispatch({ type: 'OPEN_CART' })} className="btn-icon"
               style={{ position: 'relative', width: 38, height: 38, borderRadius: '50%', background: 'transparent', border: 'none', cursor: 'pointer', color: '#1c1c22', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none', transition: 'background .15s' }}>
@@ -445,25 +487,29 @@ export default function App() {
         {s.screen === 'home' && (
           <>
             {/* Full-width greeting hero */}
-            <div style={{ background: `linear-gradient(115deg, ${BD} 0%, ${B} 48%, #ff85b8 100%)`, position: 'relative', overflow: 'visible' }}>
+            <div style={{ background: `linear-gradient(115deg, ${BD} 0%, ${B} 60%, #f8579e 100%)`, position: 'relative', overflow: 'visible' }}>
               <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
                 {[820, 620, 440, 280].map(d => (
                   <div key={d} style={{ position: 'absolute', bottom: 5 - d / 2, right: 125 - d / 2, width: d, height: d, borderRadius: '50%', background: 'rgba(255,255,255,.055)' }} />
                 ))}
               </div>
-              <div style={{ maxWidth: 1240, margin: '0 auto', padding: narrow ? '26px 22px 40px' : '34px 22px 60px', position: 'relative' }}>
+              <div style={{ maxWidth: 1240, margin: '0 auto', padding: narrow ? '20px 22px 28px' : '24px 22px 40px', position: 'relative' }}>
                 <div style={{ marginLeft: compact ? 0 : 266 }}>
                   <h1 style={{ margin: 0, color: '#fff', fontSize: narrow ? 27 : 34, fontWeight: 800, letterSpacing: '-.8px' }}>Good Afternoon</h1>
                   <p style={{ margin: '6px 0 0', color: 'rgba(255,255,255,.95)', fontSize: 18, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 7 }}>Ready for something you&apos;ll love? <span style={{ opacity: .8, fontSize: 15 }}>ⓘ</span></p>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginTop: 22, flexWrap: 'wrap' }}>
-                    <button onClick={() => dispatch({ type: 'SET_CHIP', v: 'All' })} className="hero-chip"
-                      style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(255,255,255,.92)', border: 'none', cursor: 'pointer', fontSize: 17, color: B, display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}>↻</button>
-                    {HERO_CHIPS.map(c => {
+                    <button onClick={() => dispatch({ type: 'SHUFFLE_HERO' })} className="hero-chip" aria-label="Show me something new"
+                      style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(255,255,255,.92)', border: 'none', cursor: 'pointer', color: B, display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}>
+                      <svg key={s.heroPulse} aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" style={{ animation: s.heroPulse ? 'spin .5s ease' : 'none' }}><path fillRule="evenodd" clipRule="evenodd" d="M12.0859 3C7.06791 3 3 7.02944 3 12C3 16.9706 7.06791 21 12.0859 21C16.4151 21 20.1183 17.9784 20.9837 13.83C21.0708 13.4127 20.7999 13.0046 20.3787 12.9184C19.9574 12.8322 19.5454 13.1005 19.4584 13.5177C18.7417 16.9531 15.6727 19.4571 12.0859 19.4571C7.92814 19.4571 4.55759 16.1185 4.55759 12C4.55759 7.88153 7.92814 4.54286 12.0859 4.54286C14.4082 4.54286 16.5416 5.59328 17.9458 7.31666C18.0129 7.39907 17.9999 7.51979 17.9167 7.5863C17.8822 7.61384 17.8393 7.62885 17.7951 7.62885L16.7587 7.62857C16.3286 7.62857 15.9799 7.97395 15.9799 8.4C15.9799 8.82605 16.3286 9.17143 16.7587 9.17143H20.4969C20.7263 9.17143 20.9122 8.98723 20.9122 8.76V5.05714C20.9122 4.63109 20.5636 4.28571 20.1334 4.28571C19.7035 4.28571 19.3549 4.63099 19.3549 5.05691L19.3554 6.20997C19.3555 6.2842 19.2947 6.34441 19.2198 6.34444C19.1791 6.34446 19.1406 6.3264 19.1148 6.29523C17.42 4.24684 14.8646 3 12.0859 3Z" /></svg>
+                    </button>
+                    {s.heroChips.map((c, idx) => {
                       const active = c.chip !== 'All' && c.chip === s.chip;
                       return (
-                        <button key={c.label} onClick={() => { dispatch({ type: 'SET_CHIP', v: c.chip }); document.getElementById('all-rests')?.scrollIntoView({ behavior: 'smooth' }); }} className="hero-chip"
-                          style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 18px', borderRadius: 999, border: 'none', background: active ? '#1c1c22' : 'rgba(255,255,255,.92)', color: active ? '#fff' : '#1c1c22', font: 'inherit', fontWeight: 700, fontSize: 14, cursor: 'pointer', transition: 'all .15s' }}>
-                          <span style={{ color: active ? '#ff8fbd' : B }}>✦</span>{c.label}
+                        <button key={`${s.heroPulse}-${idx}`} onClick={() => { dispatch({ type: 'SET_CHIP', v: c.chip }); document.getElementById('all-rests')?.scrollIntoView({ behavior: 'smooth' }); }} className="hero-chip"
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 18px', borderRadius: 999, border: 'none', background: active ? '#1c1c22' : 'rgba(255,255,255,.92)', color: active ? '#fff' : '#1c1c22', font: 'inherit', fontWeight: 700, fontSize: 14, cursor: 'pointer', transition: 'background .15s,color .15s', animation: 'chipIn .4s ease both', animationDelay: `${(s.heroChips.length - 1 - idx) * 0.07}s` }}>
+                          <span style={{ display: 'inline-flex', color: active ? '#ff8fbd' : B }}>
+                            <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M18.8646 10.3406C17.7865 9.79807 16.9701 8.84681 16.5972 7.69874L15.3248 3.78109C14.9865 2.73964 13.5135 2.73964 13.1752 3.78109L11.9028 7.69874C11.5299 8.84681 10.7135 9.79807 9.63541 10.3406L8.12214 11.1022C7.29217 11.5199 7.29275 12.7053 8.12312 13.1222L9.71873 13.9232C10.799 14.4656 11.6172 15.4181 11.9904 16.5681L13.1751 20.2187C13.5132 21.2604 14.9868 21.2604 15.3249 20.2187L16.5096 16.5681C16.8828 15.4181 17.701 14.4656 18.7813 13.9232L20.3769 13.1222C21.2073 12.7053 21.2078 11.5199 20.3779 11.1022L18.8646 10.3406Z" /><path d="M8.50717 5.31615C7.64638 5.02912 6.9709 4.35364 6.68387 3.49285C6.46475 2.83572 5.53525 2.83572 5.31613 3.49285C5.02911 4.35364 4.35363 5.02913 3.49283 5.31615C2.83572 5.53527 2.83572 6.46474 3.49284 6.68386C4.35364 6.97088 5.02912 7.64636 5.31615 8.50716C5.53526 9.16428 6.46474 9.16428 6.68385 8.50716C6.97088 7.64636 7.64636 6.97089 8.50716 6.68386C9.16428 6.46475 9.16429 5.53526 8.50717 5.31615Z" /><path d="M6 19.5C6.82843 19.5 7.5 18.8284 7.5 18C7.5 17.1716 6.82843 16.5 6 16.5C5.17157 16.5 4.5 17.1716 4.5 18C4.5 18.8284 5.17157 19.5 6 19.5Z" /></svg>
+                          </span>{c.label}
                         </button>
                       );
                     })}
@@ -486,8 +532,8 @@ export default function App() {
             <main style={{ maxWidth: 1240, margin: '0 auto', padding: '0 22px 24px', display: 'flex', gap: 26, alignItems: 'flex-start' }}>
 
               {/* Left filters — floats up over the hero (hidden on tablet & below) */}
-              <aside style={{ display: compact ? 'none' : 'block', width: 240, flex: 'none', marginTop: -150, position: 'sticky', top: 132, alignSelf: 'flex-start' }}>
-                <div style={{ background: '#fff', borderRadius: 16, padding: 20, boxShadow: '0 8px 28px rgba(20,20,30,.14)', maxHeight: 'calc(100vh - 150px)', overflowY: 'auto' }}>
+              <aside style={{ display: compact ? 'none' : 'block', width: 240, flex: 'none', marginTop: -200, position: 'sticky', top: 140, alignSelf: 'flex-start' }}>
+                <div style={{ background: '#fff', borderRadius: 16, padding: 20, boxShadow: '0 8px 28px rgba(20,20,30,.14)', maxHeight: 'calc(100vh - 108px)', overflowY: 'auto' }}>
                   <div style={{ fontWeight: 800, fontSize: 19, marginBottom: 16 }}>Filters</div>
                   <div style={{ fontSize: 13, fontWeight: 700, color: '#8a8a93', marginBottom: 8 }}>Sort by</div>
                   {['Relevance', 'Fastest Delivery', 'Distance', 'Top rated'].map((o, i) => (
@@ -507,6 +553,13 @@ export default function App() {
                     <span style={{ width: 18, height: 18, borderRadius: 5, border: '2px solid #cfcfd6', flex: 'none' }} />
                     Accepts vouchers
                   </label>
+                  <div style={{ height: 1, background: '#f1f1f3', margin: '15px 0' }} />
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#8a8a93', marginBottom: 11 }}>Price</div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    {['₱', '₱₱', '₱₱₱'].map(p => (
+                      <span key={p} className="chip-btn" style={{ flex: 1, textAlign: 'center', border: '1.5px solid #d9d9de', borderRadius: 999, padding: '7px 0', fontSize: 13.5, fontWeight: 700, cursor: 'pointer', transition: 'all .15s' }}>{p}</span>
+                    ))}
+                  </div>
                 </div>
               </aside>
 
@@ -563,35 +616,10 @@ export default function App() {
                   </div>
                 ) : (
                   <div style={{ display: 'grid', gridTemplateColumns: narrow ? '1fr' : 'repeat(auto-fill,minmax(280px,1fr))', gap: narrow ? 18 : 24 }}>
-                    {visibleRestaurants.map((r, i) => (
-                      <div key={r.id} onClick={() => { dispatch({ type: 'OPEN_REST', id: r.id }); window.scrollTo(0, 0); }} className="rest-card"
-                        style={{ cursor: 'pointer', transition: 'transform .16s ease' }}>
-                        <div style={{ position: 'relative', height: 168, borderRadius: 14, overflow: 'hidden' }}>
-                          <Img src={`${A}/restaurants/${r.id}.webp`} alt={r.name} className="rest-img" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                            fallback={<div className="rest-img" style={{ width: '100%', height: '100%', background: r.grad, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 66 }}>{r.emoji}</div>} />
-                          <div style={{ position: 'absolute', top: 12, right: 12, width: 28, height: 28, borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1c1c22', boxShadow: '0 2px 8px rgba(0,0,0,.15)' }}>
-                            <svg aria-hidden="true" focusable="false" width="19" height="19" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" fillRule="evenodd" clipRule="evenodd" d="M12.6217 2.82875C14.6366 3.8152 15.5488 6.39602 14.6592 8.59316C13.5308 11.0256 11.4249 12.9696 8.3415 14.4254C8.15614 14.5107 7.94533 14.5229 7.75273 14.4618L7.65776 14.425C4.57478 12.9693 2.46912 11.0254 1.34078 8.59316C0.451161 6.39602 1.36338 3.8152 3.37828 2.82875C4.83682 2.11468 6.33306 2.64718 7.49473 3.62706C7.55809 3.68051 7.63615 3.75107 7.72889 3.83874L7.72892 3.83871C7.88199 3.98341 8.11731 3.98336 8.27032 3.8386C8.34183 3.77095 8.40276 3.71543 8.45314 3.67203C9.62526 2.66225 11.1429 2.10474 12.6217 2.82875ZM11.8696 4.45404C11.1697 4.11137 10.2881 4.36724 9.41854 5.19403L9.24485 5.36699L8.28326 6.36823C8.12801 6.52989 7.87475 6.53148 7.71758 6.37179C7.71631 6.3705 7.71504 6.36919 7.71378 6.36787L6.75338 5.36542C5.83294 4.40468 4.87775 4.08814 4.13039 4.45404C2.96994 5.02217 2.42026 6.5773 2.92018 7.81797C3.76446 9.63786 5.30414 11.1633 7.59598 12.391L7.82073 12.5071C7.93328 12.5652 8.06585 12.5655 8.17856 12.5077C8.30589 12.4425 8.40456 12.391 8.47457 12.353C10.6006 11.2014 12.0681 9.79624 12.9017 8.18989L13.0437 7.90114C13.5554 6.63747 13.0778 5.16307 12.024 4.53751L11.8696 4.45404Z" /></svg>
-                          </div>
-                          {i % 3 === 0 && <div style={{ position: 'absolute', bottom: 12, right: 12, background: '#3b3b44', color: '#fff', fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 6 }}>Ad</div>}
-                        </div>
-                        <div style={{ padding: '12px 2px 0' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'flex-start' }}>
-                            <h3 style={{ margin: 0, fontSize: 17, fontWeight: 800, letterSpacing: '-.3px' }}>{r.name}</h3>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 3, color: '#1c1c22', fontSize: 13.5, fontWeight: 800, flex: 'none' }}>
-                              <span style={{ color: '#f5a623' }}>★</span> {r.rating.toFixed(1)}
-                            </div>
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 5, color: '#8a8a93', fontSize: 13, fontWeight: 600 }}>
-                            <span>From {r.time.split('–')[0]} min</span><span style={{ opacity: .5 }}>•</span>
-                            <span>₱</span><span style={{ opacity: .5 }}>•</span>
-                            <span>{r.cuisines[0]}</span>
-                          </div>
-                          <div style={{ marginTop: 7, fontSize: 13, fontWeight: 600, color: '#54545c' }}>
-                            🛵 <span style={{ textDecoration: 'line-through', opacity: .55 }}>₱{r.fee || 39}</span> <span style={{ color: B, fontWeight: 700 }}>Free for first order</span>
-                          </div>
-                          {i % 3 === 2 && <div style={{ display: 'inline-block', marginTop: 8, background: BT, color: BD, fontSize: 12, fontWeight: 800, padding: '4px 9px', borderRadius: 7 }}>🏷 Up to 30% off</div>}
-                        </div>
-                      </div>
+                    {visibleRestaurants.map(r => (
+                      <RestCard key={r.id} r={r} isFav={s.favorites.includes(r.id)}
+                        onOpen={() => { dispatch({ type: 'OPEN_REST', id: r.id }); window.scrollTo(0, 0); }}
+                        onFav={() => toggleFav(r.id)} B={B} BD={BD} />
                     ))}
                   </div>
                 )}
@@ -599,6 +627,34 @@ export default function App() {
             </div>
           </main>
           </>
+        )}
+
+        {/* Favourites */}
+        {s.screen === 'favorites' && (
+          <main style={{ maxWidth: 1240, margin: '0 auto', padding: narrow ? '26px 22px 40px' : '34px 22px 48px', minHeight: 'calc(100vh - 122px)', display: 'flex', flexDirection: 'column' }}>
+            <h1 style={{ margin: '0 0 26px', fontSize: narrow ? 28 : 34, fontWeight: 800, letterSpacing: '-.8px' }}>My Favourites</h1>
+            {favRestaurants.length === 0 ? (
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', color: '#54545c', paddingBottom: 40 }}>
+                <img src="https://micro-assets.foodora.com/img/no-favorites-fp.svg" alt="No favourites found" style={{ width: 180, height: 180, margin: '0 auto 22px', display: 'block', objectFit: 'contain' }} />
+                <div style={{ fontWeight: 800, fontSize: 21, color: '#1c1c22' }}>No Favourites Saved</div>
+                <div style={{ fontSize: 15, marginTop: 8, lineHeight: 1.5, maxWidth: 440, marginInline: 'auto' }}>
+                  You&apos;ll see all your favourites here, to make ordering even faster. Just look for the <span style={{ color: B }}>♥</span>
+                </div>
+                <button onClick={() => { dispatch({ type: 'RESET_HOME' }); window.scrollTo(0, 0); }} className="ghost-btn"
+                  style={{ marginTop: 22, background: '#fff', border: '1.5px solid #d9d9de', borderRadius: 12, padding: '12px 22px', font: 'inherit', fontWeight: 700, fontSize: 14.5, color: '#1c1c22', cursor: 'pointer', transition: 'background .15s' }}>
+                  Let&apos;s find some favourites
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: narrow ? '1fr' : 'repeat(auto-fill,minmax(280px,1fr))', gap: narrow ? 18 : 24 }}>
+                {favRestaurants.map(r => (
+                  <RestCard key={r.id} r={r} isFav
+                    onOpen={() => { dispatch({ type: 'OPEN_REST', id: r.id }); window.scrollTo(0, 0); }}
+                    onFav={() => toggleFav(r.id)} B={B} BD={BD} />
+                ))}
+              </div>
+            )}
+          </main>
         )}
 
         {/* Restaurant */}
@@ -854,6 +910,48 @@ export default function App() {
         )}
       </div>
     </>
+  );
+}
+
+// Restaurant grid card with a tappable favourite heart (top-right).
+function RestCard({ r, isFav, onOpen, onFav, B, BD }) {
+  return (
+    <div onClick={onOpen} className="rest-card" style={{ cursor: 'pointer', transition: 'transform .16s ease' }}>
+      <div style={{ position: 'relative', height: 168, borderRadius: 14, overflow: 'hidden' }}>
+        <Img src={`${A}/restaurants/${r.id}.webp`} alt={r.name} className="rest-img" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          fallback={<div className="rest-img" style={{ width: '100%', height: '100%', background: r.grad, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 66 }}>{r.emoji}</div>} />
+        <button onClick={e => { e.stopPropagation(); onFav(); }} className="fav-btn" aria-label={isFav ? 'Remove from favourites' : 'Add to favourites'} aria-pressed={isFav}
+          style={{ position: 'absolute', top: 12, right: 12, width: 28, height: 28, borderRadius: '50%', background: '#fff', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isFav ? B : '#1c1c22', boxShadow: '0 2px 8px rgba(0,0,0,.15)', transition: 'transform .12s,color .15s' }}>
+          <svg key={isFav ? 'on' : 'off'} aria-hidden="true" focusable="false" width="19" height="19" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style={{ animation: isFav ? 'pop .35s ease' : 'none' }}><path fill="currentColor" fillRule="evenodd" clipRule="evenodd" d="M12.6217 2.82875C14.6366 3.8152 15.5488 6.39602 14.6592 8.59316C13.5308 11.0256 11.4249 12.9696 8.3415 14.4254C8.15614 14.5107 7.94533 14.5229 7.75273 14.4618L7.65776 14.425C4.57478 12.9693 2.46912 11.0254 1.34078 8.59316C0.451161 6.39602 1.36338 3.8152 3.37828 2.82875C4.83682 2.11468 6.33306 2.64718 7.49473 3.62706C7.55809 3.68051 7.63615 3.75107 7.72889 3.83874L7.72892 3.83871C7.88199 3.98341 8.11731 3.98336 8.27032 3.8386C8.34183 3.77095 8.40276 3.71543 8.45314 3.67203C9.62526 2.66225 11.1429 2.10474 12.6217 2.82875ZM11.8696 4.45404C11.1697 4.11137 10.2881 4.36724 9.41854 5.19403L9.24485 5.36699L8.28326 6.36823C8.12801 6.52989 7.87475 6.53148 7.71758 6.37179C7.71631 6.3705 7.71504 6.36919 7.71378 6.36787L6.75338 5.36542C5.83294 4.40468 4.87775 4.08814 4.13039 4.45404C2.96994 5.02217 2.42026 6.5773 2.92018 7.81797C3.76446 9.63786 5.30414 11.1633 7.59598 12.391L7.82073 12.5071C7.93328 12.5652 8.06585 12.5655 8.17856 12.5077C8.30589 12.4425 8.40456 12.391 8.47457 12.353C10.6006 11.2014 12.0681 9.79624 12.9017 8.18989L13.0437 7.90114C13.5554 6.63747 13.0778 5.16307 12.024 4.53751L11.8696 4.45404Z" /></svg>
+        </button>
+      </div>
+      <div style={{ padding: '12px 2px 0' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'flex-start' }}>
+          <h3 style={{ margin: 0, fontSize: 17, fontWeight: 800, letterSpacing: '-.3px' }}>{r.name}</h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 3, color: '#1c1c22', fontSize: 13.5, fontWeight: 800, flex: 'none' }}>
+            <span style={{ color: '#f5a623' }}>★</span> {r.rating.toFixed(1)}
+          </div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 5, color: '#8a8a93', fontSize: 12, fontWeight: 600 }}>
+          <span>{r.time.replace('–', '-')}</span><span style={{ opacity: .5 }}>·</span>
+          <span>₱₱</span><span style={{ opacity: .5 }}>·</span>
+          <span>{r.cuisines[0]}</span>
+        </div>
+        <div style={{ marginTop: 6, fontSize: 12, fontWeight: 600, color: '#54545c', display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
+          <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" style={{ flex: 'none' }}><path fillRule="evenodd" clipRule="evenodd" d="M9.23752 3.28752C9.23752 3.95027 8.70027 4.48752 8.03752 4.48752C7.37478 4.48752 6.83752 3.95027 6.83752 3.28752C6.83752 2.62478 7.37478 2.08752 8.03752 2.08752C8.70027 2.08752 9.23752 2.62478 9.23752 3.28752ZM6.14386 9.14592C6.00445 8.96508 5.94904 8.72306 6.01506 8.48618L6.86505 5.43618C6.97625 5.03718 7.38985 4.80386 7.78886 4.91506C7.91357 4.94981 8.02209 5.01411 8.10897 5.09826L9.67246 6.11242L11.5377 6.11242C11.8829 6.11242 12.1627 6.39224 12.1627 6.73742C12.1627 7.0826 11.8829 7.36242 11.5377 7.36242H9.48751C9.3668 7.36242 9.24867 7.32746 9.14739 7.26177L8.10235 6.58391L7.63531 8.2598L9.66925 8.36322C9.87995 8.37393 10.071 8.49022 10.1773 8.67244C10.2837 8.85467 10.2909 9.07823 10.1965 9.26693L10.0965 9.46693L10.0947 9.47057L8.54468 12.5206C8.38829 12.8283 8.01206 12.951 7.70434 12.7946C7.39662 12.6382 7.27394 12.262 7.43032 11.9543L8.64567 9.56279L6.65576 9.46161C6.43443 9.45035 6.24586 9.32527 6.14386 9.14592ZM2.53752 4.68752C1.87478 4.68752 1.33752 5.22478 1.33752 5.88752V7.48752C1.33752 8.15027 1.87478 8.68752 2.53752 8.68752H4.13752C4.80027 8.68752 5.33752 8.15027 5.33752 7.48752V5.88752C5.33752 5.22478 4.80027 4.68752 4.13752 4.68752H2.53752ZM4.33752 10.5125C3.74382 10.5125 3.26252 10.9938 3.26252 11.5875C3.26252 12.1812 3.74382 12.6625 4.33752 12.6625C4.93123 12.6625 5.41252 12.1812 5.41252 11.5875C5.41252 10.9938 4.93123 10.5125 4.33752 10.5125ZM2.01252 11.5875C2.01252 10.3035 3.05346 9.26252 4.33752 9.26252C5.62159 9.26252 6.66252 10.3035 6.66252 11.5875C6.66252 12.8716 5.62159 13.9125 4.33752 13.9125C3.05346 13.9125 2.01252 12.8716 2.01252 11.5875ZM11.2625 11.5875C11.2625 10.9938 11.7438 10.5125 12.3375 10.5125C12.9312 10.5125 13.4125 10.9938 13.4125 11.5875C13.4125 12.1812 12.9312 12.6625 12.3375 12.6625C11.7438 12.6625 11.2625 12.1812 11.2625 11.5875ZM12.3375 9.26252C11.0535 9.26252 10.0125 10.3035 10.0125 11.5875C10.0125 12.8716 11.0535 13.9125 12.3375 13.9125C13.6216 13.9125 14.6625 12.8716 14.6625 11.5875C14.6625 10.3035 13.6216 9.26252 12.3375 9.26252Z" /></svg>
+          <span>₱{r.fee || 39} or</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2, color: '#6c2bd9', fontWeight: 800, fontSize: 11, background: '#efe9fd', padding: '2px 6px', borderRadius: 6 }}>
+            <svg aria-hidden="true" focusable="false" width="13" height="13" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" style={{ flex: 'none' }}><path d="M10.6832 7.7806L8.00209 3L5.2852 7.7806L2 5.72375L2.99745 13H12.9713L14 5.70407L10.6832 7.7806Z" /></svg>
+            PRO
+          </span>
+          <span>Free with ₱200 spend</span>
+        </div>
+        <div style={{ marginTop: 7, display: 'inline-flex', alignItems: 'center', gap: 4, color: BD, fontSize: 11, fontWeight: 800, background: BT, padding: '3px 7px', borderRadius: 6 }}>
+          <svg aria-hidden="true" focusable="false" width="13" height="13" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" style={{ flex: 'none' }}><path fillRule="evenodd" clipRule="evenodd" d="M6.65484 2.56705C7.3923 1.81115 8.60773 1.81115 9.34518 2.56705L9.39322 2.61629C9.74688 2.9788 10.2319 3.18322 10.7384 3.18322L10.9377 3.18322C11.9755 3.18322 12.8169 4.02447 12.8169 5.0622V5.26146C12.8169 5.76789 13.0213 6.25287 13.3839 6.60649L13.4331 6.65452C14.1891 7.3919 14.1891 8.6072 13.4331 9.34457L13.3839 9.39261C13.0213 9.74623 12.8169 10.2312 12.8169 10.7376V10.9369C12.8169 11.9746 11.9755 12.8159 10.9377 12.8159L10.7384 12.8159C10.2319 12.8159 9.74688 13.0203 9.39322 13.3828L9.34518 13.432C8.60773 14.188 7.3923 14.1879 6.65484 13.432L6.6068 13.3828C6.25314 13.0203 5.76811 12.8159 5.26163 12.8159L5.06235 12.8159C4.02451 12.8159 3.18316 11.9746 3.18316 10.9369L3.18316 10.7376C3.18316 10.2312 2.97872 9.74623 2.61618 9.39261L2.56693 9.34457C1.81094 8.6072 1.81094 7.3919 2.56693 6.65452L2.61618 6.60649C2.97872 6.25287 3.18316 5.76789 3.18316 5.26147L3.18316 5.0622C3.18316 4.02447 4.0245 3.18322 5.06235 3.18322L5.26163 3.18322C5.76811 3.18322 6.25314 2.9788 6.6068 2.61629L6.65484 2.56705ZM6.89645 5.89616C6.89645 6.44839 6.44873 6.89607 5.89644 6.89607C5.34415 6.89607 4.89643 6.44839 4.89643 5.89616C4.89643 5.34393 5.34415 4.89626 5.89644 4.89626C6.44873 4.89626 6.89645 5.34393 6.89645 5.89616ZM10.1036 11.1028C10.6559 11.1028 11.1036 10.6552 11.1036 10.1029C11.1036 9.5507 10.6559 9.10303 10.1036 9.10303C9.5513 9.10303 9.10358 9.5507 9.10358 10.1029C9.10358 10.6552 9.5513 11.1028 10.1036 11.1028ZM5.90129 9.05883C5.6084 9.35172 5.6084 9.82659 5.90129 10.1195C6.19419 10.4124 6.66906 10.4124 6.96195 10.1195L10.1439 6.93751C10.4368 6.64461 10.4368 6.16974 10.1439 5.87685C9.85104 5.58395 9.37617 5.58395 9.08327 5.87685L5.90129 9.05883Z" /></svg>
+          10% off ₱899
+        </div>
+      </div>
+    </div>
   );
 }
 
