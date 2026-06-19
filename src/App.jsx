@@ -208,12 +208,26 @@ const TOP_BRANDS = ['jb', 'chowking', 'kfc', 'bonchon', 'greenwich', 'mcdo', 'sh
 
 // ─── State ───────────────────────────────────────────────────────────────────
 
-// Saved delivery addresses shown in the address picker. `value` is what lands in the header.
-const SAVED_ADDRESSES = [
-  { id: 'makati', icon: 'pin', label: 'Makati City, 1227', sub: '', value: 'Makati City, 1227' },
-  { id: 'home', icon: 'home', label: 'Home', sub: 'Bulacan', value: 'Bulacan' },
-  { id: 'partner', icon: 'heart', label: 'Partner', sub: '1 Bulacan, 3020', value: '1 Bulacan, 3020' },
+// Address logos. Click an svg pill in the picker to assign a label when saving.
+const ADDR_ICONS = {
+  home: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M3 11l9-7 9 7" /><path d="M5 10v10h5v-6h4v6h5V10" /></svg>,
+  work: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2" /></svg>,
+  heart: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M12 20s-7-4.5-7-9.5A4 4 0 0112 7a4 4 0 017 3.5C19 15.5 12 20 12 20z" /></svg>,
+  pin: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M12 21s7-6.5 7-11a7 7 0 10-14 0c0 4.5 7 11 7 11z" /><circle cx="12" cy="10" r="2.5" /></svg>,
+};
+
+// Quick labels shown as pills. key → icon in ADDR_ICONS.
+const ADDR_LABELS = [
+  { key: 'home', text: 'Home' },
+  { key: 'work', text: 'Work' },
+  { key: 'heart', text: 'Partner' },
 ];
+
+// Saved delivery addresses persist in localStorage. Starts empty.
+const ADDR_KEY = 'poodfanda.savedAddresses';
+function loadAddresses() {
+  try { return JSON.parse(localStorage.getItem(ADDR_KEY)) || []; } catch { return []; }
+}
 
 const init = {
   screen: 'home',
@@ -235,7 +249,7 @@ const init = {
   heroPulse: 0,
   address: 'Triangle Paseo de Roxas Makati City',
   addrOpen: false,
-  sort: 'Relevance',     // 'Relevance' | 'Top rated' active; 'Fastest Delivery' | 'Distance' are inert
+  sort: '',              // '' = none selected; 'Top rated' active; 'Relevance' | 'Fastest Delivery' | 'Distance' are inert
   minRating: 0,          // 0 = off, 4 = "Ratings 4+" filter on
   vouchers: false,       // "Accepts vouchers" → free-delivery restaurants
   priceLevels: [],       // selected price tiers (1/2/3), empty = all
@@ -255,6 +269,7 @@ function reducer(s, a) {
     case 'TOGGLE_RATING': return { ...s, minRating: s.minRating ? 0 : 4 };
     case 'TOGGLE_VOUCHERS': return { ...s, vouchers: !s.vouchers };
     case 'TOGGLE_PRICE': return { ...s, priceLevels: s.priceLevels.includes(a.v) ? [] : [a.v] };
+    case 'CLEAR_FILTERS': return { ...s, sort: '', minRating: 0, vouchers: false, priceLevels: [] };
     case 'OPEN_REST': return { ...s, screen: 'restaurant', activeRid: a.id, menuCat: 'All', menuQ: '' };
     case 'GO_HOME': return { ...s, screen: 'home' };
     case 'SHUFFLE_HERO': return { ...s, heroChips: shuffleHero(), heroPulse: s.heroPulse + 1 };
@@ -338,6 +353,20 @@ export default function App() {
   const narrow = vw < 640;    // phone — trim header, full-width search, 1-col grid
   const toastTimer = useRef(null);
   const [addrInput, setAddrInput] = useState('');
+  const [addrLabel, setAddrLabel] = useState('home');  // label to assign when saving
+  const [saved, setSaved] = useState(loadAddresses);   // persisted saved addresses
+  useEffect(() => { localStorage.setItem(ADDR_KEY, JSON.stringify(saved)); }, [saved]);
+
+  function saveAddr() {
+    const v = addrInput.trim();
+    if (!v) return;
+    const lbl = ADDR_LABELS.find(l => l.key === addrLabel) || ADDR_LABELS[0];
+    setSaved(list => list.some(a => a.value === v) ? list : [...list, { id: Date.now().toString(36), icon: lbl.key, label: lbl.text, sub: v, value: v }]);
+    dispatch({ type: 'SET_ADDRESS', v });
+  }
+  function delAddr(id) {
+    setSaved(list => list.filter(a => a.id !== id));
+  }
 
   function toast(msg) {
     clearTimeout(toastTimer.current);
@@ -406,7 +435,8 @@ export default function App() {
         @keyframes chipIn{from{transform:translateX(26px);opacity:0}to{transform:translateX(0);opacity:1}}
         @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
         *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-        ::-webkit-scrollbar{height:6px;width:8px;}
+        ::-webkit-scrollbar{height:0;width:8px;}
+        ::-webkit-scrollbar:horizontal{display:none;}
         ::-webkit-scrollbar-thumb{background:rgba(0,0,0,.16);border-radius:999px;}
         .rest-img{transition:transform .3s ease;}
         .rest-card:hover .rest-img{transform:scale(1.07);}
@@ -418,6 +448,12 @@ export default function App() {
         .hide-scroll{scrollbar-width:none;}
         .scroll-arrow:hover{transform:translateY(-50%) scale(1.08);}
         .hero-chip:hover{filter:brightness(.95);}
+        .clear-all:hover{opacity:.6;}
+        .filter-scroll{scrollbar-width:thin;scrollbar-color:#cfcfd6 transparent;}
+        .filter-scroll::-webkit-scrollbar{width:8px;}
+        .filter-scroll::-webkit-scrollbar-track{background:transparent;}
+        .filter-scroll::-webkit-scrollbar-thumb{background:#cfcfd6;border-radius:999px;}
+        .filter-scroll::-webkit-scrollbar-thumb:hover{background:#b3b3bd;}
         .ghost-btn:hover{background:#f5f5f6 !important;}
         .btn-brand:hover{filter:brightness(1.07);}
         .btn-brand:active{transform:scale(.985);}
@@ -438,7 +474,7 @@ export default function App() {
         .addr-go:active{transform:scale(.96);}
       `}</style>
 
-      <div style={{ minHeight: '100vh', background: '#f5f5f6', paddingBottom: s.screen === 'favorites' ? 0 : 40 }}>
+      <div style={{ minHeight: '100vh', background: '#f5f5f6', display: 'flex', flexDirection: 'column' }}>
 
         {/* Header */}
         <header style={{ position: 'sticky', top: 0, zIndex: 40, background: '#fff', boxShadow: '0 1px 0 rgba(0,0,0,.07),0 4px 18px rgba(0,0,0,.03)' }}>
@@ -475,7 +511,7 @@ export default function App() {
               EN ▾
             </div>
             <button onClick={() => { dispatch({ type: 'OPEN_FAV' }); window.scrollTo(0, 0); }} className="btn-icon" aria-label="Favourites"
-              style={{ position: 'relative', width: 38, height: 38, borderRadius: '50%', background: 'transparent', border: 'none', cursor: 'pointer', color: s.screen === 'favorites' ? B : '#1c1c22', display: narrow ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none', transition: 'background .15s,color .15s' }}>
+              style={{ position: 'relative', width: 38, height: 38, borderRadius: '50%', background: 'transparent', border: 'none', cursor: 'pointer', color: s.screen === 'favorites' ? B : '#1c1c22', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none', transition: 'background .15s,color .15s' }}>
               <svg aria-hidden="true" focusable="false" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path fillRule="evenodd" d="M18.338 4.438c2.764 1.316 4.015 4.757 2.795 7.686-1.548 3.243-4.436 5.835-8.665 7.776-.254.114-.543.13-.807.05l-.13-.05c-4.228-1.94-7.116-4.533-8.664-7.776-1.22-2.93.031-6.37 2.795-7.686 1.89-.9 3.826-.315 5.378.855.112.084.246.195.403.333l.286.257a.4.4 0 00.542 0l.315-.283c.145-.125.27-.228.374-.307 1.555-1.171 3.49-1.754 5.378-.855zm-.644 1.355c-1.178-.56-2.506-.3-3.831.699l-.151.12c-.115.096-.258.222-.427.376-.207.19-.553.467-1.038.83a.4.4 0 01-.487-.007 99.836 99.836 0 00-.909-.708l-.13-.11-.158-.143a7.024 7.024 0 00-.426-.36c-1.323-.997-2.652-1.258-3.83-.697-2.032.966-2.972 3.553-2.086 5.685 1.335 2.798 3.822 5.087 7.52 6.863l.259.122.259-.121c3.561-1.711 5.998-3.895 7.34-6.493l.149-.301c.888-2.133.034-4.627-1.867-5.66l-.187-.095z" />
               </svg>
@@ -515,30 +551,51 @@ export default function App() {
                           </button>
                         )}
                       </div>
-                      <button onClick={() => { if (addrInput.trim()) dispatch({ type: 'SET_ADDRESS', v: addrInput.trim() }); }} className="addr-go" aria-label="Confirm address"
+                      <button onClick={saveAddr} className="addr-go" aria-label="Save address"
                         style={{ background: B, color: '#fff', border: 'none', borderRadius: 12, width: 56, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'filter .15s,transform .1s' }}>
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
                       </button>
                     </div>
 
+                    {/* Add a label for the address — click a pill to assign it */}
+                    <div style={{ marginTop: 14, paddingLeft: 4 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: '#54545c', marginBottom: 8 }}>Add a Label</div>
+                      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                        {ADDR_LABELS.map(({ key, text }) => {
+                          const on = addrLabel === key;
+                          return (
+                            <button key={key} type="button" onClick={() => setAddrLabel(key)}
+                              style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '8px 16px', borderRadius: 999, cursor: 'pointer', fontSize: 14, fontWeight: 600, background: on ? '#fdeaf2' : '#fff', color: on ? B : '#1c1c22', border: on ? `1.5px solid ${B}` : '1.5px solid #e3e3e6', transition: 'all .12s' }}>
+                              {ADDR_ICONS[key]}{text}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
                     <div style={{ fontWeight: 800, fontSize: 18, letterSpacing: '-.3px', margin: '18px 0 4px', paddingLeft: 4 }}>Saved Addresses</div>
-                    {SAVED_ADDRESSES.map(adr => {
+                    {saved.length === 0 && (
+                      <div style={{ color: '#8a8a93', fontSize: 14, padding: '8px 10px 4px' }}>No saved addresses yet. Type one above, pick a logo, then tap the arrow to save.</div>
+                    )}
+                    {saved.map(adr => {
                       const selected = s.address === adr.value;
                       return (
                         <div key={adr.id} onClick={() => dispatch({ type: 'SET_ADDRESS', v: adr.value })} className="addr-row"
                           style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 10px', borderRadius: 12, cursor: 'pointer', background: selected ? '#f6f6f7' : 'transparent', transition: 'background .12s' }}>
                           <span style={{ color: '#1c1c22', display: 'flex', flex: 'none' }}>
-                            {adr.icon === 'pin' && <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M12 21s7-6.5 7-11a7 7 0 10-14 0c0 4.5 7 11 7 11z" /><circle cx="12" cy="10" r="2.5" /></svg>}
-                            {adr.icon === 'home' && <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M3 11l9-7 9 7" /><path d="M5 10v10h5v-6h4v6h5V10" /></svg>}
-                            {adr.icon === 'heart' && <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M12 20s-7-4.5-7-9.5A4 4 0 0112 7a4 4 0 017 3.5C19 15.5 12 20 12 20z" /></svg>}
+                            {ADDR_ICONS[adr.icon] || ADDR_ICONS.pin}
                           </span>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontWeight: 700, fontSize: 15, color: '#1c1c22' }}>{adr.label}</div>
+                            <div style={{ fontWeight: 700, fontSize: 15, color: '#1c1c22', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{adr.label}</div>
                             {adr.sub && <div style={{ color: '#54545c', fontSize: 14 }}>{adr.sub}</div>}
                           </div>
                           {selected && (
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={B} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" style={{ flex: 'none' }} xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9" /><path d="M8.5 12.5l2.5 2.5 4.5-5" /></svg>
                           )}
+                          <button onClick={e => { e.stopPropagation(); delAddr(adr.id); }} aria-label="Remove address"
+                            style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#8a8a93', display: 'flex', flex: 'none', padding: 4 }}>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M12 3a9 9 0 100 18 9 9 0 000-18zM9.53 8.47a.75.75 0 00-1.06 1.06L10.94 12l-2.47 2.47a.75.75 0 101.06 1.06L12 13.06l2.47 2.47a.75.75 0 101.06-1.06L13.06 12l2.47-2.47a.75.75 0 00-1.06-1.06L12 10.94 9.53 8.47z" /></svg>
+                          </button>
                         </div>
                       );
                     })}
@@ -615,12 +672,15 @@ export default function App() {
               )}
             </div>
 
-            <main style={{ maxWidth: 1240, margin: '0 auto', padding: '0 22px 24px', display: 'flex', gap: 26, alignItems: 'flex-start' }}>
+            <main style={{ width: '100%', maxWidth: 1240, margin: '0 auto', padding: '0 22px 24px', display: 'flex', gap: 26, alignItems: 'flex-start' }}>
 
               {/* Left filters — floats up over the hero (hidden on tablet & below) */}
               <aside style={{ display: compact ? 'none' : 'block', width: 240, flex: 'none', marginTop: -200, position: 'sticky', top: 140, alignSelf: 'flex-start' }}>
-                <div style={{ background: '#fff', borderRadius: 16, padding: 20, boxShadow: '0 8px 28px rgba(20,20,30,.14)', maxHeight: 'calc(100vh - 108px)', overflowY: 'auto' }}>
-                  <div style={{ fontWeight: 800, fontSize: 19, marginBottom: 16 }}>Filters</div>
+                <div className="filter-scroll" style={{ background: '#fff', borderRadius: 16, padding: 20, boxShadow: '0 8px 28px rgba(20,20,30,.14)', maxHeight: 'calc(100vh - 108px)', overflowY: 'auto' }}>
+                  <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 16 }}>
+                    <span style={{ fontWeight: 800, fontSize: 19 }}>Filters</span>
+                    <span onClick={() => dispatch({ type: 'CLEAR_FILTERS' })} className="clear-all" style={{ fontSize: 13, fontWeight: 700, color: '#1c1c22', cursor: 'pointer' }}>Clear all</span>
+                  </div>
                   <div style={{ fontSize: 13, fontWeight: 700, color: '#8a8a93', marginBottom: 8 }}>Sort by</div>
                   {['Relevance', 'Fastest Delivery', 'Distance', 'Top rated'].map((o) => {
                     const on = s.sort === o;
@@ -726,7 +786,7 @@ export default function App() {
 
         {/* Favourites */}
         {s.screen === 'favorites' && (
-          <main style={{ maxWidth: 1240, margin: '0 auto', padding: narrow ? '26px 22px 40px' : '34px 22px 48px', minHeight: 'calc(100vh - 122px)', display: 'flex', flexDirection: 'column' }}>
+          <main style={{ width: '100%', maxWidth: 1240, margin: '0 auto', padding: narrow ? '26px 22px 40px' : '34px 22px 48px', minHeight: 'calc(100vh - 122px)', display: 'flex', flexDirection: 'column' }}>
             <h1 style={{ margin: '0 0 26px', fontSize: narrow ? 28 : 34, fontWeight: 800, letterSpacing: '-.8px' }}>My Favourites</h1>
             {favRestaurants.length === 0 ? (
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', color: '#54545c', paddingBottom: 40 }}>
@@ -741,7 +801,7 @@ export default function App() {
                 </button>
               </div>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: narrow ? '1fr' : 'repeat(auto-fill,minmax(280px,1fr))', gap: narrow ? 18 : 24 }}>
+              <div style={{ width: '100%', display: 'grid', gridTemplateColumns: narrow ? '1fr' : 'repeat(auto-fill,minmax(280px,1fr))', gap: narrow ? 18 : 24 }}>
                 {favRestaurants.map(r => (
                   <RestCard key={r.id} r={r} isFav
                     onOpen={() => { dispatch({ type: 'OPEN_REST', id: r.id }); window.scrollTo(0, 0); }}
@@ -908,6 +968,36 @@ export default function App() {
             </button>
           </main>
         )}
+
+        {/* Footer */}
+        <footer style={{ background: '#fff', borderTop: '1px solid #ececef', marginTop: 'auto' }}>
+          <div style={{ maxWidth: 1240, margin: '0 auto', padding: narrow ? '20px 22px' : '22px 22px', display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
+            {/* Left: brand lockup */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, flex: '1 1 auto' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="26" height="26" aria-hidden="true" focusable="false">
+                  <path d="M35 0H5C2.24 0 0 2.24 0 5v30c0 2.76 2.24 5 5 5h30c2.76 0 5-2.24 5-5V5c0-2.76-2.24-5-5-5Z" fill="#ff2b85" />
+                  <path d="M14.58 17.53c.41-.04.71-.4.68-.81a.756.756 0 0 0-.81-.68c-.39.03-.68.35-.68.74.02.43.38.76.81.75Zm10.44-1.33c.12-.09.25-.14.4-.16.43-.02.79.32.81.75 0 .41-.33.75-.75.75s-.75-.33-.75-.75c0-.23.11-.45.29-.59Z" fill="#fff" />
+                  <path fillRule="evenodd" clipRule="evenodd" d="M33.51 14.52v-.03c-.15-.3-.1-.65.12-.9a4.983 4.983 0 0 0 .89-4.78c-.06-.19-.34-.24-.61-.29-.26-.05-.52-.09-.62-.26-.09-.15-.06-.38 0-.63.02-.07.03-.13.04-.2.05-.26.07-.51-.06-.64s-.28-.26-.42-.37l-.09-.07c-1-.74-2.23-1.1-3.47-1.03-1.08.05-2.23.41-3.06 1.14-.4.29-.92.37-1.39.22l-.07-.02c-.84-.3-1.7-.52-2.58-.66a14.28 14.28 0 0 0-6.95.66h-.05c-.45.18-.96.1-1.35-.19-1.55-1.37-4.68-1.71-6.72.01-2.23 1.88-2.36 5.17-.71 7.1.22.25.26.6.12.9-.98 2-1.5 4.2-1.51 6.43 0 7.97 6.72 13.77 15 13.77 8.28 0 15-5.8 15-13.77 0-2.22-.52-4.41-1.49-6.41 0 0 0 .02-.01.02h-.01ZM19.9 20.19c1.19 0 2.15.26 2.15.72 0 .46-.96 1.5-2.15 1.5s-2.15-1.04-2.15-1.5c0-.46.96-.72 2.15-.72ZM7.86 11.8a.578.578 0 0 1-.18-.2c-.02-.03-.04-.07-.06-.1-.36-.66-.45-1.44-.23-2.16.42-1.41 1.92-2.24 3.35-2.05.37.05.74.17 1.07.35.14.08.26.17.37.28.04.04.08.09.1.15.02.09 0 .18-.07.25-.06.06-.14.11-.22.15-1.37.8-2.49 1.95-3.52 3.14-.17.19-.35.37-.61.19Zm3.66 11.33c-1.24-.14-2.32-1.45-2.73-2.77-.18-.58-.61-3.26 1.31-5.2.64-.64 1.54-1.21 2.79-1.59.41-.1.82-.15 1.24-.15.62 0 1.36.1 1.95.53 1.24.91 1.26 2.44.52 3.23s-2.4 2.59-2.83 4.06c-.42 1.47-1.01 2.04-2.26 1.9 0 0 .01-.01.01 0v-.01Zm8.4 4.43h-.04c-2.39-.01-4.32-1.7-4.32-3.4 0-.59.26-.89.89-.73.37.09 1.89.48 3.27.48h.35c1.35 0 2.82-.37 3.24-.48h.03c.64-.16.89.14.89.72 0 1.7-1.93 3.39-4.32 3.4h.01v.01Zm11.09-7.22c-.41 1.32-1.49 2.63-2.73 2.77-1.24.14-1.83-.42-2.26-1.9-.43-1.47-2.09-3.28-2.83-4.07-.74-.78-.72-2.32.52-3.23.58-.43 1.33-.53 1.95-.53.42 0 .83.05 1.24.15 1.25.38 2.15.94 2.79 1.58 1.92 1.94 1.49 4.62 1.31 5.2 0 0 .01.03 0 .03h.01Zm1.37-8.84-.06.1a.86.86 0 0 1-.18.2c-.26.18-.44 0-.61-.19-1.03-1.19-2.15-2.34-3.52-3.14a1.07 1.07 0 0 1-.22-.15.33.33 0 0 1-.08-.25c.02-.06.05-.11.1-.15.11-.11.23-.21.37-.28.33-.18.7-.3 1.07-.35 1.43-.19 2.93.64 3.35 2.05.21.72.13 1.5-.23 2.16h.01Z" fill="#fff" />
+                </svg>
+                <span style={{ fontWeight: 800, fontSize: 19, letterSpacing: '-.5px', color: '#ff2b85' }}>poodfanda</span>
+              </div>
+              <span style={{ width: 1, height: 22, background: '#d9d9de', flex: 'none' }} />
+              <svg width="160" height="32" viewBox="0 0 300 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ flex: 'none' }}><mask id="mask0_1088_35094" maskUnits="userSpaceOnUse" x="0" y="10" width="62" height="45" style={{ maskType: 'luminance' }}><path fillRule="evenodd" clipRule="evenodd" d="M0 10H61.7303V55H0V10Z" fill="white"></path></mask><g mask="url(#mask0_1088_35094)"><path fillRule="evenodd" clipRule="evenodd" d="M52.503 31.1474C52.488 31.1544 52.48 31.1614 52.468 31.1664L46.336 33.6684L46.149 33.7534L44.655 40.5824C44.555 40.8154 44.257 40.8704 44.056 40.6754L39.589 35.3934L39.567 35.3784L14.379 46.1874C14.357 46.1994 14.332 46.2044 14.308 46.2044C14.214 46.2044 14.139 46.1294 14.139 46.0344C14.139 45.9804 14.165 45.9304 14.207 45.8994L35.984 29.5984L33.229 23.3084C33.091 23.0214 33.345 22.7164 33.682 22.8004H33.685L40.357 24.4454L45.538 19.8334V19.8344C45.763 19.6594 46.066 19.7844 46.122 20.0604L46.629 26.9904L52.604 30.4854C52.86 30.6494 52.823 31.0274 52.503 31.1474M49.458 11.3434C41.728 8.31042 33.226 10.5874 27.979 16.4184L7.50504 38.3504C7.23004 38.6454 7.35704 39.0154 7.69304 39.0654L13.147 39.4004C13.584 39.4274 13.638 39.8024 13.418 40.0604L0.0850411 54.4424C-0.145959 54.6924 0.133041 55.0834 0.451041 54.9844L19.487 48.9694C19.89 48.8314 20.2 49.1894 20.029 49.5034L17.483 54.0054C17.352 54.2624 17.599 54.6144 17.919 54.5904L45.363 48.4774C51.922 47.4394 57.776 43.0624 60.379 36.4354C64.298 26.4884 59.401 15.2554 49.458 11.3434" fill="#D61F26"></path></g><path fillRule="evenodd" clipRule="evenodd" d="M123.031 44.7135H116.777L121.67 21.7975L128.49 19.2905L123.031 44.7135Z" fill="#D61F26"></path><path fillRule="evenodd" clipRule="evenodd" d="M109.598 31.5875C108.101 31.5875 107.24 32.8265 106.89 34.2645C109.851 34.2645 110.747 33.3395 110.747 32.5715C110.747 32.0325 110.265 31.5875 109.598 31.5875M106.19 38.2775C106.156 38.4355 106.124 38.7255 106.124 38.8825C106.124 39.9035 106.823 40.2525 108.675 40.2525C110.33 40.2525 112.687 39.8385 114.059 39.3615V44.0465C112.307 44.6835 109.563 45.0325 107.365 45.0325C102.202 45.0325 99.7168 43.6295 99.7168 38.9475C99.7168 34.3525 101.851 27.1855 110.077 27.1855C115.3 27.1855 116.861 29.5475 116.861 32.0325C116.861 35.2505 114.091 37.9905 106.19 38.2775" fill="#D61F26"></path><path fillRule="evenodd" clipRule="evenodd" d="M134.389 26.365C132.257 26.365 130.885 24.995 130.885 23.114C130.885 20.66 132.607 19.29 134.739 19.29C136.907 19.29 138.247 20.66 138.247 22.509C138.247 24.995 136.557 26.365 134.389 26.365" fill="#D61F26"></path><path fillRule="evenodd" clipRule="evenodd" d="M130.001 27.7627H136.438L133.183 44.4607H126.682L128.975 32.7347" fill="#D61F26"></path><path fillRule="evenodd" clipRule="evenodd" d="M154.983 27.7627C152.751 33.3717 150.296 38.8517 147.174 44.4607H139.206C138.187 39.1687 137.74 33.5927 137.869 27.7627H144.372C144.241 30.5027 144.275 33.3087 144.431 35.9177C144.465 36.6197 144.531 37.2877 144.592 37.9617H144.629C144.913 37.2877 145.229 36.6197 145.517 35.9177C146.631 33.1737 147.651 30.1867 148.421 27.7627H154.983Z" fill="#D61F26"></path><path fillRule="evenodd" clipRule="evenodd" d="M163.682 31.5875C162.187 31.5875 161.322 32.8265 160.968 34.2645C163.937 34.2645 164.829 33.3395 164.829 32.5715C164.829 32.0325 164.353 31.5875 163.682 31.5875M160.274 38.2775C160.243 38.4355 160.206 38.7255 160.206 38.8825C160.206 39.9035 160.911 40.2525 162.756 40.2525C164.414 40.2525 166.773 39.8385 168.143 39.3615V44.0465C166.389 44.6835 163.649 45.0325 161.452 45.0325C156.286 45.0325 153.801 43.6295 153.801 38.9475C153.801 34.3525 155.935 27.1855 164.16 27.1855C169.386 27.1855 170.945 29.5475 170.945 32.0325C170.945 35.2505 168.177 37.9905 160.274 38.2775" fill="#D61F26"></path><path fillRule="evenodd" clipRule="evenodd" d="M183.445 33.656C183.091 33.56 182.389 33.463 181.881 33.463C180.445 33.463 179.298 34.899 178.786 37.544L177.454 44.461H170.945L174.202 27.763H179.079L179.237 29.989C180.733 28.143 181.915 27.186 183.73 27.186C184.557 27.186 185.005 27.249 185.225 27.314L183.445 33.656Z" fill="#D61F26"></path><path fillRule="evenodd" clipRule="evenodd" d="M203.774 27.7627C200.903 35.2197 198.355 40.6687 195.805 44.4317C192.109 49.9467 188.857 51.2207 185.508 51.2207C184.52 51.2207 183.47 50.9617 182.959 50.7077L183.981 45.8967H186.212C187.328 45.8967 187.803 45.4477 188.539 44.4607C187.295 39.9687 186.688 33.6907 186.752 27.7627H193.288C193.155 30.4687 193.189 33.2767 193.351 35.8247C193.383 36.5547 193.443 37.2577 193.506 37.9617H193.541C193.827 37.2877 194.143 36.6197 194.433 35.8877C195.517 33.2417 196.571 30.2137 197.267 27.7627H203.774Z" fill="#D61F26"></path><path fillRule="evenodd" clipRule="evenodd" d="M228.765 44.4609H221.908L223.535 36.0449H217.732L216.105 44.4609H209.256L213.589 22.2139H220.444L218.883 30.1519H224.684L226.245 22.2139H233.094L228.765 44.4609Z" fill="#D61F26"></path><path fillRule="evenodd" clipRule="evenodd" d="M242.271 31.5875C240.773 31.5875 239.915 32.8265 239.564 34.2645C242.529 34.2645 243.424 33.3395 243.424 32.5715C243.424 32.0325 242.941 31.5875 242.271 31.5875M238.862 38.2775C238.829 38.4355 238.8 38.7255 238.8 38.8825C238.8 39.9035 239.502 40.2525 241.346 40.2525C243.006 40.2525 245.365 39.8385 246.735 39.3615V44.0465C244.983 44.6835 242.241 45.0325 240.04 45.0325C234.876 45.0325 232.391 43.6295 232.391 38.9475C232.391 34.3525 234.527 27.1855 242.75 27.1855C247.978 27.1855 249.542 29.5475 249.542 32.0325C249.542 35.2505 246.763 37.9905 238.862 38.2775" fill="#D61F26"></path><path fillRule="evenodd" clipRule="evenodd" d="M262.031 33.656C261.681 33.56 260.985 33.463 260.472 33.463C259.039 33.463 257.889 34.899 257.38 37.544L256.04 44.461H249.543L252.79 27.763H257.665L257.826 29.989C259.325 28.143 260.501 27.186 262.316 27.186C263.149 27.186 263.593 27.249 263.819 27.314L262.031 33.656Z" fill="#D61F26"></path><mask id="mask1_1088_35094" maskUnits="userSpaceOnUse" x="262" y="27" width="20" height="19" style={{ maskType: 'luminance' }}><path fillRule="evenodd" clipRule="evenodd" d="M262.734 27.1851H281.091V45.0321H262.734V27.1851Z" fill="white"></path></mask><g mask="url(#mask1_1088_35094)"><path fillRule="evenodd" clipRule="evenodd" d="M272.709 32.3181C270.096 32.3181 269.394 36.3011 269.394 38.0881C269.394 39.5211 269.999 39.9341 271.182 39.9341C273.759 39.9341 274.428 35.9491 274.428 34.1371C274.428 32.7341 273.856 32.3181 272.709 32.3181M270.283 45.0321C265.218 45.0321 262.734 42.8641 262.734 38.5311C262.734 33.7181 265.124 27.1851 273.54 27.1851C278.574 27.1851 281.091 29.4171 281.091 33.6901C281.091 38.5981 278.699 45.0321 270.283 45.0321" fill="#D61F26"></path></g><path fillRule="evenodd" clipRule="evenodd" d="M85.7605 39.1688H84.4855L86.7785 27.4398H88.5665C91.2735 27.4398 92.2615 29.0398 92.2615 31.2328C92.2615 35.6658 89.8035 39.1688 85.7605 39.1688V39.1688ZM91.8335 27.8558L96.1665 23.6978C94.4765 22.6808 92.1565 22.2148 89.2625 22.2148H87.7985H80.9775L76.6465 44.4618H83.4615H85.2845C95.3205 44.4618 99.3325 37.4498 99.3325 30.1518C99.3325 28.2568 98.9255 26.7408 98.1375 25.5628L91.8335 27.8558Z" fill="#D61F26"></path></svg>
+            </div>
+            {/* Right: socials */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 'none' }}>
+              <a href="https://instagram.com" target="_blank" rel="noreferrer" aria-label="Instagram" className="btn-icon"
+                style={{ width: 38, height: 38, borderRadius: '50%', border: '1px solid #d9d9de', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1c1c22', transition: 'background .15s,color .15s' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" /></svg>
+              </a>
+              <a href="https://facebook.com" target="_blank" rel="noreferrer" aria-label="Facebook" className="btn-icon"
+                style={{ width: 38, height: 38, borderRadius: '50%', border: '1px solid #d9d9de', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1c1c22', transition: 'background .15s,color .15s' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M13.5 21v-7h2.4l.4-2.8h-2.8V9.4c0-.8.2-1.4 1.4-1.4h1.5V5.5c-.3 0-1.2-.1-2.2-.1-2.2 0-3.7 1.3-3.7 3.8v2.1H8v2.8h2.5V21h3z" /></svg>
+              </a>
+            </div>
+          </div>
+        </footer>
 
         {/* Cart overlay */}
         <div onClick={() => dispatch({ type: 'CLOSE_CART' })}
