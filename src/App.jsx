@@ -15,27 +15,526 @@ function mkGrad(color) {
 }
 
 const RAW = [
-  { id: 'jb', name: "Jollibee", emoji: '🐝', color: '#e21b24', tagline: 'Langhap-sarap favorites', rating: 4.8, time: '20–35 min', fee: 39, cuisines: ['Chicken', 'Burgers', 'Filipino'], menu: [
-    { name: 'Chickenjoy (1pc w/ Rice)', desc: 'Crispylicious, juicylicious fried chicken with rice', price: 82, cat: 'Chickenjoy', emoji: '🍗', badge: 'Bestseller' },
-    { name: 'Chickenjoy Bucket (6pc)', desc: 'Good for the whole barkada', price: 549, cat: 'Chickenjoy', emoji: '🍗' },
-    { name: 'Jolly Spaghetti', desc: 'Sweet-style sauce with hotdog slices and cheese', price: 75, cat: 'Pasta', emoji: '🍝', badge: 'Popular' },
-    { name: 'Yumburger', desc: 'Classic beef burger with special dressing', price: 40, cat: 'Burgers', emoji: '🍔' },
-    { name: 'Champ Jr.', desc: 'Big flame-grilled beef patty with cheese', price: 110, cat: 'Burgers', emoji: '🍔' },
-    { name: 'Burger Steak (1pc)', desc: 'Beef patty in mushroom gravy with rice', price: 85, cat: 'Rice Meals', emoji: '🍛' },
-    { name: 'Jolly Crispy Fries', desc: 'Golden, crispy and lightly salted', price: 50, cat: 'Sides', emoji: '🍟' },
-    { name: 'Peach Mango Pie', desc: 'Warm, crispy crust with peach-mango filling', price: 40, cat: 'Desserts', emoji: '🥧' },
-    { name: 'Pineapple Juice', desc: 'Refreshing chilled pineapple juice', price: 50, cat: 'Drinks', emoji: '🧃' },
+  { id: 'jb', name: "Jollibee", emoji: '🐝', color: '#e21b24', tagline: 'Langhap-sarap favorites', rating: 5.0, time: '20–35 min', fee: 39, cuisines: ['Burgers', 'Fast Food', 'Meat', 'Chicken', 'Fried Chicken'], menu: [
+    // Popular
+    { name: '1 - pc. Chickenjoy w/ Jolly Spaghetti Solo', desc: 'Crispylicious, juicylicious Chickenjoy paired with the tastiest and meatiest Jollibee Spaghetti. Two favorites in one meal!', price: 179, cat: 'Popular', emoji: '🍗', img: 'https://images.deliveryhero.io/image/menu-import-gateway-prd/regions/AS/chains/cg0ep/ab9ccaa6bc67c519c06149bbb622b299.jpg?width=128&height=128' },
+    { name: '2 - pc. Chickenjoy Solo', desc: "The Best Fried Chicken! Crispylicious, Juicylicious! Jollibee's perfectly seasoned fried chicken that's crispy on the outside; tender and juicy on the inside.", price: 211, cat: 'Popular', emoji: '🍗', img: 'https://images.deliveryhero.io/image/menu-import-gateway-prd/regions/AS/chains/cg0ep/704eff90058a3a281422952c8d868729.jpg?width=128&height=128' },
+    { name: '1-pc. Chickenjoy, Half Jolly Spaghetti, Reg. Fries with Rice and Reg. Drink', desc: '', price: 229, cat: 'Popular', emoji: '🍗' },
+    { name: 'Palabok Solo', desc: '', price: 163, cat: 'Popular', emoji: '🍝' },
+    { name: 'Jolly Spaghetti w/ Yumburger w/ Drink', desc: '', price: 151, cat: 'Popular', emoji: '🍝' },
+    { name: '1 - pc. Chickenjoy w/ Burger Steak Solo', desc: '', price: 188, cat: 'Popular', emoji: '🍗' },
+    // Family Super Meals
+    { name: 'Burger Steak Family Savers', desc: '3 1-pc Burger Steak and 3 Peach Mango Pies', price: 363, cat: 'Family Super Meals', emoji: '🍛' },
+    { name: '6 - pc. Chickenjoy Solo', desc: '', price: 572, cat: 'Family Super Meals', emoji: '🍗' },
+    { name: '8 - pc. Chickenjoy Solo', desc: '', price: 734, cat: 'Family Super Meals', emoji: '🍗' },
+    { name: '6 - pc. Chickenjoy with Palabok Family Pan', desc: '', price: 1124, cat: 'Family Super Meals', emoji: '🍗' },
+    { name: '8 - pc. Chickenjoy with Palabok Family Pan', desc: '', price: 1241, cat: 'Family Super Meals', emoji: '🍗' },
+    { name: '4 – pc. Chickenjoy Family Box Solo', desc: '', price: 433, cat: 'Family Super Meals', emoji: '🍗' },
+    { name: '6 - pc. Chickenjoy w/ Rice, Jolly Spaghetti & Drinks', desc: '', price: 889, cat: 'Family Super Meals', emoji: '🍗' },
+    { name: '8 - pc. Chickenjoy w/ Rice, Jolly Spaghetti & Drinks', desc: '', price: 1153, cat: 'Family Super Meals', emoji: '🍗' },
+    { name: 'Jolly Spaghetti Family Pan', desc: '', price: 334, cat: 'Family Super Meals', emoji: '🍝' },
+    { name: 'Palabok Family Pan', desc: '', price: 615, cat: 'Family Super Meals', emoji: '🍝' },
+    { name: 'Yumburger Family Savers', desc: '', price: 316, cat: 'Family Super Meals', emoji: '🍔' },
+    { name: '6 - pc. Burger Steak Family Pan', desc: '', price: 468, cat: 'Family Super Meals', emoji: '🍛' },
+    { name: '8 - pc. Burger Steak Family Pan', desc: '', price: 621, cat: 'Family Super Meals', emoji: '🍛' },
+    { name: '6 - pc. Burger Steak w/ Jolly Spaghetti Family Pan', desc: '', price: 738, cat: 'Family Super Meals', emoji: '🍛' },
+    { name: '8 - pc. Burger Steak w/ Jolly Spaghetti Family Pan', desc: '', price: 855, cat: 'Family Super Meals', emoji: '🍛' },
+    { name: '6 - pc Burger Steak w/ Palabok Family Pan', desc: '', price: 935, cat: 'Family Super Meals', emoji: '🍛' },
+    { name: '8 - pc Burger Steak w/ Palabok Family Pan', desc: '', price: 1041, cat: 'Family Super Meals', emoji: '🍛' },
+    // GameJoy Combos
+    { name: 'Yumburger Gamejoy Combo', desc: '', price: 198, cat: 'GameJoy Combos', emoji: '🍔' },
+    { name: 'Original Cheesy Yumburger Gamejoy Combo', desc: '', price: 198, cat: 'GameJoy Combos', emoji: '🍔' },
+    { name: 'Special Cheesy Yumburger Gamejoy Combo', desc: '', price: 198, cat: 'GameJoy Combos', emoji: '🍔' },
+    { name: 'Cheesy Classic Jolly Hotdog Gamejoy Combo', desc: '', price: 198, cat: 'GameJoy Combos', emoji: '🌭' },
+    // Chickenjoy
+    { name: '1 - pc. Chickenjoy w/ Chicken Macaroni Soup', desc: "Philippines' best-tasting crispylicious, juicylicious Chickenjoy paired with Chicken Macaroni Soup", price: 170, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '1 - pc. Crispy Hot Chickenjoy w/ Chicken Macaroni Soup', desc: "Philippines' best-tasting crispylicious, juicylicious Chickenjoy paired with Chicken Macaroni Soup", price: 178, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '1 - pc. Chickenjoy w/ Chicken Macaroni Soup & Drink', desc: "Philippines' best-tasting crispylicious, juicylicious Chickenjoy paired with Chicken Macaroni Soup & drink", price: 198, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '1 - pc. Crispy Hot Chickenjoy w/ Chicken Macaroni Soup & Drink', desc: "Philippines' best-tasting crispylicious, juicylicious Chickenjoy paired with Chicken Macaroni Soup & drink", price: 206, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '1 - pc. Chickenjoy Solo', desc: "The Best Fried Chicken! Crispylicious, Juicylicious! Jollibee's perfectly seasoned fried chicken that's crispy on the outside; tender and juicy on the inside.", price: 106, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '2 - pc. Chickenjoy Solo', desc: "The Best Fried Chicken! Crispylicious, Juicylicious! Jollibee's perfectly seasoned fried chicken that's crispy on the outside; tender and juicy on the inside.", price: 211, cat: 'Chickenjoy', emoji: '🍗', badge: 'Popular' },
+    { name: '1 - pc. Chickenjoy w/ Jolly Spaghetti Solo', desc: 'Crispylicious, juicylicious Chickenjoy paired with the tastiest and meatiest Jollibee Spaghetti. Two favorites in one meal!', price: 179, cat: 'Chickenjoy', emoji: '🍗', badge: 'Popular' },
+    { name: '1 - pc. Chickenjoy w/ Palabok Solo', desc: 'Your favorite Chickenjoy can also be enjoyed with the classic Palabok Fiesta. Two favorites in one meal!', price: 257, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '1-pc. Chickenjoy, Half Jolly Spaghetti, Reg. Fries with Rice and Reg. Drink', desc: '', price: 229, cat: 'Chickenjoy', emoji: '🍗', badge: 'Popular' },
+    { name: '1-pc. Chickenjoy w/ Drink', desc: "Philippines' best-tasting crispylicious, juicylicious Chickenjoy that is crispy on the outside, tender and juicy on the inside.", price: 111, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '1-pc. Chickenjoy, Half Jolly Spaghetti, Burger Steak with Rice and Reg. Drink', desc: '1 pc. Chickenjoy with Burger Steak, Half Jolly Spaghetti, Rice and Drink', price: 264, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '1 - pc. Chickenjoy w/ Coke Float', desc: "Philippines' best-tasting crispylicious, juicylicious Chickenjoy with refreshing Coke Float.", price: 175, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '1 - pc. Chickenjoy New Spicy w/ Coke Float', desc: "Philippines' best-tasting crispylicious, juicylicious Chickenjoy New Spicy with refreshing Coke Float.", price: 183, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '1 - pc. Chickenjoy New Spicy Solo', desc: '', price: 114, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '1 - pc. Chickenjoy New Spicy w/ Drink', desc: '', price: 119, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '1 - pc. Chickenjoy w/ Fries Solo', desc: '', price: 164, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '1 - pc. Chickenjoy New Spicy w/ Fries Solo', desc: '', price: 172, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '1 - pc. Chickenjoy w/ Fries w/ Drink', desc: '', price: 198, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '1 - pc. Chickenjoy New Spicy w/ Fries w/ Drink', desc: '', price: 206, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '2 - pc. Chickenjoy New Spicy Solo', desc: '', price: 227, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '2 - pc. Chickenjoy w/ Drink', desc: '', price: 233, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '2 - pc. Chickenjoy New Spicy w/ Drink', desc: '', price: 249, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '1pc Chickenjoy, Double Rice & Regular Iced Tea', desc: '', price: 187, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '1pc Chickenjoy New Spicy w/ Double Rice and Regular Iced Tea', desc: '', price: 195, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '1 - pc. Chickenjoy New Spicy w/ Jolly Spaghetti Solo', desc: '', price: 187, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '1 - pc. Chickenjoy w/ Jolly Spaghetti w/ Drink', desc: '', price: 205, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '1 - pc. Chickenjoy New Spicy w/ Jolly Spaghetti w/ Drink', desc: '', price: 213, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '1 - pc. Chickenjoy w/ Burger Steak Solo', desc: '', price: 188, cat: 'Chickenjoy', emoji: '🍗', badge: 'Popular' },
+    { name: '1 - pc. Chickenjoy New Spicy w/ Burger Steak Solo', desc: '', price: 196, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '1 - pc. Chickenjoy w/ Burger Steak w/ Drink', desc: '', price: 205, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '1 - pc. Chickenjoy New Spicy w/ Burger Steak w/ Drink', desc: '', price: 213, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '1 - pc. Chickenjoy New Spicy w/ Palabok Solo', desc: '', price: 265, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '1 - pc. Chickenjoy w/ Palabok w/ Drink', desc: '', price: 292, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '4 – pc. Chickenjoy Family Box Solo', desc: '', price: 433, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '6 - pc. Chickenjoy Solo', desc: '', price: 572, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '8 - pc. Chickenjoy Solo', desc: '', price: 734, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '6 - pc. Chickenjoy with Palabok Family Pan', desc: '', price: 1124, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '8 - pc. Chickenjoy with Palabok Family Pan', desc: '', price: 1241, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '6 - pc. Chickenjoy w/ Rice, Jolly Spaghetti & Drinks', desc: '', price: 889, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '8 - pc. Chickenjoy w/ Rice, Jolly Spaghetti & Drinks', desc: '', price: 1153, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '1-pc. Crispy Hot Chickenjoy, Half Jolly Spaghetti, Burger Steak with Rice', desc: '', price: 272, cat: 'Chickenjoy', emoji: '🍗' },
+    { name: '1 - pc. Chickenjoy New Spicy w/ Palabok w/ Drink', desc: '', price: 300, cat: 'Chickenjoy', emoji: '🍗' },
+    // Chicken Nuggets
+    { name: '6 - pc. Chicken Nuggets', desc: '', price: 147, cat: 'Chicken Nuggets', emoji: '🍗' },
+    { name: '6 - pc. Chicken Nuggets w/ Fries & Drink', desc: '', price: 199, cat: 'Chicken Nuggets', emoji: '🍗' },
+    { name: '10 - pc. Chicken Nuggets', desc: '', price: 233, cat: 'Chicken Nuggets', emoji: '🍗' },
+    // Burgers
+    { name: 'Special Cheesy Yumburger Solo', desc: 'Cheeseburger with juicy, beefy langhap-sarap Yumburger patty, topped with cheese, dill pickle, chopped onions, and ketchup, sandwiched in between soft buns', price: 105, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Double Special Cheesy Yumburger Solo', desc: 'Cheeseburger with two juicy, beefy langhap-sarap Yumburger patties, topped with cheese, dill pickle, chopped onions, and ketchup, sandwiched in between soft buns', price: 182, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Special Cheesy Yumburger w/ Drink', desc: 'Cheeseburger with juicy, beefy langhap-sarap Yumburger patty, topped with cheese, dill pickle, chopped onions, and ketchup, with drink', price: 129, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Double Special Cheesy Yumburger w/ Drink', desc: 'Cheeseburger with two juicy, beefy langhap-sarap Yumburger patties, with drink', price: 217, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Special Cheesy Yumburger w/ Fries & Drink', desc: 'Cheeseburger with juicy, beefy langhap-sarap Yumburger patty, with fries and drink', price: 188, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Double Special Cheesy Yumburger w/ Fries & Drink', desc: 'Cheeseburger with two juicy, beefy langhap-sarap Yumburger patties, with fries and drink', price: 258, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Double Original Cheesy Yumburger w/ Fries & Drink', desc: 'The same cheesy, beefy langhap-sarap Cheesy Yumburger you love with double beef patty, cheese, and special burger dressing', price: 264, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Double Original Cheesy Yumburger w/ Drink', desc: 'The same cheesy, beefy langhap-sarap Cheesy Yumburger you love with double beef patty, cheese, and special burger dressing', price: 205, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Double Original Cheesy Yumburger Solo', desc: 'The same cheesy, beefy langhap-sarap Cheesy Yumburger you love with double beef patty, cheese, and special burger dressing', price: 182, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Original Cheesy Yumburger Solo', desc: 'Your favorite Yum patty topped with our special burger dressing and sliced cheese, served on a soft bun.', price: 93, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Yumburger, Half Jolly Spaghetti, Reg. Fries with Reg. Drink', desc: 'Yumburger with Half Jolly Spaghetti, Fries and Drink', price: 170, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Yumburger Family Savers', desc: '', price: 316, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Yumburger w/ Fries & Drink', desc: '', price: 163, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Yumburger w/ Drink', desc: '', price: 94, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Yumburger Solo', desc: '', price: 56, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Original Cheesy Yumburger w/ Fries & Drink', desc: '', price: 175, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Original Cheesy Yumburger w/ Drink', desc: '', price: 106, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Bacon Cheesy Yumburger w/ Fries & Drink', desc: '', price: 223, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Bacon Cheesy Yumburger w/ Drink', desc: '', price: 157, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Bacon Cheesy Yumburger Solo', desc: '', price: 140, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Jolly Spaghetti w/ Cheesy Yumburger w/ Drink', desc: '', price: 182, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Jolly Spaghetti w/ Yumburger w/ Drink', desc: '', price: 151, cat: 'Burgers', emoji: '🍔' },
+    // Jolly Spaghetti & Palabok
+    { name: '1-pc. Pepper Cream w/ Jolly Spaghetti Solo', desc: 'Meaty, tender, chicken fillet slices with rich, creamy sauce with peppery kick. Served with the meatiest, cheesiest and sweet-sarap Jolly Spaghetti', price: 158, cat: 'Jolly Spaghetti & Palabok', emoji: '🍝' },
+    { name: '1-pc. Pepper Cream w/ Jolly Spaghetti & Drink', desc: 'Meaty, tender, chicken fillet slices with rich, creamy sauce with peppery kick. Served with Jolly Spaghetti and drink.', price: 182, cat: 'Jolly Spaghetti & Palabok', emoji: '🍝' },
+    { name: 'Jolly Spaghetti Solo', desc: '', price: 85, cat: 'Jolly Spaghetti & Palabok', emoji: '🍝' },
+    { name: 'Jolly Spaghetti w/ Drink', desc: '', price: 94, cat: 'Jolly Spaghetti & Palabok', emoji: '🍝' },
+    { name: 'Jolly Spaghetti w/ Fries & Drink', desc: '', price: 160, cat: 'Jolly Spaghetti & Palabok', emoji: '🍝' },
+    { name: 'Palabok Solo', desc: '', price: 163, cat: 'Jolly Spaghetti & Palabok', emoji: '🍝', badge: 'Popular' },
+    { name: 'Palabok w/ Drink', desc: '', price: 187, cat: 'Jolly Spaghetti & Palabok', emoji: '🍝' },
+    { name: 'Jolly Spaghetti w/ Yumburger w/ Drink', desc: '', price: 151, cat: 'Jolly Spaghetti & Palabok', emoji: '🍝', badge: 'Popular' },
+    { name: 'Jolly Spaghetti w/ Cheesy Yumburger w/ Drink', desc: '', price: 182, cat: 'Jolly Spaghetti & Palabok', emoji: '🍝' },
+    { name: 'Jolly Spaghetti w/ 1 - pc. Burger Steak Solo', desc: '', price: 170, cat: 'Jolly Spaghetti & Palabok', emoji: '🍝' },
+    { name: 'Jolly Spaghetti w/ 1 - pc. Burger Steak w/ Drink', desc: '', price: 176, cat: 'Jolly Spaghetti & Palabok', emoji: '🍝' },
+    { name: 'Jolly Spaghetti Family Pan', desc: '', price: 334, cat: 'Jolly Spaghetti & Palabok', emoji: '🍝' },
+    { name: 'Palabok Family Pan', desc: '', price: 615, cat: 'Jolly Spaghetti & Palabok', emoji: '🍝' },
+    { name: '6 - pc. Chickenjoy with Palabok Family Pan', desc: '', price: 1124, cat: 'Jolly Spaghetti & Palabok', emoji: '🍗' },
+    { name: '8 - pc. Chickenjoy with Palabok Family Pan', desc: '', price: 1241, cat: 'Jolly Spaghetti & Palabok', emoji: '🍗' },
+    // Burger Steak & Chicken Fillet
+    { name: '1 - pc. Burger Steak Solo', desc: '100% pure beef YUM patty topped with flavorful mushroom gravy and mushroom slices. Served with steamed rice.', price: 85, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: 'Burger Steak Family Savers', desc: '3 1-pc Burger Steak and 3 Peach Mango Pies', price: 363, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: '1-pc. Chickenjoy, Half Jolly Spaghetti, Burger Steak with Rice and Reg. Drink', desc: '1 pc. Chickenjoy with Burger Steak, Half Jolly Spaghetti, Rice and Drink', price: 264, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: '2-pc. Pepper Cream Solo', desc: '2-pcs of meaty, tender, chicken fillet slices with rich, creamy sauce with peppery kick. Served with steamed rice.', price: 158, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: '2-pc. Pepper Cream w/ Drink', desc: '2-pcs of meaty, tender, chicken fillet slices with rich, creamy sauce with peppery kick. Served with steamed rice and drink.', price: 175, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: "2-pc. Tomato 'n Cheese Solo", desc: '2-pcs of meaty, tender, chicken fillet slices with savory tomato sauce with soft, chewy Mozzarella cheese bits. Served with steamed rice.', price: 163, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: "2-pc. Tomato 'n Cheese w/ Drink", desc: '2-pcs of meaty, tender, chicken fillet slices with savory tomato sauce with Mozzarella cheese bits. Served with steamed rice and drink.', price: 182, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: '1-pc. Pepper Cream w/ Jolly Spaghetti Solo', desc: 'Meaty, tender, chicken fillet slices with rich, creamy sauce with peppery kick. Served with Jolly Spaghetti', price: 158, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: '1-pc. Pepper Cream w/ Jolly Spaghetti & Drink', desc: 'Meaty, tender, chicken fillet slices with rich, creamy sauce with peppery kick. Served with Jolly Spaghetti and drink.', price: 182, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: '1-pc. Burger Steak Supreme Solo', desc: '', price: 153, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: '1-pc. Burger Steak Supreme w/ Drink', desc: '', price: 172, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: '2-pc. Burger Steak Supreme Solo', desc: '', price: 211, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: '2-pc. Burger Steak Supreme w/ Drink', desc: '', price: 233, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: '1 - pc. Burger Steak w/ Drink', desc: '', price: 94, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: '1 – pc. Burger Steak w/ Fries & Drink', desc: '', price: 163, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: '2 - pc. Burger Steak Solo', desc: '', price: 158, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: '2 – pc. Burger Steak w/ Drink', desc: '', price: 175, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: '6 - pc. Burger Steak Family Pan', desc: '', price: 468, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: '8 - pc. Burger Steak Family Pan', desc: '', price: 621, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: '6 - pc. Burger Steak w/ Jolly Spaghetti Family Pan', desc: '', price: 738, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: '8 - pc. Burger Steak w/ Jolly Spaghetti Family Pan', desc: '', price: 855, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: '6 - pc Burger Steak w/ Palabok Family Pan', desc: '', price: 935, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: '8 - pc Burger Steak w/ Palabok Family Pan', desc: '', price: 1041, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: 'Jolly Spaghetti w/ 1 - pc. Burger Steak w/ Drink', desc: '', price: 176, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: 'Jolly Spaghetti w/ 1 - pc. Burger Steak Solo', desc: '', price: 170, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: '1-pc. Crispy Hot Chickenjoy, Half Jolly Spaghetti, Burger Steak with Rice', desc: '', price: 272, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: 'Pepper Cream Chicken Fillet Solo', desc: '', price: 93, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: 'Pepper Cream Chicken Fillet w/ Drink', desc: '', price: 116, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: 'Pepper Cream Chicken Fillet w/ Fries & Drink', desc: '', price: 147, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: "Tomato 'n Cheese Chicken Fillet Solo", desc: '', price: 100, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: "Tomato 'n Cheese Chicken Fillet w/ Drink", desc: '', price: 123, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    { name: "Tomato 'n Cheese Chicken Fillet w/ Fries & Drink", desc: '', price: 147, cat: 'Burger Steak & Chicken Fillet', emoji: '🍛' },
+    // Super Meals
+    { name: '1-pc. Chickenjoy, Half Jolly Spaghetti, Reg. Fries with Rice and Reg. Drink', desc: '', price: 229, cat: 'Super Meals', emoji: '🍗' },
+    { name: '1-pc. Chickenjoy, Half Jolly Spaghetti, Burger Steak with Rice and Reg. Drink', desc: '1 pc. Chickenjoy with Burger Steak, Half Jolly Spaghetti, Rice and Drink', price: 264, cat: 'Super Meals', emoji: '🍗' },
+    { name: 'Yumburger, Half Jolly Spaghetti, Reg. Fries with Reg. Drink', desc: 'Yumburger with Half Jolly Spaghetti, Fries and Drink', price: 170, cat: 'Super Meals', emoji: '🍔' },
+    { name: '1-pc. Crispy Hot Chickenjoy, Half Jolly Spaghetti, Reg. Fries with Rice', desc: '', price: 237, cat: 'Super Meals', emoji: '🍗' },
+    { name: '1-pc. Crispy Hot Chickenjoy, Half Jolly Spaghetti, Burger Steak with Rice', desc: '', price: 272, cat: 'Super Meals', emoji: '🍗' },
+    { name: '1-pc. Chickenjoy, Half Jolly Spaghetti, Yumburger, with Rice and Reg. Drink', desc: '', price: 229, cat: 'Super Meals', emoji: '🍗' },
+    // Sandwiches & Savory Pies
+    { name: 'Cheesy Classic Jolly Hotdog w/ Fries & Drink', desc: '', price: 176, cat: 'Sandwiches & Savory Pies', emoji: '🌭' },
+    { name: 'Cheesy Classic Jolly Hotdog w/ Drink', desc: '', price: 106, cat: 'Sandwiches & Savory Pies', emoji: '🌭' },
+    { name: 'Cheesy Classic Jolly Hotdog Solo', desc: '', price: 103, cat: 'Sandwiches & Savory Pies', emoji: '🌭' },
+    { name: 'Tuna Pie Solo', desc: '', price: 88, cat: 'Sandwiches & Savory Pies', emoji: '🥧' },
+    { name: 'Tuna Pie Trio', desc: '', price: 233, cat: 'Sandwiches & Savory Pies', emoji: '🥧' },
+    { name: 'Spicy Tuna Pie', desc: '', price: 88, cat: 'Sandwiches & Savory Pies', emoji: '🥧' },
+    { name: 'Spicy Tuna Pie Trio', desc: '', price: 233, cat: 'Sandwiches & Savory Pies', emoji: '🥧' },
+    // Fries & Sides
+    { name: 'Chicken Macaroni Soup', desc: 'Creamy macaroni soup with meaty chicken chunks', price: 77, cat: 'Fries & Sides', emoji: '🍲' },
+    { name: 'Regular Fries w/ Mini Choco Sundae', desc: '', price: 110, cat: 'Fries & Sides', emoji: '🍟' },
+    { name: 'Medium Fries w/ Choco Sundae', desc: '', price: 163, cat: 'Fries & Sides', emoji: '🍟' },
+    { name: 'Regular Fries w/ Coke Float', desc: '', price: 112, cat: 'Fries & Sides', emoji: '🍟' },
+    { name: 'Medium Fries w/ Coke Float', desc: '', price: 163, cat: 'Fries & Sides', emoji: '🍟' },
+    { name: 'Large Fries w/ Coke Float', desc: '', price: 188, cat: 'Fries & Sides', emoji: '🍟' },
+    { name: 'Bucket of Fries w/ 3 Coke Floats', desc: '', price: 350, cat: 'Fries & Sides', emoji: '🍟' },
+    { name: 'Jolly Crispy Fries - Regular', desc: '', price: 71, cat: 'Fries & Sides', emoji: '🍟' },
+    { name: 'Extra Rice', desc: '', price: 47, cat: 'Fries & Sides', emoji: '🍚' },
+    { name: 'Extra Chickenjoy Gravy', desc: '', price: 15, cat: 'Fries & Sides', emoji: '🥣' },
+    // Desserts & Sweet Pies
+    { name: 'Cookies & Cream Sundae', desc: 'Creamy vanilla soft serve topped with crushed Oreo cookies and indulgent choco coating', price: 89, cat: 'Desserts & Sweet Pies', emoji: '🍦' },
+    { name: 'Chocolate Sundae', desc: 'Creamy vanilla soft serve topped with chocolate fudge', price: 65, cat: 'Desserts & Sweet Pies', emoji: '🍦' },
+    { name: 'Mini Chocolate Sundae', desc: 'Creamy vanilla soft serve topped with rich, indulgent chocolate syrup', price: 47, cat: 'Desserts & Sweet Pies', emoji: '🍦' },
+    // Beverages
+    { name: 'Iced Vanilla Regular', desc: 'Vanilla-flavored Iced coffee, freshly brewed, made from 100% Arabica beans', price: 93, cat: 'Beverages', emoji: '☕' },
+    { name: 'Iced Vanilla Large', desc: 'Vanilla-flavored Iced coffee, freshly brewed, made from 100% Arabica beans', price: 112, cat: 'Beverages', emoji: '☕' },
+    { name: 'Iced Vanilla Float', desc: 'Iced Vanilla Coffee topped with creamy vanilla sundae', price: 105, cat: 'Beverages', emoji: '☕' },
+    { name: 'Iced Caramel Regular', desc: 'Caramel-flavored Iced coffee, freshly brewed, made from 100% Arabica beans', price: 100, cat: 'Beverages', emoji: '☕' },
+    { name: 'Iced Caramel Large', desc: 'Caramel-flavored Iced coffee, freshly brewed, made from 100% Arabica beans', price: 124, cat: 'Beverages', emoji: '☕' },
+    { name: 'Iced Caramel Float', desc: 'Iced Caramel Coffee topped with creamy vanilla sundae', price: 117, cat: 'Beverages', emoji: '☕' },
+    { name: 'Iced Mocha Regular', desc: 'Iced coffee, freshly brewed made from 100% Arabica beans, mixed with creamy chocolate', price: 93, cat: 'Beverages', emoji: '☕' },
+    { name: 'Iced Mocha Large', desc: 'Iced coffee, freshly brewed made from 100% Arabica beans, mixed with creamy chocolate', price: 112, cat: 'Beverages', emoji: '☕' },
+    { name: 'Iced Mocha Float', desc: 'Iced Mocha with creamy vanilla sundae add-on', price: 100, cat: 'Beverages', emoji: '☕' },
+    { name: 'Iced Latte Regular', desc: 'Iced Blend of Coffee, Fresh Milk, and Sweet Syrup', price: 77, cat: 'Beverages', emoji: '☕' },
+    { name: 'Iced Latte Large', desc: 'Iced Blend of Coffee, Fresh Milk, and Sweet Syrup', price: 100, cat: 'Beverages', emoji: '☕' },
+    { name: 'Coke Float', desc: 'Creamy vanilla soft serve on ice-cold Coke, drizzled with choco syrup.', price: 83, cat: 'Beverages', emoji: '🥤' },
+    // Jollibee Kids Meal
+    { name: '4-pc. Chicken Nuggets w/ Drink Kids Meal', desc: '', price: 186, cat: 'Jollibee Kids Meal', emoji: '🍗' },
+    { name: '4-pc. Chicken Nuggets Kids Meal', desc: '', price: 155, cat: 'Jollibee Kids Meal', emoji: '🍗' },
+    { name: 'Yumburger w/ Drink Kids Meal', desc: '', price: 149, cat: 'Jollibee Kids Meal', emoji: '🍔' },
+    { name: 'Yumburger Kids Meal', desc: '', price: 111, cat: 'Jollibee Kids Meal', emoji: '🍔' },
+    { name: 'Jolly Spaghetti w/ Drink Kids Meal', desc: '', price: 158, cat: 'Jollibee Kids Meal', emoji: '🍝' },
+    { name: 'Jolly Spaghetti Kids Meal', desc: '', price: 148, cat: 'Jollibee Kids Meal', emoji: '🍝' },
+    { name: '1 - pc. Burger Steak w/ Drink Kids Meal', desc: '', price: 158, cat: 'Jollibee Kids Meal', emoji: '🍛' },
+    { name: '1 - pc. Burger Steak Kids Meal', desc: '', price: 148, cat: 'Jollibee Kids Meal', emoji: '🍛' },
+    { name: '1 - pc. Chickenjoy w/ Drink Kids Meal', desc: '', price: 179, cat: 'Jollibee Kids Meal', emoji: '🍗' },
+    { name: '1 - pc. Chickenjoy Kids Meal', desc: '', price: 168, cat: 'Jollibee Kids Meal', emoji: '🍗' },
   ]},
-  { id: 'mcdo', name: "McDonald's PH", emoji: '🍟', color: '#da291c', tagline: "I'm lovin' the classics", rating: 4.7, time: '15–30 min', fee: 0, cuisines: ['Burgers', 'Chicken'], menu: [
-    { name: 'Big Mac', desc: 'Two beef patties, special sauce, lettuce, cheese', price: 180, cat: 'Burgers', emoji: '🍔', badge: 'Bestseller' },
-    { name: 'Quarter Pounder w/ Cheese', desc: 'Quarter-pound beef patty with melty cheese', price: 195, cat: 'Burgers', emoji: '🍔' },
-    { name: 'McChicken Sandwich', desc: 'Crispy chicken patty with creamy mayo', price: 120, cat: 'Burgers', emoji: '🍔' },
-    { name: '1pc Chicken McDo w/ Rice', desc: 'Crispy fried chicken with garlic rice', price: 99, cat: 'Chicken', emoji: '🍗' },
-    { name: '6pc Chicken McNuggets', desc: 'Tender bite-sized nuggets with dip', price: 150, cat: 'Chicken', emoji: '🍗' },
-    { name: 'McSpaghetti', desc: 'Sweet sauce with McDo meatballs', price: 79, cat: 'Pasta', emoji: '🍝' },
-    { name: 'World Famous Fries (Medium)', desc: 'Hot, golden and crispy fries', price: 75, cat: 'Sides', emoji: '🍟' },
-    { name: 'Coke Float', desc: 'Ice-cold Coke topped with soft-serve', price: 65, cat: 'Desserts', emoji: '🥤', badge: 'Popular' },
-    { name: 'Hot Fudge Sundae', desc: 'Soft-serve with warm chocolate fudge', price: 45, cat: 'Desserts', emoji: '🍦' },
+  { id: 'mcdo', name: "McDonald's PH", emoji: '🍟', color: '#da291c', tagline: "I'm lovin' the classics", rating: 4.9, time: '15–30 min', fee: 0, cuisines: ['Burgers', 'Fast Food', 'Meat', 'Chicken', 'Fried Chicken'], menu: [
+    // Popular
+    { name: '1-pc. Chicken McDo Solo', desc: '', price: 96, cat: 'Popular', emoji: '🍗' },
+    { name: '6-pc. Chicken McNuggets Solo', desc: '', price: 121, cat: 'Popular', emoji: '🍗' },
+    { name: '1-pc. Chicken McDo w/ Fries Small Meal', desc: 'Comes with Small Fries and Drink', price: 169, cat: 'Popular', emoji: '🍗' },
+    { name: '10-pc. Chicken McNuggets', desc: '', price: 195, cat: 'Popular', emoji: '🍗' },
+    { name: 'Crispy Chicken Fillet Ala King Solo', desc: '', price: 95, cat: 'Popular', emoji: '🍗' },
+    { name: 'BFF Fries', desc: '', price: 181, cat: 'Popular', emoji: '🍟' },
+    // #BetterWithCoke
+    { name: '1-pc. Chicken McDo Medium Meal', desc: 'Comes with a Drink', price: 116, cat: '#BetterWithCoke', emoji: '🍗' },
+    { name: 'Crispy Chicken Sandwich w/ Fries Medium Meal', desc: 'Comes with Medium Fries & Drink', price: 175, cat: '#BetterWithCoke', emoji: '🍔' },
+    { name: 'Burger McDo w/ Fries Medium Meal', desc: 'Comes with Medium Fries & Drink', price: 145, cat: '#BetterWithCoke', emoji: '🍔' },
+    { name: '6-pc. Chicken McNuggets w/ Fries Medium Meal', desc: 'Comes with Medium Fries & Drink', price: 217, cat: '#BetterWithCoke', emoji: '🍗' },
+    { name: 'Crispy Chicken Fillet Ala King Medium Meal', desc: '', price: 112, cat: '#BetterWithCoke', emoji: '🍗' },
+    // New Offers
+    { name: 'FIFA Collectible Cup Meal: 6-pc. Chicken McNuggets', desc: 'Comes with Fries, A&W Root Beer & Big Mac Sauce', price: 284, cat: 'New Offers', emoji: '🍗' },
+    { name: '1-pc. Chicken McDo w/ Fries Happy Meal', desc: 'Comes with Small Fries & Drink', price: 214, cat: 'New Offers', emoji: '🍗' },
+    { name: 'FIFA Collectible Cup Meal: Cheeseburger', desc: 'Comes with Fries and A&W Root Beer McFloat', price: 258, cat: 'New Offers', emoji: '🍔' },
+    { name: 'FIFA GOALden Bundle: 10-pc. Chicken McNuggets', desc: 'Comes with BFF Fries, 2 A&W Root Beer & 2 Big Mac Sauce', price: 469, cat: 'New Offers', emoji: '🍗' },
+    { name: 'A&W Root Beer McFloat and Fries Combo', desc: 'Comes with Fries and McFloat', price: 101, cat: 'New Offers', emoji: '🥤' },
+    { name: '1-pc. Chicken McDo w/ Crispy Chicken Fillet and Drink Meal', desc: 'Comes with a Drink', price: 181, cat: 'New Offers', emoji: '🍗' },
+    { name: '1-pc. Chicken McDo w/ Mushroom Pepper Steak and Drink Meal', desc: 'Comes with a Drink', price: 181, cat: 'New Offers', emoji: '🍗' },
+    // Group Meals
+    { name: 'FIFA GOALden Bundle: 10-pc. Chicken McNuggets', desc: 'Comes with BFF Fries, 2 A&W Root Beer & 2 Big Mac Sauce', price: 469, cat: 'Group Meals', emoji: '🍗' },
+    { name: 'FIFA GOALden Bundle: 2 Cheeseburgers', desc: 'Comes with BFF Fries and 2 A&W Root Beer McFloat', price: 449, cat: 'Group Meals', emoji: '🍔' },
+    { name: "Father's Day Bundle for 4", desc: 'Comes with 1-pc. Chicken McDo with Crispy Chicken Fillet Meal, Mushroom Pepper Steak Meal, and 2 Happy Meal Burger McDo with Drinks', price: 590, cat: 'Group Meals', emoji: '🍱' },
+    { name: "Father's Day Bundle for 3", desc: 'Comes with 1-pc. Chicken McDo with Crispy Chicken Fillet Meal, Mushroom Pepper Steak Meal, and 1 Happy Meal Burger McDo with Drink', price: 476, cat: 'Group Meals', emoji: '🍱' },
+    { name: '10-pc. Chicken McNuggets', desc: '', price: 195, cat: 'Group Meals', emoji: '🍗', badge: 'Popular' },
+    { name: '20-pc. Chicken McNuggets', desc: '', price: 382, cat: 'Group Meals', emoji: '🍗' },
+    { name: 'McShare Bundle for 3', desc: 'Comes with 6 pcs Chicken McDo, 1 BFF Fries, 3 rice & 3 beverages', price: 615, cat: 'Group Meals', emoji: '🍱' },
+    { name: 'McShare Bundle for 4', desc: 'Comes with 8 pcs Chicken McDo, 2 BFF Fries, 4 rice & 4 beverages', price: 855, cat: 'Group Meals', emoji: '🍱' },
+    { name: '6-pc. Chicken McShare Box', desc: '', price: 515, cat: 'Group Meals', emoji: '🍗' },
+    { name: '8-pc. Chicken McShare Box', desc: '', price: 675, cat: 'Group Meals', emoji: '🍗' },
+    // Chicken
+    { name: 'FIFA Collectible Cup Meal: 6-pc. Chicken McNuggets', desc: 'Comes with Fries, A&W Root Beer & Big Mac Sauce', price: 284, cat: 'Chicken', emoji: '🍗' },
+    { name: 'FIFA GOALden Bundle: 10-pc. Chicken McNuggets', desc: 'Comes with BFF Fries, 2 A&W Root Beer & 2 Big Mac Sauce', price: 469, cat: 'Chicken', emoji: '🍗' },
+    { name: 'FIFA World Cup Chicken McNuggets Meal', desc: 'Comes with Fries, A&W Root Beer McFloat & Big Mac Sauce', price: 242, cat: 'Chicken', emoji: '🍗' },
+    { name: '6-pc. Chicken McNuggets w/ Fries and A&W Root Beer', desc: 'Comes with the Big Mac Sauce, Fries and Drink', price: 222, cat: 'Chicken', emoji: '🍗' },
+    { name: '6-pc. Chicken McNuggets w/ Big Mac Sauce', desc: 'Comes with the Big Mac Sauce', price: 120, cat: 'Chicken', emoji: '🍗' },
+    { name: '6-pc Chicken McNuggets Small Meal with Fries, Drink and Big Mac Sauce', desc: 'Comes with Small Fries and Drink', price: 187, cat: 'Chicken', emoji: '🍗' },
+    { name: '6-pc Chicken McNuggets Large Meal with Fries, Drink and Big Mac Sauce', desc: 'Comes with Large Fries and Drink', price: 261, cat: 'Chicken', emoji: '🍗' },
+    { name: '6-pc. Chicken McNuggets with Rice and Small Drink and Big Mac Sauce', desc: 'Comes with a Drink', price: 181, cat: 'Chicken', emoji: '🍗' },
+    { name: '6-pc. Chicken McNuggets with Rice and Medium Drink and Big Mac Sauce', desc: 'Comes with a Drink', price: 192, cat: 'Chicken', emoji: '🍗' },
+    { name: '6-pc Chicken McNuggets Large Meal with Rice, Drink and Big Mac Sauce', desc: 'Comes with a Drink', price: 201, cat: 'Chicken', emoji: '🍗' },
+    { name: '1-pc. Chicken McDo Solo', desc: '', price: 96, cat: 'Chicken', emoji: '🍗', badge: 'Popular' },
+    { name: '1-pc. Chicken McDo w/ Fries Small Meal', desc: 'Comes with Small Fries and Drink', price: 169, cat: 'Chicken', emoji: '🍗', badge: 'Popular' },
+    { name: '1-pc. Spicy Chicken McDo w/ Crispy Chicken Fillet and Drink Meal', desc: 'Comes with a Drink', price: 187, cat: 'Chicken', emoji: '🍗' },
+    { name: '1-pc. Chicken McDo w/ Crispy Chicken Fillet and Drink Meal', desc: 'Comes with a Drink', price: 181, cat: 'Chicken', emoji: '🍗' },
+    { name: '1-pc. Spicy Chicken McDo w/ Mushroom Pepper Steak and Drink Meal', desc: 'Comes with a Drink', price: 187, cat: 'Chicken', emoji: '🍗' },
+    { name: '1-pc. Chicken McDo w/ Mushroom Pepper Steak and Drink Meal', desc: 'Comes with a Drink', price: 181, cat: 'Chicken', emoji: '🍗' },
+    { name: '1-pc. Chicken McDo Medium Meal', desc: 'Comes with a Drink', price: 120, cat: 'Chicken', emoji: '🍗' },
+    { name: '1-pc. Chicken McDo w/ Fries Medium Meal', desc: '', price: 207, cat: 'Chicken', emoji: '🍗' },
+    { name: '1-pc. Chicken McDo Large Meal', desc: 'Comes with a Drink', price: 129, cat: 'Chicken', emoji: '🍗' },
+    { name: '1-pc. Chicken McDo w/ Fries Large Meal', desc: 'Comes with Large Fries & Drink', price: 246, cat: 'Chicken', emoji: '🍗' },
+    { name: '1-pc Spicy Chicken McDo with Small Drink', desc: 'Comes with a Drink', price: 115, cat: 'Chicken', emoji: '🍗' },
+    { name: '1-pc Spicy Chicken McDo', desc: '', price: 102, cat: 'Chicken', emoji: '🍗' },
+    { name: '1-pc Spicy Chicken McDo and Medium Drink', desc: 'Comes with a Drink', price: 126, cat: 'Chicken', emoji: '🍗' },
+    { name: '1-pc Spicy Chicken McDo with Large Drink', desc: 'Comes with a Drink', price: 135, cat: 'Chicken', emoji: '🍗' },
+    { name: '1-pc Spicy Chicken McDo with Small Fries and Drink', desc: 'Comes with Small Fries & Drink', price: 175, cat: 'Chicken', emoji: '🍗' },
+    { name: '1-pc Spicy Chicken McDo with Medium Fries and Drink', desc: 'Comes with Medium Fries & Drink', price: 213, cat: 'Chicken', emoji: '🍗' },
+    { name: '1-pc Spicy Chicken McDo with Large Fries and Drink', desc: 'Comes with Large Fries & Drink', price: 252, cat: 'Chicken', emoji: '🍗' },
+    { name: '1-pc. Chicken McDo w/ McSpaghetti Solo', desc: '', price: 161, cat: 'Chicken', emoji: '🍗' },
+    { name: '1-pc Chicken McDo with McSpaghetti and Small Drink', desc: 'Comes with a Drink', price: 192, cat: 'Chicken', emoji: '🍗' },
+    { name: '1-pc. Chicken McDo w/ McSpaghetti Medium Meal', desc: 'Comes with a Drink', price: 203, cat: 'Chicken', emoji: '🍗' },
+    { name: '1-pc. Chicken McDo w/ McSpaghetti Large Meal', desc: 'Comes with a Drink', price: 212, cat: 'Chicken', emoji: '🍗' },
+    { name: '1-pc. Chicken McDo w/ McSpaghetti & Fries Small Meal', desc: 'Comes with Small Fries and Drink', price: 235, cat: 'Chicken', emoji: '🍗' },
+    { name: '1-pc. Chicken McDo w/ McSpaghetti & Fries Medium Meal', desc: 'Comes with Medium Fries & Drink', price: 273, cat: 'Chicken', emoji: '🍗' },
+    { name: '1-pc. Chicken McDo w/ McSpaghetti & Fries Large Meal', desc: 'Comes with Large Fries & Drink', price: 312, cat: 'Chicken', emoji: '🍗' },
+    { name: '1-pc Spicy Chicken McDo with McSpaghetti', desc: '', price: 167, cat: 'Chicken', emoji: '🍗' },
+    { name: '1-pc. Spicy Chicken McDo w/ McSpaghetti & Fries Medium Meal', desc: 'Comes with Medium Fries & Drink', price: 279, cat: 'Chicken', emoji: '🍗' },
+    { name: '1-pc. Spicy Chicken McDo w/ McSpaghetti & Fries Small Meal', desc: 'Comes with Small Fries & Drink', price: 241, cat: 'Chicken', emoji: '🍗' },
+    { name: '1-pc. Spicy Chicken McDo w/ McSpaghetti & Fries Large Meal', desc: 'Comes with Large Fries & Drink', price: 318, cat: 'Chicken', emoji: '🍗' },
+    { name: '2-pc. Chicken McDo Solo', desc: '', price: 191, cat: 'Chicken', emoji: '🍗' },
+    { name: '2-pc Chicken McDo with Small Drink', desc: 'Comes with a Drink', price: 219, cat: 'Chicken', emoji: '🍗' },
+    { name: '2-pc. Chicken McDo Medium Meal', desc: 'Comes with a Drink', price: 230, cat: 'Chicken', emoji: '🍗' },
+    { name: '2-pc. Chicken McDo Large Meal', desc: 'Comes with a Drink', price: 239, cat: 'Chicken', emoji: '🍗' },
+    { name: '2-pc. Chicken McDo w/ Fries Small Meal', desc: 'Comes with Small Fries and Drink', price: 259, cat: 'Chicken', emoji: '🍗' },
+    { name: '2-pc. Chicken McDo w/ Fries Medium Meal', desc: 'Comes with Medium Fries & Drink', price: 297, cat: 'Chicken', emoji: '🍗' },
+    { name: '2-pc. Chicken McDo w/ Fries Large Meal', desc: 'Comes with Large Fries & Drink', price: 336, cat: 'Chicken', emoji: '🍗' },
+    { name: '2-pc Spicy Chicken McDo', desc: '', price: 203, cat: 'Chicken', emoji: '🍗' },
+    { name: '2-pc Spicy Chicken McDo with Medium Drink', desc: 'Comes with a Drink', price: 242, cat: 'Chicken', emoji: '🍗' },
+    { name: '2-pc Spicy Chicken McDo and Small Drink', desc: 'Comes with a Drink', price: 231, cat: 'Chicken', emoji: '🍗' },
+    { name: '2-pc Spicy Chicken McDo with Large Drink', desc: 'Comes with a Drink', price: 251, cat: 'Chicken', emoji: '🍗' },
+    { name: '2-pc Spicy Chicken McDo & Fries Small Meal', desc: 'Comes with Small Fries & Drink', price: 271, cat: 'Chicken', emoji: '🍗' },
+    { name: '2-pc. Spicy Chicken McDo & Fries Medium Meal', desc: 'Comes with Medium Fries & Drink', price: 309, cat: 'Chicken', emoji: '🍗' },
+    { name: '2-pc. Spicy Chicken McDo & Fries Large Meal', desc: 'Comes with Large Fries & Drink', price: 348, cat: 'Chicken', emoji: '🍗' },
+    { name: '6-pc. Chicken McShare Box', desc: '', price: 515, cat: 'Chicken', emoji: '🍗' },
+    { name: '8-pc. Chicken McShare Box', desc: '', price: 675, cat: 'Chicken', emoji: '🍗' },
+    { name: 'Crispy Chicken Fillet Ala King Solo', desc: '', price: 95, cat: 'Chicken', emoji: '🍗', badge: 'Popular' },
+    { name: 'Crispy Chicken Fillet Ala King w/ Fries Small Meal', desc: 'Comes with Small Fries and Drink', price: 142, cat: 'Chicken', emoji: '🍗' },
+    { name: 'Crispy Chicken Fillet Ala King w/ Fries Medium Meal', desc: 'Comes with Medium Fries & Drink', price: 180, cat: 'Chicken', emoji: '🍗' },
+    { name: 'Crispy Chicken Fillet Solo', desc: '', price: 88, cat: 'Chicken', emoji: '🍗' },
+    { name: 'Crispy Chicken Fillet Ala King w/ Fries Large Meal', desc: 'Comes with Large Fries & Drink', price: 219, cat: 'Chicken', emoji: '🍗' },
+    { name: 'Crispy Chicken Fillet w/ Fries Small Meal', desc: 'Comes with Small Fries and Drink', price: 135, cat: 'Chicken', emoji: '🍗' },
+    { name: 'Crispy Chicken Fillet w/ Fries Medium Meal', desc: 'Comes with Medium Fries & Drink', price: 173, cat: 'Chicken', emoji: '🍗' },
+    { name: 'Crispy Chicken Fillet w/ Fries Large Meal', desc: 'Comes with Large Fries & Drink', price: 212, cat: 'Chicken', emoji: '🍗' },
+    { name: 'Golden Curry Fillet with Small Fries and Drink', desc: 'Comes with Small Fries & Drink', price: 146, cat: 'Chicken', emoji: '🍗' },
+    { name: 'Golden Curry Fillet with Medium Fries and Drink', desc: 'Comes with Medium Fries & Drink', price: 184, cat: 'Chicken', emoji: '🍗' },
+    { name: 'Golden Curry Fillet with Large Fries and Drink', desc: 'Comes with Large Fries & Drink', price: 223, cat: 'Chicken', emoji: '🍗' },
+    { name: 'Golden Curry Fillet with Medium Drink', desc: 'Comes with a Drink', price: 116, cat: 'Chicken', emoji: '🍗' },
+    { name: 'Golden Curry Fillet with Small Drink', desc: 'Comes with a Drink', price: 101, cat: 'Chicken', emoji: '🍗' },
+    { name: 'Golden Curry Fillet with Rice', desc: 'Enjoy this new product!', price: 98, cat: 'Chicken', emoji: '🍗' },
+    { name: 'Golden Curry Fillet with Large Drink', desc: 'Comes with a Drink', price: 125, cat: 'Chicken', emoji: '🍗' },
+    { name: '6-pc. Chicken McNuggets with Small Fries and Drink and Cajun Sauce', desc: 'Comes with the Cajun Sauce', price: 187, cat: 'Chicken', emoji: '🍗' },
+    { name: '6-pc. Chicken McNuggets with Medium Fries and Drink and Cajun Sauce', desc: 'Comes with the Cajun Sauce', price: 222, cat: 'Chicken', emoji: '🍗' },
+    { name: '6-pc. Chicken McNuggets with Large Fries and Drink and Cajun Sauce', desc: 'Comes with the Cajun Sauce', price: 261, cat: 'Chicken', emoji: '🍗' },
+    { name: '6-pc. Chicken McNuggets with Rice and Small Drink and Cajun Sauce', desc: 'Comes with the Cajun Sauce', price: 181, cat: 'Chicken', emoji: '🍗' },
+    { name: '6-pc. Chicken McNuggets with Rice and Medium Drink and Cajun Sauce', desc: 'Comes with the Cajun Sauce', price: 192, cat: 'Chicken', emoji: '🍗' },
+    { name: '6-pc. Chicken McNuggets with Rice and Large Drink and Cajun Sauce', desc: 'Comes with the Cajun Sauce', price: 201, cat: 'Chicken', emoji: '🍗' },
+    { name: '6-pc. Chicken McNuggets w/ Fries Small Meal', desc: 'Comes with Small Fries and Drink', price: 185, cat: 'Chicken', emoji: '🍗' },
+    { name: '6-pc. Chicken McNuggets w/ Fries Medium Meal', desc: 'Comes with Medium Fries & Drink', price: 223, cat: 'Chicken', emoji: '🍗' },
+    { name: '6-pc. Chicken McNuggets w/ Fries Large Meal', desc: 'Comes with Large Fries & Drink', price: 262, cat: 'Chicken', emoji: '🍗' },
+    { name: '6-pc. Chicken McNuggets w/ Rice Small Meal', desc: 'Comes w/ Small Rice and Drink', price: 182, cat: 'Chicken', emoji: '🍗' },
+    { name: '6-pc. Chicken McNuggets w/ Rice Medium Meal', desc: 'Comes with Medium Rice & Drink', price: 193, cat: 'Chicken', emoji: '🍗' },
+    { name: '6-pc. Chicken McNuggets w/ Rice Large Meal', desc: 'Comes with Large Rice & Drink', price: 202, cat: 'Chicken', emoji: '🍗' },
+    { name: '6-pc Chicken McNuggets Meal A la Carte with Cajun Sauce', desc: 'Comes with the Cajun Sauce', price: 120, cat: 'Chicken', emoji: '🍗' },
+    { name: '6-pc. Chicken McNuggets Solo', desc: '', price: 121, cat: 'Chicken', emoji: '🍗', badge: 'Popular' },
+    { name: '6-pc Chicken McNuggets Medium Meal with Fries, Drink and Big Mac Sauce', desc: 'Comes with Medium Fries and Drink', price: 222, cat: 'Chicken', emoji: '🍗' },
+    { name: '1-pc Spicy Chicken McDo with McSpaghetti and Small Drink', desc: 'Comes with a Drink', price: 198, cat: 'Chicken', emoji: '🍗' },
+    { name: '1-pc Spicy Chicken McDo with McSpaghetti and Medium Drink', desc: 'Comes with a Drink', price: 209, cat: 'Chicken', emoji: '🍗' },
+    { name: '1-pc Spicy Chicken McDo with McSpaghetti and Large Drink', desc: 'Comes with a Drink', price: 218, cat: 'Chicken', emoji: '🍗' },
+    // Burgers
+    { name: 'FIFA Collectible Cup Meal: Cheeseburger', desc: 'Comes with Fries and A&W Root Beer McFloat', price: 258, cat: 'Burgers', emoji: '🍔' },
+    { name: 'FIFA GOALden Bundle: 2 Cheeseburgers', desc: 'Comes with BFF Fries and 2 A&W Root Beer McFloat', price: 449, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Triple Cheeseburger w/ Fries Medium Meal', desc: 'Comes with Medium Fries & Drink', price: 303, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Triple Cheeseburger w/ Fries Large Meal', desc: 'Comes with Large Fries & Drink', price: 342, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Triple Cheeseburger w/ Fries Small Meal', desc: 'Comes with Small Fries & Drink', price: 265, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Crispy Chicken Sandwich w/ Fries Medium Meal', desc: 'Comes with Medium Fries & Drink', price: 180, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Crispy Chicken Sandwich w/ Fries Large Meal', desc: 'Comes with Large Fries & Drink', price: 219, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Double Cheeseburger w/ Fries Medium Meal', desc: 'Comes with Medium Fries & Drink', price: 262, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Double Cheeseburger w/ Fries Large Meal', desc: 'Comes with Large Fries & Drink', price: 301, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Double Cheeseburger w/ Fries Small Meal', desc: 'Comes with Small Fries & Drink', price: 224, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Double Cheeseburger with Lettuce & Tomatoes with Medium Fries and Drink', desc: 'Comes with Medium Fries & Drink', price: 297, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Double Cheeseburger with Lettuce & Tomatoes with Large Fries and Drink', desc: 'Comes with Large Fries & Drink', price: 336, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Cheesy Burger McDo w/ Fries Medium Meal', desc: 'Comes with Medium Fries & Drink', price: 175, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Cheesy Burger McDo w/ Fries Large Meal', desc: 'Comes with Large Fries & Drink', price: 214, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Cheesy Burger McDo with Small Fries and Drink', desc: 'Comes with Small Fries & Drink', price: 137, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Double Cheeseburger with Lettuce & Tomatoes with Small Fries and Drink', desc: 'Comes with Small Fries & Drink', price: 259, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Burger McDo w/ Fries Medium Meal', desc: 'Comes with Medium Fries & Drink', price: 164, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Burger McDo w/ Fries Large Meal', desc: 'Comes with Large Fries & Drink', price: 203, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Burger McDo w/ Fries Small Meal', desc: 'Comes with Small Fries & Drink', price: 126, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Big Mac w/ Fries Medium Meal', desc: 'Comes with Medium Fries & Drink', price: 296, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Big Mac w/ Fries Large Meal', desc: 'Comes with Large Fries & Drink', price: 335, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Big Mac w/ Fries Small Meal', desc: 'Comes with Small Fries & Drink', price: 258, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Cheeseburger w/ Fries Medium Meal', desc: 'Comes with Medium Fries & Drink', price: 165, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Cheeseburger w/ Fries Large Meal', desc: 'Comes with Large Fries & Drink', price: 204, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Cheeseburger w/ Fries Small Meal', desc: 'Comes with Small Fries & Drink', price: 127, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Cheeseburger with Lettuce & Tomatoes with Medium Fries and Drink', desc: 'Comes with Medium Fries & Drink', price: 198, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Cheeseburger with Lettuce & Tomatoes with Large Fries and Drink', desc: 'Comes with Large Fries & Drink', price: 237, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Cheeseburger with Lettuce & Tomatoes with Small Fries and Drink', desc: 'Comes with Small Fries & Drink', price: 160, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Quarter Pounder w/ Cheese w/ Fries Medium Meal', desc: 'Comes with Medium Fries & Drink', price: 296, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Quarter Pounder w/ Cheese w/ Fries Large Meal', desc: 'Comes with Large Fries & Drink', price: 335, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Quarter Pounder w/ Cheese w/ Fries Small Meal', desc: 'Comes with Small Fries & Drink', price: 258, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Quarter Pounder w/ Cheese, Lettuce & Tomatoes with Medium Fries and Drink', desc: 'Comes with Medium Fries & Drink', price: 331, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Quarter Pounder w/ Cheese, Lettuce & Tomatoes with Large Fries and Drink', desc: 'Comes with Large Fries & Drink', price: 370, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Quarter Pounder with Cheese, Lettuce & Tomatoes with Small Fries and Drink', desc: 'Comes with Small Fries & Drink', price: 293, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Double Quarter Pounder w/ Cheese w/ Fries Medium Meal', desc: 'Comes with Medium Fries & Drink', price: 357, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Double Quarter Pounder w/ Cheese w/ Fries Large Meal', desc: 'Comes with Large Fries & Drink', price: 396, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Double Quarter Pounder w/ Cheese w/ Fries Small Meal', desc: 'Comes with Small Fries & Drink', price: 319, cat: 'Burgers', emoji: '🍔' },
+    { name: 'McChicken w/ Fries Medium Meal', desc: 'Comes with Medium Fries & Drink', price: 246, cat: 'Burgers', emoji: '🍔' },
+    { name: 'McChicken w/ Fries Large Meal', desc: 'Comes with Large Fries & Drink', price: 285, cat: 'Burgers', emoji: '🍔' },
+    { name: 'McChicken w/ Fries Small Meal', desc: 'Comes with Small Fries & Drink', price: 208, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Double McChicken w/ Fries Large Meal', desc: 'Comes with Large Fries & Drink', price: 316, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Double McChicken w/ Fries Medium Meal', desc: 'Comes with Medium Fries & Drink', price: 277, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Double McChicken w/ Fries Small Meal', desc: 'Comes with Small Fries & Drink', price: 239, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Crispy Chicken Sandwich with Lettuce & Tomatoes with Medium Fries and Drink', desc: 'Comes with Medium Fries & Drink', price: 218, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Crispy Chicken Sandwich with Lettuce & Tomatoes with Large Fries and Drink', desc: 'Comes with Large Fries & Drink', price: 257, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Crispy Chicken Sandwich with Lettuce & Tomatoes with Small Fries and Drink', desc: 'Comes with Small Fries & Drink', price: 180, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Burger McDo with Lettuce & Tomatoes with Large Fries and Drink', desc: 'Comes with Large Fries & Drink', price: 238, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Burger McDo with Lettuce & Tomatoes with Small Fries and Drink', desc: 'Comes with Small Fries & Drink', price: 161, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Ebi Burger Solo', desc: '', price: 189, cat: 'Burgers', emoji: '🍤' },
+    { name: 'Crispy Chicken Sandwich Solo', desc: '', price: 70, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Burger McDo Solo', desc: '', price: 52, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Cheesy Burger McDo Solo', desc: '', price: 69, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Triple Cheeseburger Solo', desc: '', price: 198, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Double Cheeseburger Solo', desc: '', price: 154, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Cheeseburger Solo', desc: '', price: 95, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Cheeseburger with Lettuce & Tomatoes Solo', desc: '', price: 130, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Double Cheeseburger with Lettuce & Tomatoes', desc: '', price: 189, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Big Mac Solo', desc: '', price: 196, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Quarter Pounder w/ Cheese Solo', desc: '', price: 196, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Quarter Pounder w/ Cheese, Lettuce & Tomatoes', desc: '', price: 231, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Double Quarter Pounder w/ Cheese Solo', desc: '', price: 259, cat: 'Burgers', emoji: '🍔' },
+    { name: 'McChicken Solo', desc: '', price: 115, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Double McChicken Solo', desc: '', price: 158, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Crispy Chicken Sandwich with Lettuce & Tomatoes', desc: '', price: 105, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Burger McDo with Lettuce & Tomatoes', desc: '', price: 87, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Crispy Chicken Sandwich w/ Fries Small Meal', desc: 'Comes with Small Fries & Drink', price: 142, cat: 'Burgers', emoji: '🍔' },
+    { name: 'Burger McDo with Lettuce & Tomatoes with Medium Fries and Drink', desc: 'Comes with Medium Fries & Drink', price: 199, cat: 'Burgers', emoji: '🍔' },
+    // Spaghetti
+    { name: 'McSpaghetti w/ Fries Medium Meal', desc: 'Comes with Medium Fries & Drink', price: 177, cat: 'Spaghetti', emoji: '🍝' },
+    { name: 'McSpaghetti w/ Fries Small Meal', desc: 'Comes with Small Fries and Drink', price: 139, cat: 'Spaghetti', emoji: '🍝' },
+    { name: 'McSpaghetti w/ Fries Large Meal', desc: 'Comes with Large Fries & Drink', price: 216, cat: 'Spaghetti', emoji: '🍝' },
+    { name: 'McSpaghetti w/ Burger McDo Small Meal', desc: 'Comes with Small Drink', price: 139, cat: 'Spaghetti', emoji: '🍝' },
+    { name: 'McSpaghetti w/ Burger McDo Medium Meal', desc: 'Comes with Medium Drink', price: 150, cat: 'Spaghetti', emoji: '🍝' },
+    { name: 'McSpaghetti w/ Burger McDo Large Meal', desc: 'Comes with Large Drink', price: 159, cat: 'Spaghetti', emoji: '🍝' },
+    { name: 'McSpaghetti Solo', desc: '', price: 79, cat: 'Spaghetti', emoji: '🍝' },
+    { name: '1-pc. Chicken McDo w/ McSpaghetti Solo', desc: '', price: 161, cat: 'Spaghetti', emoji: '🍝' },
+    { name: '1-pc. Chicken McDo w/ McSpaghetti & Fries Small Meal', desc: 'Comes with Small Fries and Drink', price: 235, cat: 'Spaghetti', emoji: '🍝' },
+    { name: '1-pc. Chicken McDo w/ McSpaghetti & Fries Medium Meal', desc: 'Comes with Medium Fries & Drink', price: 273, cat: 'Spaghetti', emoji: '🍝' },
+    { name: '1-pc. Chicken McDo w/ McSpaghetti & Fries Large Meal', desc: 'Comes with Large Fries & Drink', price: 312, cat: 'Spaghetti', emoji: '🍝' },
+    { name: '1-pc Spicy Chicken McDo with McSpaghetti', desc: '', price: 167, cat: 'Spaghetti', emoji: '🍝' },
+    { name: '1-pc. Spicy Chicken McDo w/ McSpaghetti & Fries Medium Meal', desc: 'Comes with Medium Fries & Drink', price: 279, cat: 'Spaghetti', emoji: '🍝' },
+    { name: '1-pc. Spicy Chicken McDo w/ McSpaghetti & Fries Small Meal', desc: 'Comes with Small Fries & Drink', price: 241, cat: 'Spaghetti', emoji: '🍝' },
+    { name: '1-pc. Spicy Chicken McDo w/ McSpaghetti & Fries Large Meal', desc: 'Comes with Large Fries & Drink', price: 318, cat: 'Spaghetti', emoji: '🍝' },
+    { name: '1-pc Spicy Chicken McDo with McSpaghetti and Small Drink', desc: 'Comes with a Drink', price: 198, cat: 'Spaghetti', emoji: '🍝' },
+    { name: '1-pc Spicy Chicken McDo with McSpaghetti and Medium Drink', desc: 'Comes with a Drink', price: 209, cat: 'Spaghetti', emoji: '🍝' },
+    { name: '1-pc Spicy Chicken McDo with McSpaghetti and Large Drink', desc: 'Comes with a Drink', price: 218, cat: 'Spaghetti', emoji: '🍝' },
+    // Rice Bowls
+    { name: '1-pc. Mushroom Pepper Steak w/ Fries Medium Meal', desc: 'Comes with Medium Fries & Drink', price: 162, cat: 'Rice Bowls', emoji: '🍛' },
+    { name: '1-pc. Mushroom Pepper Steak w/ Fries Large Meal', desc: 'Comes with Large Fries & Drink', price: 201, cat: 'Rice Bowls', emoji: '🍛' },
+    { name: '2-pc. Mushroom Pepper Steak w/ Fries Medium Meal', desc: 'Comes with Medium Fries & Drink', price: 215, cat: 'Rice Bowls', emoji: '🍛' },
+    { name: '2-pc. Mushroom Pepper Steak w/ Fries Large Meal', desc: 'Comes with Large Fries & Drink', price: 254, cat: 'Rice Bowls', emoji: '🍛' },
+    { name: '2-pc. Mushroom Pepper Steak w/ Fries Small Meal', desc: 'Comes with Small Fries and Drink', price: 177, cat: 'Rice Bowls', emoji: '🍛' },
+    { name: '1-pc. Mushroom Pepper Steak Solo', desc: '', price: 92, cat: 'Rice Bowls', emoji: '🍛' },
+    { name: '2-pc. Mushroom Pepper Steak Solo', desc: '', price: 139, cat: 'Rice Bowls', emoji: '🍛' },
+    { name: '1-pc. Mushroom Pepper Steak w/ Fries Small Meal', desc: 'Comes with Small Fries and Drink', price: 124, cat: 'Rice Bowls', emoji: '🍛' },
+    // Desserts & Drinks
+    { name: 'A&W Root Beer McFloat Medium', desc: 'Drink only', price: 62, cat: 'Desserts & Drinks', emoji: '🥤' },
+    { name: 'A&W Root Beer McFloat Large', desc: 'Drink only', price: 84, cat: 'Desserts & Drinks', emoji: '🥤' },
+    { name: 'A&W Root Beer Regular', desc: 'Drink only', price: 42, cat: 'Desserts & Drinks', emoji: '🥤' },
+    { name: 'A&W Root Beer Medium', desc: 'Drink only', price: 42, cat: 'Desserts & Drinks', emoji: '🥤' },
+    { name: 'A&W Root Beer Large', desc: '', price: 42, cat: 'Desserts & Drinks', emoji: '🥤' },
+    { name: 'McFlurry® Strawberry with OREO®', desc: '', price: 83, cat: 'Desserts & Drinks', emoji: '🍦' },
+    { name: 'McFlurry® Strawberry with Matcha', desc: '', price: 83, cat: 'Desserts & Drinks', emoji: '🍦' },
+    { name: 'McFlurry® Matcha with OREO®', desc: '', price: 83, cat: 'Desserts & Drinks', emoji: '🍦' },
+    { name: 'Royal McFloat Medium', desc: 'Drink only', price: 62, cat: 'Desserts & Drinks', emoji: '🥤' },
+    { name: 'Royal McFloat Large', desc: 'Drink only', price: 84, cat: 'Desserts & Drinks', emoji: '🥤' },
+    { name: 'Coke McFloat with Hot Fudge Medium', desc: 'Drink only', price: 62, cat: 'Desserts & Drinks', emoji: '🥤' },
+    { name: 'Coke McFloat Medium', desc: 'Drink only', price: 58, cat: 'Desserts & Drinks', emoji: '🥤' },
+    { name: 'Coke McFloat Large', desc: 'Drink only', price: 80, cat: 'Desserts & Drinks', emoji: '🥤' },
+    { name: 'Coke McFloat with Hot Fudge Large', desc: 'Drink only', price: 84, cat: 'Desserts & Drinks', emoji: '🥤' },
+    { name: 'Medium Royal', desc: 'Drink only', price: 77, cat: 'Desserts & Drinks', emoji: '🥤' },
+    { name: 'Large Royal', desc: 'Drink only', price: 87, cat: 'Desserts & Drinks', emoji: '🥤' },
+    { name: 'Coke Medium', desc: 'Drink only', price: 77, cat: 'Desserts & Drinks', emoji: '🥤' },
+    { name: 'Coke Large', desc: 'Drink only', price: 87, cat: 'Desserts & Drinks', emoji: '🥤' },
+    { name: 'Coke Zero Medium', desc: 'Drink only', price: 77, cat: 'Desserts & Drinks', emoji: '🥤' },
+    { name: 'Coke Zero Large', desc: 'Drink only', price: 87, cat: 'Desserts & Drinks', emoji: '🥤' },
+    { name: 'Sprite Medium', desc: 'Drink only', price: 77, cat: 'Desserts & Drinks', emoji: '🥤' },
+    { name: 'Sprite Large', desc: 'Drink only', price: 87, cat: 'Desserts & Drinks', emoji: '🥤' },
+    { name: 'Orange Juice Medium', desc: 'Drink only', price: 85, cat: 'Desserts & Drinks', emoji: '🧃' },
+    { name: 'Orange Juice Large', desc: 'Drink only', price: 95, cat: 'Desserts & Drinks', emoji: '🧃' },
+    { name: 'Iced Tea Medium', desc: 'Drink only', price: 85, cat: 'Desserts & Drinks', emoji: '🧊' },
+    { name: 'Iced Tea Large', desc: 'Drink only', price: 95, cat: 'Desserts & Drinks', emoji: '🧊' },
+    { name: 'McFlurry® with OREO®', desc: '', price: 72, cat: 'Desserts & Drinks', emoji: '🍦' },
+    { name: 'Hot Caramel Sundae', desc: '', price: 59, cat: 'Desserts & Drinks', emoji: '🍦' },
+    { name: 'Hot Fudge Sundae', desc: '', price: 59, cat: 'Desserts & Drinks', emoji: '🍦' },
+    { name: 'Apple Pie', desc: '', price: 47, cat: 'Desserts & Drinks', emoji: '🥧' },
+    // McCafe Drinks
+    { name: 'McCafé Cereal Milk Premium Roast Coffee Regular', desc: 'Enjoy this new product!', price: 73, cat: 'McCafe Drinks', emoji: '☕' },
+    { name: 'McCafé Cereal Milk Premium Roast Coffee Large', desc: 'Enjoy this new product!', price: 93, cat: 'McCafe Drinks', emoji: '☕' },
+    { name: 'McCafé Sea Salt Caramel Iced Coffee Medium', desc: 'Enjoy this new product!', price: 83, cat: 'McCafe Drinks', emoji: '☕' },
+    { name: 'McCafé Sea Salt Caramel Iced Coffee Large', desc: 'Enjoy this new product!', price: 103, cat: 'McCafe Drinks', emoji: '☕' },
+    { name: 'McCafé Cereal Milk Iced Coffee Medium', desc: 'Enjoy this new product!', price: 83, cat: 'McCafe Drinks', emoji: '☕' },
+    { name: 'McCafé Cereal Milk Iced Coffee Large', desc: 'Enjoy this new product!', price: 103, cat: 'McCafe Drinks', emoji: '☕' },
+    { name: 'McCafé Iced Coffee Original Medium', desc: 'Refreshing, creamy brown McCafe Iced coffee', price: 65, cat: 'McCafe Drinks', emoji: '☕' },
+    { name: 'McCafé Iced Coffee Original Large', desc: 'Refreshing, creamy brown McCafe Iced coffee', price: 95, cat: 'McCafe Drinks', emoji: '☕' },
+    { name: 'McCafé Iced Coffee Original w/ Vanilla Medium', desc: 'Cool, creamy brown McCafe Iced coffee', price: 82, cat: 'McCafe Drinks', emoji: '☕' },
+    { name: 'McCafé Iced Coffee Original w/ Vanilla Large', desc: 'Cool, creamy brown McCafe Iced coffee', price: 102, cat: 'McCafe Drinks', emoji: '☕' },
+    { name: 'McCafé Iced Coffee Mocha Medium', desc: 'Refreshing mocha McCafe Iced coffee', price: 82, cat: 'McCafe Drinks', emoji: '☕' },
+    { name: 'McCafé Iced Coffee Mocha Large', desc: 'Refreshing mocha McCafe Iced coffee', price: 102, cat: 'McCafe Drinks', emoji: '☕' },
+    { name: 'McCafé Iced Coffee Black Medium', desc: 'Rich, bold black McCafe Iced coffee', price: 62, cat: 'McCafe Drinks', emoji: '☕' },
+    { name: 'McCafé Iced Coffee Black Large', desc: 'Rich, bold black McCafe Iced coffee', price: 86, cat: 'McCafe Drinks', emoji: '☕' },
+    { name: 'McCafé Coffee McFloat', desc: 'Black McCafe Iced coffee, topped with creamy soft serve and rich chocolate syrup', price: 85, cat: 'McCafe Drinks', emoji: '☕' },
+    { name: 'McCafé Coffee McFloat Large', desc: 'Black McCafe Iced coffee, topped with creamy soft serve and rich chocolate syrup', price: 105, cat: 'McCafe Drinks', emoji: '☕' },
+    { name: 'McCafé Premium Roast Coffee Regular', desc: '', price: 63, cat: 'McCafe Drinks', emoji: '☕' },
+    { name: 'McCafé Premium Roast Coffee Large', desc: '', price: 79, cat: 'McCafe Drinks', emoji: '☕' },
+    // Happy Meal
+    { name: '1-pc. Chicken McDo w/ Fries Happy Meal', desc: 'Comes with Small Fries & Drink', price: 214, cat: 'Happy Meal', emoji: '🍗' },
+    { name: '1-pc. Chicken McDo Happy Meal', desc: 'Comes with a Drink', price: 151, cat: 'Happy Meal', emoji: '🍗' },
+    { name: '4-pc McNuggets w/ Fries Happy Meal', desc: 'Comes with Small Fries & Drink', price: 198, cat: 'Happy Meal', emoji: '🍗' },
+    { name: '4-pc McNuggets Happy Meal', desc: 'Comes with a Drink', price: 158, cat: 'Happy Meal', emoji: '🍗' },
+    { name: 'Burger McDo w/ Fries Happy Meal', desc: 'Comes with Small Fries & Drink', price: 162, cat: 'Happy Meal', emoji: '🍔' },
+    { name: 'Burger McDo Happy Meal', desc: 'Comes with a Drink', price: 114, cat: 'Happy Meal', emoji: '🍔' },
+    { name: 'McSpaghetti w/ Fries Happy Meal', desc: 'Comes with Small Fries & Drink', price: 182, cat: 'Happy Meal', emoji: '🍝' },
+    { name: 'McSpaghetti Happy Meal', desc: 'Comes with a Drink', price: 136, cat: 'Happy Meal', emoji: '🍝' },
+    // Fries & Extras
+    { name: "A&W Root Beer McFloat and Fries Combo", desc: 'Comes with Fries and McFloat', price: 101, cat: 'Fries & Extras', emoji: '🥤' },
+    { name: 'Big Mac Sauce', desc: 'Sauce Only', price: 20, cat: 'Fries & Extras', emoji: '🧂' },
+    { name: "Medium Shake Shake Fries N' McFloat Combo Cheese", desc: 'Comes with Medium Shake Shake Fries and Coke McFloat', price: 120, cat: 'Fries & Extras', emoji: '🍟' },
+    { name: "Medium Shake Shake Fries N' McFloat Combo BBQ", desc: 'Comes with Medium Shake Shake Fries and Coke McFloat', price: 120, cat: 'Fries & Extras', emoji: '🍟' },
+    { name: "Large Shake Shake Fries N' McFloat Combo Cheese", desc: 'Comes with Large Shake Shake Fries and Coke McFloat', price: 153, cat: 'Fries & Extras', emoji: '🍟' },
+    { name: "Large Shake Shake Fries N' McFloat Combo BBQ", desc: 'Comes with Large Shake Shake Fries and Coke McFloat', price: 153, cat: 'Fries & Extras', emoji: '🍟' },
+    { name: "BFF Fries N' McFloat Combo", desc: 'Comes with 1 BFF Fries and 3 Coke McFloat', price: 289, cat: 'Fries & Extras', emoji: '🍟' },
+    { name: 'BFF Fries', desc: '', price: 181, cat: 'Fries & Extras', emoji: '🍟', badge: 'Popular' },
+    { name: 'Large Fries', desc: '', price: 114, cat: 'Fries & Extras', emoji: '🍟' },
+    { name: 'Medium Fries', desc: '', price: 95, cat: 'Fries & Extras', emoji: '🍟' },
+    { name: 'Regular Fries', desc: '', price: 72, cat: 'Fries & Extras', emoji: '🍟' },
+    { name: 'McShaker Fries Medium Cheese', desc: '', price: 105, cat: 'Fries & Extras', emoji: '🍟' },
+    { name: 'McShaker Fries Medium BBQ', desc: '', price: 105, cat: 'Fries & Extras', emoji: '🍟' },
+    { name: 'McShaker Fries Large Cheese', desc: '', price: 124, cat: 'Fries & Extras', emoji: '🍟' },
+    { name: 'McShaker Fries Large BBQ', desc: '', price: 124, cat: 'Fries & Extras', emoji: '🍟' },
+    { name: 'BFF McShaker Fries Cheese', desc: '', price: 201, cat: 'Fries & Extras', emoji: '🍟' },
+    { name: 'BFF McShaker Fries BBQ', desc: '', price: 201, cat: 'Fries & Extras', emoji: '🍟' },
+    { name: "Large Fries N' McFloat Combo", desc: '', price: 143, cat: 'Fries & Extras', emoji: '🍟' },
+    { name: "BFF Shake Shake Fries N' McFloat Combo Cheese", desc: '', price: 294, cat: 'Fries & Extras', emoji: '🍟' },
+    { name: "BFF Shake Shake Fries N' McFloat Combo BBQ", desc: '', price: 294, cat: 'Fries & Extras', emoji: '🍟' },
+    { name: 'Extra Gravy', desc: '', price: 11, cat: 'Fries & Extras', emoji: '🧂' },
+    { name: 'Extra Cheese', desc: '', price: 17, cat: 'Fries & Extras', emoji: '🧂' },
+    { name: 'Extra BBQ Sauce', desc: '', price: 17, cat: 'Fries & Extras', emoji: '🧂' },
+    { name: 'Mushroom Pepper Sauce', desc: '', price: 11, cat: 'Fries & Extras', emoji: '🧂' },
+    { name: 'Extra Golden Curry Fillet Sauce', desc: '', price: 11, cat: 'Fries & Extras', emoji: '🧂' },
+    // McSavers Sulit Busog Meals
+    { name: 'Sulit Busog 2-pc. Crispy Chicken Fillet Ala King Meal', desc: 'Double Ulam with Drink', price: 152, cat: 'McSavers Sulit Busog Meals', emoji: '🍱' },
+    { name: 'Sulit Busog 2-pc Golden Curry Fillet Meal', desc: 'Double Ulam with Drink', price: 152, cat: 'McSavers Sulit Busog Meals', emoji: '🍱' },
+    { name: 'Sulit Busog 2-pc. Crispy Chicken Fillet Meal', desc: 'Double Ulam with Drink', price: 142, cat: 'McSavers Sulit Busog Meals', emoji: '🍱' },
+    { name: 'Sulit Busog 2-pc Mushroom Pepper Steak with Small Drink', desc: 'Double Ulam with Drink', price: 142, cat: 'McSavers Sulit Busog Meals', emoji: '🍱' },
+    { name: 'McSavers Sulit Busog Crispy Chicken Fillet Ala King with Extra Rice Meal', desc: 'Comes with extra rice', price: 108, cat: 'McSavers Sulit Busog Meals', emoji: '🍱' },
+    { name: 'Sulit Busog Crispy Chicken Fillet with Extra Rice Meal', desc: 'Comes with extra rice', price: 108, cat: 'McSavers Sulit Busog Meals', emoji: '🍱' },
+    { name: 'Sulit Busog 1-pc Mushroom Pepper Steak with Extra Rice Meal', desc: 'Comes with extra rice', price: 108, cat: 'McSavers Sulit Busog Meals', emoji: '🍱' },
+    { name: 'Sulit Busog Meal Golden Curry Fillet with Extra Rice Meal', desc: 'Comes with extra rice', price: 108, cat: 'McSavers Sulit Busog Meals', emoji: '🍱' },
+    { name: 'Sulit Busog 1-pc Chicken McDo with Extra Rice Meal', desc: 'Comes with extra rice', price: 130, cat: 'McSavers Sulit Busog Meals', emoji: '🍱' },
+    { name: 'McSavers Sulit Busog Cheeseburger Meal', desc: 'Comes with Fries & Drink', price: 127, cat: 'McSavers Sulit Busog Meals', emoji: '🍱' },
+    { name: 'McSavers Sulit Busog 1-pc Mushroom Pepper Steak Meal', desc: 'Comes with a Drink', price: 119, cat: 'McSavers Sulit Busog Meals', emoji: '🍱' },
+    { name: 'McSavers Sulit Busog 1-pc Chicken McDo Meal', desc: 'Comes with a Drink', price: 109, cat: 'McSavers Sulit Busog Meals', emoji: '🍱' },
   ]},
   { id: 'chowking', name: 'Chowking', emoji: '🥢', color: '#e4002b', tagline: 'Chinese-Filipino comfort', rating: 4.5, time: '25–40 min', fee: 49, cuisines: ['Filipino'], menu: [
     { name: 'Chinese-Style Fried Chicken Lauriat', desc: 'Fried chicken, chao fan, lumpia and soup', price: 195, cat: 'Lauriat', emoji: '🍱', badge: 'Bestseller' },
@@ -313,6 +812,9 @@ function reducer(s, a) {
 
 const peso = n => '₱' + Number(n).toLocaleString('en-PH');
 
+// DOM id for a menu category section — used to scroll-link the category tabs.
+const catSlug = (rid, cat) => `cat-${rid}-${cat.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`;
+
 function computeTotals(cart, cartRid, serviceFee = 9) {
   let subtotal = 0;
   Object.keys(cart).forEach(id => { subtotal += ITEMS[id].price * cart[id]; });
@@ -438,6 +940,7 @@ export default function App() {
         ::-webkit-scrollbar{height:0;width:8px;}
         ::-webkit-scrollbar:horizontal{display:none;}
         ::-webkit-scrollbar-thumb{background:rgba(0,0,0,.16);border-radius:999px;}
+        .menu-search::placeholder{font-weight:700;color:#8a8a93;opacity:1;}
         .rest-img{transition:transform .3s ease;}
         .rest-card:hover .rest-img{transform:scale(1.07);}
         .brand-item{position:relative;}
@@ -459,6 +962,7 @@ export default function App() {
         .btn-brand:active{transform:scale(.985);}
         .btn-icon:hover{background:#e7e7ea !important;}
         .back-btn:active{transform:scale(.92);}
+        .menu-card:hover{box-shadow:0 6px 18px rgba(0,0,0,.10);}
         .add-btn:hover{border-color:${B} !important;}
         .add-btn:active{transform:scale(.88);}
         .fav-btn:hover{transform:scale(1.12);}
@@ -605,7 +1109,8 @@ export default function App() {
             </>
           )}
 
-          {/* Nav row: tabs · search */}
+          {/* Nav row: tabs · search — hidden on restaurant screen */}
+          {s.screen !== 'restaurant' && (
           <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 22px', display: 'flex', alignItems: 'flex-end', gap: 18, flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: narrow ? 16 : 26, flex: 'none', overflowX: 'auto' }} className="hide-scroll">
               {[[NavIcons.delivery, 'Delivery', true], [NavIcons.pickup, 'Pick-up', false], [NavIcons.pandamart, 'pandamart', false], [NavIcons.shops, 'Shops', false]].map(([icon, label, active]) => (
@@ -624,6 +1129,7 @@ export default function App() {
                 style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%', font: 'inherit', fontSize: 14.5, color: '#1c1c22' }} />
             </div>
           </div>
+          )}
         </header>
 
         {/* Home */}
@@ -814,44 +1320,141 @@ export default function App() {
 
         {/* Restaurant */}
         {s.screen === 'restaurant' && R && (
-          <main>
-            <div style={{ position: 'relative', height: 196, background: R.grad, overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', right: 24, bottom: -18, fontSize: 150, opacity: .22 }}>{R.emoji}</div>
-              <Img src={`${A}/restaurants/${R.id}.webp`} alt={R.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} fallback={null} />
-              <button onClick={() => { dispatch({ type: 'GO_HOME' }); window.scrollTo(0, 0); }} className="back-btn"
-                style={{ position: 'absolute', top: 16, left: 16, width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,.92)', border: 'none', cursor: 'pointer', fontSize: 22, fontWeight: 700, color: '#1c1c22', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 3px 10px rgba(0,0,0,.18)', transition: 'transform .1s' }}>‹</button>
-            </div>
-            <div style={{ maxWidth: 920, margin: '-46px auto 0', padding: '0 18px', position: 'relative' }}>
-              <div style={{ background: '#fff', borderRadius: 22, padding: 22, boxShadow: '0 10px 30px rgba(0,0,0,.10)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                  <div style={{ width: 56, height: 56, borderRadius: 16, background: R.grad, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 30, flex: 'none' }}>{R.emoji}</div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800, letterSpacing: '-.6px' }}>{R.name}</h1>
-                    <p style={{ margin: '3px 0 0', color: '#8a8a93', fontSize: 13.5 }}>{R.tagline}</p>
+          <main style={{ background: '#fff', minHeight: '70vh' }}>
+            <div style={{ maxWidth: 1240, margin: '0 auto', padding: compact ? '0 18px' : '0 24px' }}>
+
+              {/* Breadcrumb */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '18px 0 2px', fontSize: 13.5, color: '#8a8a93', flexWrap: 'wrap' }}>
+                <span onClick={() => { dispatch({ type: 'GO_HOME' }); window.scrollTo(0, 0); }} style={{ color: '#1c1c22', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>Makati City</span>
+                <span>›</span>
+                <span onClick={() => { dispatch({ type: 'GO_HOME' }); window.scrollTo(0, 0); }} style={{ color: '#1c1c22', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>Restaurant List</span>
+                <span>›</span>
+                <span>{R.name}</span>
+              </div>
+
+              {/* Header */}
+              <div style={{ display: 'flex', gap: narrow ? 16 : 24, alignItems: 'flex-start', padding: '14px 0 22px', borderBottom: '1px solid #ececef' }}>
+                <div style={{ width: narrow ? 100 : 158, height: narrow ? 100 : 158, borderRadius: 14, overflow: 'hidden', flex: 'none', boxShadow: '0 2px 10px rgba(0,0,0,.10)', background: '#fff' }}>
+                  <Img src={`${A}/brands/${R.id}.webp`} alt={R.name} style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+                    fallback={<div style={{ width: '100%', height: '100%', background: R.grad, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: narrow ? 46 : 70 }}>{R.emoji}</div>} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ color: '#8a8a93', fontSize: 13.5, fontWeight: 600 }}>{R.cuisines.join(' · ')}</div>
+                  <h1 style={{ margin: '8px 0 0', fontSize: narrow ? 24 : 34, fontWeight: 800, letterSpacing: '-1px', lineHeight: 1.1 }}>{R.name}</h1>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, fontSize: 13.5, color: '#54545c', flexWrap: 'wrap' }}>
+                    <span>₱ {R.fee} delivery or <span style={{ color: B, fontWeight: 700 }}>free with ₱200 spend</span></span>
+                    <span style={{ opacity: .4 }}>•</span>
+                    <span style={{ fontWeight: 600 }}>Min. order ₱129</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginTop: 12, fontSize: 13.5, color: '#54545c', flexWrap: 'wrap' }}>
+                    <span style={{ color: '#f5a623', fontWeight: 800 }}>★ {R.rating.toFixed(1)}/5</span>
+                    <span style={{ color: '#8a8a93' }}>(20000+)</span>
+                    <span style={{ color: '#1c1c22', fontWeight: 700, textDecoration: 'underline', cursor: 'pointer' }}>See reviews</span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, marginLeft: 6, color: '#8a8a93', cursor: 'pointer' }}>ⓘ More info</span>
                   </div>
                 </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginTop: 16 }}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: BT, color: BD, padding: '6px 11px', borderRadius: 10, fontSize: 13, fontWeight: 800 }}>★ {R.rating.toFixed(1)}</span>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#f1f1f3', padding: '6px 11px', borderRadius: 10, fontSize: 13, fontWeight: 600, color: '#54545c' }}>🕒 {R.time}</span>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#f1f1f3', padding: '6px 11px', borderRadius: 10, fontSize: 13, fontWeight: 600, color: '#54545c' }}>🛵 {R.fee === 0 ? 'Free delivery' : `₱${R.fee} delivery`}</span>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#f1f1f3', padding: '6px 11px', borderRadius: 10, fontSize: 13, fontWeight: 600, color: '#54545c' }}>{R.cuisines.join(' · ')}</span>
+                <button onClick={() => toggleFav(R.id)} className="ghost-btn"
+                  style={{ flex: 'none', display: narrow ? 'none' : 'inline-flex', alignItems: 'center', gap: 8, padding: '11px 18px', borderRadius: 12, border: '1.5px solid #ececef', background: '#fff', cursor: 'pointer', font: 'inherit', fontWeight: 700, fontSize: 14, color: s.favorites.includes(R.id) ? B : '#1c1c22', transition: 'all .15s' }}>
+                  <svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M18.338 4.438c2.764 1.316 4.015 4.757 2.795 7.686-1.548 3.243-4.436 5.835-8.665 7.776-.254.114-.543.13-.807.05l-.13-.05c-4.228-1.94-7.116-4.533-8.664-7.776-1.22-2.93.031-6.37 2.795-7.686 1.89-.9 3.826-.315 5.378.855.112.084.246.195.403.333l.286.257a.4.4 0 00.542 0l.315-.283c.145-.125.27-.228.374-.307 1.555-1.171 3.49-1.754 5.378-.855zm-.644 1.355c-1.178-.56-2.506-.3-3.831.699l-.151.12c-.115.096-.258.222-.427.376-.207.19-.553.467-1.038.83a.4.4 0 01-.487-.007 99.836 99.836 0 00-.909-.708l-.13-.11-.158-.143a7.024 7.024 0 00-.426-.36c-1.323-.997-2.652-1.258-3.83-.697-2.032.966-2.972 3.553-2.086 5.685 1.335 2.798 3.822 5.087 7.52 6.863l.259.122.259-.121c3.561-1.711 5.998-3.895 7.34-6.493l.149-.301c.888-2.133.034-4.627-1.867-5.66l-.187-.095z" /></svg>
+                  {s.favorites.includes(R.id) ? 'Saved to favorites' : 'Add to favorites'}
+                </button>
+              </div>
+
+              {/* Available deals */}
+              <div style={{ padding: '24px 0 6px' }}>
+                <h2 style={{ margin: '0 0 16px', fontSize: 22, fontWeight: 800, letterSpacing: '-.5px' }}>Available deals</h2>
+                <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+                  <div style={{ width: 280, maxWidth: '100%', background: '#1c1c22', color: '#fff', borderRadius: 14, padding: 18 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, fontSize: 14 }}>
+                      <span style={{ width: 18, height: 18, borderRadius: '50%', background: B, color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, flex: 'none' }}>%</span>
+                      App-only deals
+                    </div>
+                    <div style={{ marginTop: 8, fontSize: 13, color: '#c9c9cf', lineHeight: 1.45 }}>Download the app to unlock more discounts</div>
+                  </div>
+                  <div style={{ width: 280, maxWidth: '100%', background: '#f6efff', borderRadius: 14, padding: 18 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, fontSize: 14 }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, color: '#6c2bd9', fontWeight: 800, fontSize: 10.5, background: '#e8ddff', padding: '2px 6px', borderRadius: 6, flex: 'none' }}>PRO</span>
+                      Free delivery
+                    </div>
+                    <div style={{ marginTop: 8, fontSize: 13, color: '#54545c', lineHeight: 1.45 }}>Valid for all items. Auto applied.</div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div style={{ position: 'sticky', top: 58, zIndex: 20, background: '#f5f5f6', padding: '16px 0 12px', marginTop: 18 }}>
-              <div style={{ maxWidth: 920, margin: '0 auto', padding: '0 18px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 9, background: '#fff', border: '1.5px solid #ececef', borderRadius: 13, padding: '10px 14px', marginBottom: 11 }}>
-                  <span style={{ fontSize: 14, opacity: .55 }}>🔍</span>
-                  <input value={s.menuQ} onChange={e => dispatch({ type: 'SET_MENU_Q', v: e.target.value })} placeholder="Search this menu…"
+            {/* Sticky search + category tabs */}
+            <div style={{ position: 'sticky', top: 62, zIndex: 20, background: '#fff', borderBottom: '1px solid #ececef', boxShadow: '0 4px 10px rgba(0,0,0,.03)', marginTop: 18 }}>
+              <div style={{ maxWidth: 1240, margin: '0 auto', padding: compact ? '0 18px' : '0 24px', display: 'flex', alignItems: 'center', gap: 18 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 9, background: '#f5f5f6', borderRadius: 999, padding: '9px 15px', width: narrow ? 150 : 230, flex: 'none', margin: '10px 0' }}>
+                  <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style={{ flex: 'none', color: '#8a8a93' }}>
+                    <path fillRule="evenodd" clipRule="evenodd" fill="currentColor" d="M9.96564 11.0279C9.13594 11.6401 8.11023 12.002 7 12.002C4.23858 12.002 2 9.76338 2 7.00195C2 4.24053 4.23858 2.00195 7 2.00195C9.76142 2.00195 12 4.24053 12 7.00195C12 8.11221 11.6381 9.13795 11.0259 9.96766C11.031 9.97246 11.036 9.97734 11.0409 9.9823L13.7803 12.7216C14.0732 13.0145 14.0732 13.4894 13.7803 13.7823C13.4874 14.0752 13.0125 14.0752 12.7196 13.7823L9.98029 11.043C9.97532 11.038 9.97044 11.033 9.96564 11.0279ZM10.5 7.00195C10.5 8.93495 8.933 10.502 7 10.502C5.067 10.502 3.5 8.93495 3.5 7.00195C3.5 5.06896 5.067 3.50195 7 3.50195C8.933 3.50195 10.5 5.06896 10.5 7.00195Z" />
+                  </svg>
+                  <input value={s.menuQ} onChange={e => dispatch({ type: 'SET_MENU_Q', v: e.target.value })} placeholder="Search in menu" className="menu-search"
                     style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%', font: 'inherit', fontSize: 14, color: '#1c1c22' }} />
                 </div>
-                <MenuCats R={R} menuCat={s.menuCat} dispatch={dispatch} B={B} />
+                <MenuCats key={R.id} R={R} />
               </div>
             </div>
 
-            <div style={{ maxWidth: 920, margin: '0 auto', padding: '4px 18px 30px' }}>
-              <MenuItems R={R} cart={s.cart} cartRid={s.cartRid} menuCat={s.menuCat} menuQ={s.menuQ} dispatch={dispatch} add={add} B={B} BD={BD} BT={BT} />
+            {/* Body: menu grid + cart sidebar */}
+            <div style={{ maxWidth: 1240, margin: '0 auto', padding: compact ? '4px 18px 44px' : '4px 24px 44px', display: 'flex', gap: 28, alignItems: 'flex-start' }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <MenuItems R={R} cart={s.cart} cartRid={s.cartRid} menuQ={s.menuQ} dispatch={dispatch} add={add} B={B} BD={BD} BT={BT} narrow={narrow} />
+              </div>
+
+              {!compact && (
+                <aside style={{ width: 340, flex: 'none', position: 'sticky', top: 128 }}>
+                  <div style={{ border: '1px solid #ececef', borderRadius: 16, overflow: 'hidden', boxShadow: '0 4px 18px rgba(0,0,0,.05)' }}>
+                    {t.count === 0 ? (
+                      <div style={{ padding: '32px 22px 26px', textAlign: 'center' }}>
+                        <Img src={`${A}/cart-empty.webp`} alt="" style={{ width: 96, height: 96, objectFit: 'contain', margin: '0 auto', display: 'block' }}
+                          fallback={<div style={{ fontSize: 64 }}>🧺</div>} />
+                        <div style={{ fontWeight: 800, fontSize: 19, marginTop: 12 }}>Hungry?</div>
+                        <div style={{ color: '#8a8a93', fontSize: 14, marginTop: 4, lineHeight: 1.4 }}>You haven&apos;t added anything<br />to your cart!</div>
+                      </div>
+                    ) : (
+                      <div style={{ padding: '18px 18px 4px', maxHeight: 360, overflowY: 'auto' }}>
+                        <div style={{ fontWeight: 800, fontSize: 17, marginBottom: 10, letterSpacing: '-.3px' }}>Your order</div>
+                        {Object.keys(s.cart).map(id => {
+                          const m = ITEMS[id], qty = s.cart[id];
+                          return (
+                            <div key={id} style={{ display: 'flex', gap: 10, alignItems: 'center', padding: '11px 0', borderBottom: '1px solid #f1f1f3' }}>
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ fontWeight: 700, fontSize: 13.5, lineHeight: 1.3 }}>{m.name}</div>
+                                <div style={{ fontWeight: 800, fontSize: 13, color: '#1c1c22', marginTop: 3, fontVariantNumeric: 'tabular-nums' }}>{peso(m.price * qty)}</div>
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 2, background: '#f1f1f3', borderRadius: 10, padding: 2, flex: 'none' }}>
+                                <button onClick={() => dispatch({ type: 'DEC', id })} className="stepper-dec"
+                                  style={{ width: 26, height: 26, border: 'none', background: 'transparent', color: B, fontSize: 18, fontWeight: 700, cursor: 'pointer', borderRadius: 8, transition: 'transform .1s' }}>−</button>
+                                <span style={{ minWidth: 16, textAlign: 'center', fontWeight: 800, fontSize: 13, fontVariantNumeric: 'tabular-nums' }}>{qty}</span>
+                                <button onClick={() => dispatch({ type: 'INC', id })} className="stepper-inc"
+                                  style={{ width: 26, height: 26, border: 'none', background: B, color: '#fff', fontSize: 16, fontWeight: 700, cursor: 'pointer', borderRadius: 8, transition: 'transform .1s' }}>+</button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                    <div style={{ borderTop: '1px solid #ececef', padding: '16px 18px 18px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5, color: '#54545c', marginBottom: 14, lineHeight: 1.4 }}>
+                        <span style={{ width: 18, height: 18, borderRadius: '50%', background: B, color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, flex: 'none' }}>%</span>
+                        Free delivery with ₱200 and above. Let&apos;s go!
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 14 }}>
+                        <div>
+                          <div style={{ fontWeight: 800, fontSize: 15 }}>Total <span style={{ fontWeight: 500, color: '#8a8a93', fontSize: 11.5 }}>(incl. fees and tax)</span></div>
+                          <span style={{ textDecoration: 'underline', fontSize: 12.5, color: '#1c1c22', cursor: 'pointer' }}>See summary</span>
+                        </div>
+                        <span style={{ fontWeight: 800, fontSize: 19, fontVariantNumeric: 'tabular-nums' }}>{peso(t.total)}</span>
+                      </div>
+                      <button disabled={t.count === 0} onClick={() => { dispatch({ type: 'GO_CHECKOUT' }); window.scrollTo(0, 0); }} className={t.count === 0 ? '' : 'btn-brand'}
+                        style={{ width: '100%', background: t.count === 0 ? '#e7e7ea' : B, color: t.count === 0 ? '#a0a0a8' : '#fff', border: 'none', borderRadius: 12, padding: 14, font: 'inherit', fontWeight: 800, fontSize: 15, cursor: t.count === 0 ? 'default' : 'pointer', boxShadow: t.count === 0 ? 'none' : `0 8px 20px ${BG}`, transition: 'filter .15s,transform .1s' }}>
+                        Review payment and address
+                      </button>
+                    </div>
+                  </div>
+                </aside>
+              )}
             </div>
           </main>
         )}
@@ -1176,67 +1779,114 @@ function ScrollRow({ children, gap = 18 }) {
   );
 }
 
-function MenuCats({ R, menuCat, dispatch, B }) {
-  const cats = [];
-  R.menu.forEach(m => { if (!cats.includes(m.cat)) cats.push(m.cat); });
+// Category tabs act as scroll shortcuts: clicking jumps to that section, and the
+// active underline follows the section currently scrolled into view.
+function MenuCats({ R }) {
+  const ref = useRef(null);
+  const btnRefs = useRef({});
+  const counts = {};
+  R.menu.forEach(m => { counts[m.cat] = (counts[m.cat] || 0) + 1; });
+  const cats = Object.keys(counts);
+  const [active, setActive] = useState(cats[0]);
+
+  useEffect(() => {
+    // Highlight the last section whose heading has scrolled up past the sticky bars.
+    const line = 135;
+    const onScroll = () => {
+      let current = cats[0];
+      for (const c of cats) {
+        const el = document.getElementById(catSlug(R.id, c));
+        if (el && el.getBoundingClientRect().top - line <= 0) current = c;
+      }
+      setActive(current);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [R.id]);
+
+  // When the active category changes (via scroll-spy or click), bring its tab
+  // into view if it has scrolled offscreen in the horizontal bar.
+  useEffect(() => {
+    const cont = ref.current;
+    const btn = btnRefs.current[active];
+    if (!cont || !btn) return;
+    const left = cont.scrollLeft;
+    const right = left + cont.clientWidth;
+    if (btn.offsetLeft < left || btn.offsetLeft + btn.offsetWidth > right) {
+      cont.scrollTo({ left: Math.max(0, btn.offsetLeft - (cont.clientWidth - btn.offsetWidth) / 2), behavior: 'smooth' });
+    }
+  }, [active]);
+
+  function go(cat) {
+    setActive(cat); // the [active] effect scrolls the tab into view
+    document.getElementById(catSlug(R.id, cat))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   return (
-    <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 2 }}>
-      {['All', ...cats].map(c => {
-        const active = c === menuCat;
-        return (
-          <button key={c} onClick={() => dispatch({ type: 'SET_MENU_CAT', v: c })} className="chip-btn"
-            style={{ flex: 'none', padding: '8px 15px', borderRadius: 999, border: `1.5px solid ${active ? B : '#e7e7ea'}`, background: active ? B : '#fff', color: active ? '#fff' : '#54545c', font: 'inherit', fontWeight: 700, fontSize: 13, cursor: 'pointer', transition: 'all .15s' }}>
-            {c}
-          </button>
-        );
-      })}
+    <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
+      <button onClick={() => ref.current?.scrollBy({ left: -240, behavior: 'smooth' })} aria-label="Previous categories"
+        style={{ position: 'absolute', top: '50%', left: -2, transform: 'translateY(-50%)', width: 30, height: 30, borderRadius: '50%', background: '#fff', border: '1px solid #ececef', cursor: 'pointer', fontSize: 16, color: '#1c1c22', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,.12)', zIndex: 1 }}>‹</button>
+      <div ref={ref} className="hide-scroll" style={{ display: 'flex', gap: 24, overflowX: 'auto', paddingLeft: 36, paddingRight: 36 }}>
+        {cats.map(c => {
+          const on = c === active;
+          return (
+            <button key={c} ref={el => (btnRefs.current[c] = el)} onClick={() => go(c)}
+              style={{ flex: 'none', padding: '17px 0', border: 'none', borderBottom: `3px solid ${on ? '#1c1c22' : 'transparent'}`, background: 'transparent', color: on ? '#1c1c22' : '#8a8a93', font: 'inherit', fontWeight: on ? 800 : 600, fontSize: 14, cursor: 'pointer', whiteSpace: 'nowrap', transition: 'color .15s' }}>
+              {c} ({counts[c]})
+            </button>
+          );
+        })}
+      </div>
+      <button onClick={() => ref.current?.scrollBy({ left: 240, behavior: 'smooth' })} aria-label="More categories"
+        style={{ position: 'absolute', top: '50%', right: -2, transform: 'translateY(-50%)', width: 30, height: 30, borderRadius: '50%', background: '#fff', border: '1px solid #ececef', cursor: 'pointer', fontSize: 16, color: '#1c1c22', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,.12)', zIndex: 1 }}>›</button>
     </div>
   );
 }
 
-function MenuItems({ R, cart, cartRid, menuCat, menuQ, dispatch, add, B, BD, BT }) {
+function MenuItems({ R, cart, cartRid, menuQ, dispatch, add, B, BD, BT, narrow }) {
   const cats = [];
   R.menu.forEach(m => { if (!cats.includes(m.cat)) cats.push(m.cat); });
   const mq = menuQ.toLowerCase();
 
   return cats.map(cat => {
-    if (menuCat !== 'All' && menuCat !== cat) return null;
     let items = R.menu.filter(m => m.cat === cat);
     if (mq) items = items.filter(m => m.name.toLowerCase().includes(mq) || m.desc.toLowerCase().includes(mq));
     if (!items.length) return null;
     return (
-      <div key={cat}>
-        <h3 style={{ margin: '22px 2px 4px', fontSize: 18, fontWeight: 800, letterSpacing: '-.4px' }}>{cat}</h3>
-        {items.map(m => {
-          const qty = cartRid === R.id ? (cart[m.id] || 0) : 0;
-          return (
-            <div key={m.id} style={{ display: 'flex', gap: 16, padding: '18px 0', borderBottom: '1px solid #ececef' }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                  <h4 style={{ margin: 0, fontSize: 15.5, fontWeight: 700 }}>{m.name}</h4>
-                  {m.badge && <span style={{ background: BT, color: BD, fontSize: 10.5, fontWeight: 800, padding: '3px 8px', borderRadius: 999, letterSpacing: '.3px', textTransform: 'uppercase' }}>{m.badge}</span>}
+      <div key={cat} id={catSlug(R.id, cat)} style={{ scrollMarginTop: 130 }}>
+        <h3 style={{ margin: '26px 2px 14px', fontSize: 22, fontWeight: 800, letterSpacing: '-.5px' }}>{cat}</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: narrow ? '1fr' : 'repeat(2, minmax(0, 1fr))', gap: 14 }}>
+          {items.map(m => {
+            const qty = cartRid === R.id ? (cart[m.id] || 0) : 0;
+            return (
+              <div key={m.id} className="menu-card" style={{ display: 'flex', gap: 12, padding: 14, border: '1px solid #ececef', borderRadius: 12, background: '#fff', transition: 'box-shadow .15s' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700, lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.name}</h4>
+                  <div style={{ marginTop: 6, fontWeight: 400, fontSize: 14, color: '#1c1c22', fontVariantNumeric: 'tabular-nums' }}>from {peso(m.price)}</div>
+                  {m.desc && <p style={{ margin: '8px 0 0', color: '#8a8a93', fontSize: 12.5, lineHeight: 1.45, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{m.desc}</p>}
+                  {m.badge && <span style={{ display: 'inline-block', marginTop: 8, background: BT, color: BD, fontSize: 10.5, fontWeight: 800, padding: '3px 8px', borderRadius: 999, letterSpacing: '.3px', textTransform: 'uppercase' }}>{m.badge}</span>}
                 </div>
-                <p style={{ margin: '6px 0 0', color: '#8a8a93', fontSize: 13, lineHeight: 1.45, maxWidth: 430 }}>{m.desc}</p>
-                <div style={{ marginTop: 10, fontWeight: 800, fontSize: 15, fontVariantNumeric: 'tabular-nums' }}>{peso(m.price)}</div>
+                <div style={{ position: 'relative', flex: 'none', width: 92, height: 92 }}>
+                  <Img src={m.img} alt={m.name} style={{ width: 92, height: 92, borderRadius: 12, objectFit: 'cover', display: 'block', background: '#f1f1f3' }}
+                    fallback={<div style={{ width: 92, height: 92, borderRadius: 12, background: '#f1f1f3', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>{m.emoji}</div>} />
+                  {qty === 0 ? (
+                    <button onClick={() => add(m.id)} className="add-btn"
+                      style={{ position: 'absolute', bottom: -10, right: -8, width: 36, height: 36, borderRadius: 11, background: '#fff', border: '1.5px solid #ececef', color: B, fontSize: 22, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,0,0,.12)', transition: 'border-color .15s,transform .1s' }}>+</button>
+                  ) : (
+                    <div style={{ position: 'absolute', bottom: -12, left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: 2, background: '#fff', borderRadius: 12, boxShadow: '0 4px 14px rgba(0,0,0,.16)', padding: 3 }}>
+                      <button onClick={() => dispatch({ type: 'DEC', id: m.id })} className="stepper-dec"
+                        style={{ width: 28, height: 28, border: 'none', background: 'transparent', color: B, fontSize: 19, fontWeight: 700, cursor: 'pointer', borderRadius: 9, transition: 'transform .1s' }}>−</button>
+                      <span style={{ minWidth: 16, textAlign: 'center', fontWeight: 800, fontSize: 13, fontVariantNumeric: 'tabular-nums' }}>{qty}</span>
+                      <button onClick={() => dispatch({ type: 'INC', id: m.id })} className="stepper-inc"
+                        style={{ width: 28, height: 28, border: 'none', background: B, color: '#fff', fontSize: 17, fontWeight: 700, cursor: 'pointer', borderRadius: 9, transition: 'transform .1s' }}>+</button>
+                    </div>
+                  )}
+                </div>
               </div>
-              <div style={{ position: 'relative', flex: 'none', width: 96, height: 96 }}>
-                <div style={{ width: 96, height: 96, borderRadius: 15, background: '#f1f1f3', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 42 }}>{m.emoji}</div>
-                {qty === 0 ? (
-                  <button onClick={() => add(m.id)} className="add-btn"
-                    style={{ position: 'absolute', bottom: -10, right: -8, width: 38, height: 38, borderRadius: 12, background: '#fff', border: '1.5px solid #ececef', color: B, fontSize: 22, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,0,0,.12)', transition: 'border-color .15s,transform .1s' }}>+</button>
-                ) : (
-                  <div style={{ position: 'absolute', bottom: -12, left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: 2, background: '#fff', borderRadius: 12, boxShadow: '0 4px 14px rgba(0,0,0,.16)', padding: 3 }}>
-                    <button onClick={() => dispatch({ type: 'DEC', id: m.id })} className="stepper-dec"
-                      style={{ width: 30, height: 30, border: 'none', background: 'transparent', color: B, fontSize: 20, fontWeight: 700, cursor: 'pointer', borderRadius: 9, transition: 'transform .1s' }}>−</button>
-                    <span style={{ minWidth: 18, textAlign: 'center', fontWeight: 800, fontSize: 14, fontVariantNumeric: 'tabular-nums' }}>{qty}</span>
-                    <button onClick={() => dispatch({ type: 'INC', id: m.id })} className="stepper-inc"
-                      style={{ width: 30, height: 30, border: 'none', background: B, color: '#fff', fontSize: 18, fontWeight: 700, cursor: 'pointer', borderRadius: 9, transition: 'transform .1s' }}>+</button>
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     );
   });
