@@ -127,7 +127,10 @@ const RESTAURANTS = RAW.map(r => {
     ITEMS[item.id] = item;
     return item;
   });
-  return { ...r, grad, menu };
+  // Price tier (1=₱, 2=₱₱, 3=₱₱₱) from average menu price.
+  const avg = menu.reduce((sum, m) => sum + m.price, 0) / menu.length;
+  const priceLevel = avg < 100 ? 1 : avg < 160 ? 2 : 3;
+  return { ...r, grad, menu, priceLevel };
 });
 
 // Asset base — drop images into public/assets/… and they appear automatically.
@@ -205,6 +208,13 @@ const TOP_BRANDS = ['jb', 'chowking', 'kfc', 'bonchon', 'greenwich', 'mcdo', 'sh
 
 // ─── State ───────────────────────────────────────────────────────────────────
 
+// Saved delivery addresses shown in the address picker. `value` is what lands in the header.
+const SAVED_ADDRESSES = [
+  { id: 'makati', icon: 'pin', label: 'Makati City, 1227', sub: '', value: 'Makati City, 1227' },
+  { id: 'home', icon: 'home', label: 'Home', sub: 'Bulacan', value: 'Bulacan' },
+  { id: 'partner', icon: 'heart', label: 'Partner', sub: '1 Bulacan, 3020', value: '1 Bulacan, 3020' },
+];
+
 const init = {
   screen: 'home',
   activeRid: null,
@@ -223,6 +233,12 @@ const init = {
   favorites: [],
   heroChips: HERO_CHIPS,
   heroPulse: 0,
+  address: 'Triangle Paseo de Roxas Makati City',
+  addrOpen: false,
+  sort: 'Relevance',     // 'Relevance' | 'Top rated' active; 'Fastest Delivery' | 'Distance' are inert
+  minRating: 0,          // 0 = off, 4 = "Ratings 4+" filter on
+  vouchers: false,       // "Accepts vouchers" → free-delivery restaurants
+  priceLevels: [],       // selected price tiers (1/2/3), empty = all
 };
 
 function reducer(s, a) {
@@ -232,6 +248,13 @@ function reducer(s, a) {
     case 'SET_MENU_Q': return { ...s, menuQ: a.v };
     case 'SET_MENU_CAT': return { ...s, menuCat: a.v };
     case 'SET_PAY': return { ...s, payment: a.v };
+    case 'SET_ADDRESS': return { ...s, address: a.v, addrOpen: false };
+    case 'OPEN_ADDR': return { ...s, addrOpen: true };
+    case 'CLOSE_ADDR': return { ...s, addrOpen: false };
+    case 'SET_SORT': return { ...s, sort: a.v };
+    case 'TOGGLE_RATING': return { ...s, minRating: s.minRating ? 0 : 4 };
+    case 'TOGGLE_VOUCHERS': return { ...s, vouchers: !s.vouchers };
+    case 'TOGGLE_PRICE': return { ...s, priceLevels: s.priceLevels.includes(a.v) ? [] : [a.v] };
     case 'OPEN_REST': return { ...s, screen: 'restaurant', activeRid: a.id, menuCat: 'All', menuQ: '' };
     case 'GO_HOME': return { ...s, screen: 'home' };
     case 'SHUFFLE_HERO': return { ...s, heroChips: shuffleHero(), heroPulse: s.heroPulse + 1 };
@@ -314,6 +337,7 @@ export default function App() {
   const compact = vw < 980;   // tablet & below — hide left filters, stack hero
   const narrow = vw < 640;    // phone — trim header, full-width search, 1-col grid
   const toastTimer = useRef(null);
+  const [addrInput, setAddrInput] = useState('');
 
   function toast(msg) {
     clearTimeout(toastTimer.current);
@@ -360,8 +384,12 @@ export default function App() {
   const visibleRestaurants = RESTAURANTS.filter(r => {
     const okQ = !ql || r.name.toLowerCase().includes(ql) || r.cuisines.join(' ').toLowerCase().includes(ql) || r.menu.some(m => m.name.toLowerCase().includes(ql));
     const okC = s.chip === 'All' || r.cuisines.includes(s.chip);
-    return okQ && okC;
+    const okR = !s.minRating || r.rating >= s.minRating;
+    const okV = !s.vouchers || r.fee === 0;
+    const okP = s.priceLevels.length === 0 || s.priceLevels.includes(r.priceLevel);
+    return okQ && okC && okR && okV && okP;
   });
+  if (s.sort === 'Top rated') visibleRestaurants.sort((a, b) => b.rating - a.rating);
 
   const R = s.activeRid ? RESTAURANTS.find(x => x.id === s.activeRid) : null;
   const favRestaurants = RESTAURANTS.filter(r => s.favorites.includes(r.id));
@@ -401,9 +429,13 @@ export default function App() {
         .fav-btn:active{transform:scale(.85);}
         .pay-opt:hover{border-color:${B} !important;}
         .chip-btn:hover{border-color:${B} !important;}
+        .fchip:hover{border-color:#1c1c22 !important;}
         .stepper-dec:active,.stepper-inc:active{transform:scale(.85);}
         .modal-keep:active{transform:scale(.97);}
         .modal-new:active{transform:scale(.97);}
+        .addr-row:hover{background:#f6f6f7 !important;}
+        .addr-go:hover{filter:brightness(1.07);}
+        .addr-go:active{transform:scale(.96);}
       `}</style>
 
       <div style={{ minHeight: '100vh', background: '#f5f5f6', paddingBottom: s.screen === 'favorites' ? 0 : 40 }}>
@@ -421,13 +453,13 @@ export default function App() {
               </svg>
               <span style={{ fontWeight: 800, fontSize: 23, letterSpacing: '-.6px', color: '#ff2b85', transform: 'translateY(-3px)' }}>poodfanda</span>
             </div>
-            <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', display: compact ? 'none' : 'flex', alignItems: 'center', gap: 6, color: '#1c1c22', fontSize: 14, fontWeight: 600, flex: 'none' }}>
+            <div onClick={() => { setAddrInput(s.address); dispatch({ type: 'OPEN_ADDR' }); }} style={{ position: 'absolute', left: 425, top: '50%', transform: 'translateY(-50%)', display: compact ? 'none' : 'flex', alignItems: 'center', gap: 6, color: '#1c1c22', fontSize: 14, fontWeight: 600, flex: 'none', cursor: 'pointer' }}>
               <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                <svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <svg aria-hidden="true" focusable="false" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                   <path fillRule="evenodd" clipRule="evenodd" d="M12.3224 2C16.9186 2 20.6446 5.72596 20.6446 10.3222C20.6446 11.8203 20.2487 13.226 19.5559 14.4404L18.4715 15.8911C17.8726 16.5162 16.6838 17.706 14.9052 19.4602L13.0213 21.313C12.6322 21.6947 12.0092 21.6946 11.6203 21.3128L7.91833 17.6571L6.59648 16.3282C6.2846 16.0104 5.78156 15.3801 5.08734 14.4375C4.3955 13.2238 4.00024 11.8192 4.00024 10.3222C4.00024 5.72596 7.72621 2 12.3224 2ZM12.3224 3.5C8.55463 3.5 5.50024 6.55439 5.50024 10.3222C5.50024 11.4141 5.75604 12.466 6.23886 13.4136L6.37241 13.66L6.96356 14.5436L7.18196 14.7804L7.77128 15.385C8.23371 15.8535 8.88147 16.5011 9.70239 17.3151C10.6866 18.2861 11.4247 19.0143 11.9168 19.4998C11.9577 19.5401 11.9986 19.5805 12.0395 19.6209C12.1953 19.7745 12.4456 19.7745 12.6013 19.6209L12.6754 19.5478L15.3017 16.9571L17.2047 15.0461C17.3404 14.9068 17.4503 14.7925 17.5337 14.7039L17.6874 14.534L18.2724 13.659L18.4049 13.4158C18.84 12.5624 19.0911 11.6245 19.1369 10.6487L19.1446 10.3222C19.1446 6.55439 16.0902 3.5 12.3224 3.5ZM12.3224 6.75C14.3935 6.75 16.0724 8.42893 16.0724 10.5C16.0724 12.5711 14.3935 14.25 12.3224 14.25C10.2513 14.25 8.57241 12.5711 8.57241 10.5C8.57241 8.42893 10.2513 6.75 12.3224 6.75ZM12.3224 8.25C11.0798 8.25 10.0724 9.25736 10.0724 10.5C10.0724 11.7426 11.0798 12.75 12.3224 12.75C13.5651 12.75 14.5724 11.7426 14.5724 10.5C14.5724 9.25736 13.5651 8.25 12.3224 8.25Z" />
                 </svg>
               </span>
-              <span>New address 1006 Ongpin St Manila 1003</span>
+              <span>{s.address}</span>
             </div>
             <div style={{ flex: 1 }} />
             <div className="ghost-btn" style={{ display: 'flex', alignItems: 'center', gap: 7, flex: 'none', borderRadius: 12, padding: '8px 14px', fontWeight: 700, fontSize: 14.5, color: '#1c1c22', cursor: 'pointer', transition: 'all .15s' }}>
@@ -462,6 +494,60 @@ export default function App() {
               )}
             </button>
           </div>
+
+          {/* Address picker dropdown */}
+          {s.addrOpen && (
+            <>
+              <div onClick={() => dispatch({ type: 'CLOSE_ADDR' })} style={{ position: 'fixed', inset: 0, zIndex: 45, background: 'rgba(15,15,20,.25)' }} />
+              <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 46, display: 'flex', justifyContent: 'center', padding: '0 22px', pointerEvents: 'none' }}>
+                <div style={{ width: '100%', maxWidth: 700 }}>
+                  <div style={{ background: '#fff', borderRadius: 18, boxShadow: '0 22px 55px rgba(0,0,0,.22)', padding: '18px 20px 10px', pointerEvents: 'auto', animation: 'modalIn .2s ease' }}>
+                    <div style={{ fontSize: 11.5, fontWeight: 700, color: '#8a8a93', marginBottom: 6, paddingLeft: 4 }}>Enter your address</div>
+                    <div style={{ display: 'flex', gap: 12, alignItems: 'stretch' }}>
+                      <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, border: '1px solid #e3e3e6', borderRadius: 12, padding: '11px 14px' }}>
+                        <input value={addrInput} onChange={e => setAddrInput(e.target.value)} autoFocus
+                          onKeyDown={e => { if (e.key === 'Enter' && addrInput.trim()) dispatch({ type: 'SET_ADDRESS', v: addrInput.trim() }); }}
+                          placeholder="Enter your address"
+                          style={{ flex: 1, border: 'none', outline: 'none', font: 'inherit', fontSize: 15, color: '#1c1c22', background: 'transparent' }} />
+                        {addrInput && (
+                          <button onClick={() => setAddrInput('')} aria-label="Clear address" style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#8a8a93', display: 'flex', padding: 0 }}>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M12 3a9 9 0 100 18 9 9 0 000-18zM9.53 8.47a.75.75 0 00-1.06 1.06L10.94 12l-2.47 2.47a.75.75 0 101.06 1.06L12 13.06l2.47 2.47a.75.75 0 101.06-1.06L13.06 12l2.47-2.47a.75.75 0 00-1.06-1.06L12 10.94 9.53 8.47z" /></svg>
+                          </button>
+                        )}
+                      </div>
+                      <button onClick={() => { if (addrInput.trim()) dispatch({ type: 'SET_ADDRESS', v: addrInput.trim() }); }} className="addr-go" aria-label="Confirm address"
+                        style={{ background: B, color: '#fff', border: 'none', borderRadius: 12, width: 56, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'filter .15s,transform .1s' }}>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                      </button>
+                    </div>
+
+                    <div style={{ fontWeight: 800, fontSize: 18, letterSpacing: '-.3px', margin: '18px 0 4px', paddingLeft: 4 }}>Saved Addresses</div>
+                    {SAVED_ADDRESSES.map(adr => {
+                      const selected = s.address === adr.value;
+                      return (
+                        <div key={adr.id} onClick={() => dispatch({ type: 'SET_ADDRESS', v: adr.value })} className="addr-row"
+                          style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 10px', borderRadius: 12, cursor: 'pointer', background: selected ? '#f6f6f7' : 'transparent', transition: 'background .12s' }}>
+                          <span style={{ color: '#1c1c22', display: 'flex', flex: 'none' }}>
+                            {adr.icon === 'pin' && <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M12 21s7-6.5 7-11a7 7 0 10-14 0c0 4.5 7 11 7 11z" /><circle cx="12" cy="10" r="2.5" /></svg>}
+                            {adr.icon === 'home' && <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M3 11l9-7 9 7" /><path d="M5 10v10h5v-6h4v6h5V10" /></svg>}
+                            {adr.icon === 'heart' && <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M12 20s-7-4.5-7-9.5A4 4 0 0112 7a4 4 0 017 3.5C19 15.5 12 20 12 20z" /></svg>}
+                          </span>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontWeight: 700, fontSize: 15, color: '#1c1c22' }}>{adr.label}</div>
+                            {adr.sub && <div style={{ color: '#54545c', fontSize: 14 }}>{adr.sub}</div>}
+                          </div>
+                          {selected && (
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={B} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" style={{ flex: 'none' }} xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9" /><path d="M8.5 12.5l2.5 2.5 4.5-5" /></svg>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
           {/* Nav row: tabs · search */}
           <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 22px', display: 'flex', alignItems: 'flex-end', gap: 18, flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: narrow ? 16 : 26, flex: 'none', overflowX: 'auto' }} className="hide-scroll">
@@ -536,29 +622,38 @@ export default function App() {
                 <div style={{ background: '#fff', borderRadius: 16, padding: 20, boxShadow: '0 8px 28px rgba(20,20,30,.14)', maxHeight: 'calc(100vh - 108px)', overflowY: 'auto' }}>
                   <div style={{ fontWeight: 800, fontSize: 19, marginBottom: 16 }}>Filters</div>
                   <div style={{ fontSize: 13, fontWeight: 700, color: '#8a8a93', marginBottom: 8 }}>Sort by</div>
-                  {['Relevance', 'Fastest Delivery', 'Distance', 'Top rated'].map((o, i) => (
-                    <label key={o} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', fontSize: 14, cursor: 'pointer' }}>
-                      <span style={{ width: 18, height: 18, borderRadius: '50%', border: `2px solid ${i === 0 ? B : '#cfcfd6'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}>
-                        {i === 0 && <span style={{ width: 9, height: 9, borderRadius: '50%', background: B }} />}
-                      </span>
-                      {o}
-                    </label>
-                  ))}
+                  {['Relevance', 'Fastest Delivery', 'Distance', 'Top rated'].map((o) => {
+                    const on = s.sort === o;
+                    return (
+                      <label key={o} onClick={() => dispatch({ type: 'SET_SORT', v: o })} style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '10px 0', fontSize: 14.5, fontWeight: on ? 600 : 500, color: '#2b2b30', cursor: 'pointer' }}>
+                        <span style={{ width: 20, height: 20, borderRadius: '50%', border: `2px solid ${on ? '#1c1c22' : '#d2d2d8'}`, background: on ? '#1c1c22' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}>
+                          {on && <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#fff' }} />}
+                        </span>
+                        {o}
+                      </label>
+                    );
+                  })}
                   <div style={{ height: 1, background: '#f1f1f3', margin: '15px 0' }} />
                   <div style={{ fontSize: 13, fontWeight: 700, color: '#8a8a93', marginBottom: 11 }}>Quick filters</div>
-                  <span style={{ display: 'inline-block', border: '1.5px solid #d9d9de', borderRadius: 999, padding: '7px 15px', fontSize: 13.5, fontWeight: 700, cursor: 'pointer' }}>Ratings 4+</span>
+                  <span onClick={() => dispatch({ type: 'TOGGLE_RATING' })} className="fchip" style={{ display: 'inline-block', border: `1.5px solid ${s.minRating ? '#1c1c22' : '#d9d9de'}`, background: s.minRating ? '#1c1c22' : 'transparent', color: s.minRating ? '#fff' : '#1c1c22', borderRadius: 999, padding: '7px 15px', fontSize: 13.5, fontWeight: 700, cursor: 'pointer', transition: 'all .15s' }}>Ratings 4+</span>
                   <div style={{ height: 1, background: '#f1f1f3', margin: '15px 0' }} />
                   <div style={{ fontSize: 13, fontWeight: 700, color: '#8a8a93', marginBottom: 11 }}>Offers</div>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, cursor: 'pointer' }}>
-                    <span style={{ width: 18, height: 18, borderRadius: 5, border: '2px solid #cfcfd6', flex: 'none' }} />
+                  <label onClick={() => dispatch({ type: 'TOGGLE_VOUCHERS' })} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, cursor: 'pointer' }}>
+                    <span style={{ width: 18, height: 18, borderRadius: 5, border: `2px solid ${s.vouchers ? '#1c1c22' : '#cfcfd6'}`, background: s.vouchers ? '#1c1c22' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none', transition: 'all .15s' }}>
+                      {s.vouchers && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M5 12.5l4.5 4.5L19 7" /></svg>}
+                    </span>
                     Accepts vouchers
                   </label>
                   <div style={{ height: 1, background: '#f1f1f3', margin: '15px 0' }} />
                   <div style={{ fontSize: 13, fontWeight: 700, color: '#8a8a93', marginBottom: 11 }}>Price</div>
                   <div style={{ display: 'flex', gap: 8 }}>
-                    {['₱', '₱₱', '₱₱₱'].map(p => (
-                      <span key={p} className="chip-btn" style={{ flex: 1, textAlign: 'center', border: '1.5px solid #d9d9de', borderRadius: 999, padding: '7px 0', fontSize: 13.5, fontWeight: 700, cursor: 'pointer', transition: 'all .15s' }}>{p}</span>
-                    ))}
+                    {['₱', '₱₱', '₱₱₱'].map((p, i) => {
+                      const lvl = i + 1;
+                      const on = s.priceLevels.includes(lvl);
+                      return (
+                      <span key={p} onClick={() => dispatch({ type: 'TOGGLE_PRICE', v: lvl })} className="fchip" style={{ flex: 1, textAlign: 'center', border: `1.5px solid ${on ? '#1c1c22' : '#d9d9de'}`, background: on ? '#1c1c22' : 'transparent', color: on ? '#fff' : '#1c1c22', borderRadius: 999, padding: '7px 0', fontSize: 13.5, fontWeight: 700, cursor: 'pointer', transition: 'all .15s' }}>{p}</span>
+                      );
+                    })}
                   </div>
                 </div>
               </aside>

@@ -73,3 +73,12 @@ Single `useReducer` in `App`. State shape:
 - All styles are inline (`style={{ ... }}`), no CSS classes except for hover/active/animation targets
 - CSS class names (`.rest-card`, `.btn-brand`, etc.) are declared in a `<style>` tag injected by `App` — used only for pseudo-state and keyframe animations
 - Brand color: `#d70f64` (stored as `const B`)
+
+## Positioning elements
+
+Whenever you position or move a UI element (anything touching `left`/`right`/`top`/`bottom`/`margin`/`transform`/`gap`/`padding` for placement), after the change always report:
+
+1. **Where** — a clickable `file:line` link to the exact style that controls the position, e.g. [App.jsx:440](src/App.jsx#L440).
+2. **How to adjust manually** — name the property and value to change, and which direction each way moves it (e.g. "`left: 240` — smaller = more left, bigger = more right").
+
+Prefer plain px values over `50%` + `translate(-50%)` centering tricks when an element may need manual tweaking, so the value is easy to find and drag.
