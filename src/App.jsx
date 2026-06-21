@@ -4,6 +4,9 @@ import { RESTAURANTS, ITEMS } from './data';
 // Asset base — drop images into public/assets/… and they appear automatically.
 const A = '/assets';
 
+// Empty-cart illustration (foodpanda).
+const EMPTY_CART_IMG = 'https://foodpanda.dhmedia.io/image/bento/production/web/fp/empty-state/illu_cart_empty.svg';
+
 // Nav tab icons. Inherit color via currentColor from the tab's text color.
 const NavIcons = {
   delivery: (
@@ -780,7 +783,7 @@ export default function App() {
                   <div style={{ border: '1px solid #ececef', borderRadius: 16, overflow: 'hidden', boxShadow: '0 4px 18px rgba(0,0,0,.05)' }}>
                     {t.count === 0 ? (
                       <div style={{ padding: '32px 22px 26px', textAlign: 'center' }}>
-                        <Img src={`${A}/cart-empty.webp`} alt="" style={{ width: 96, height: 96, objectFit: 'contain', margin: '0 auto', display: 'block' }}
+                        <Img src={EMPTY_CART_IMG} alt="" style={{ width: 120, height: 120, objectFit: 'contain', margin: '0 auto', display: 'block' }}
                           fallback={<div style={{ fontSize: 64 }}>🧺</div>} />
                         <div style={{ fontWeight: 800, fontSize: 19, marginTop: 12 }}>Hungry?</div>
                         <div style={{ color: '#8a8a93', fontSize: 14, marginTop: 4, lineHeight: 1.4 }}>You haven&apos;t added anything<br />to your cart!</div>
@@ -1007,7 +1010,8 @@ export default function App() {
           <div style={{ flex: 1, overflowY: 'auto', padding: '8px 20px' }}>
             {t.count === 0 ? (
               <div style={{ textAlign: 'center', padding: '70px 16px', color: '#8a8a93' }}>
-                <div style={{ fontSize: 52 }}>🛒</div>
+                <Img src={EMPTY_CART_IMG} alt="" style={{ width: 140, height: 140, objectFit: 'contain', margin: '0 auto', display: 'block' }}
+                  fallback={<div style={{ fontSize: 52 }}>🛒</div>} />
                 <div style={{ fontWeight: 700, fontSize: 17, color: '#1c1c22', marginTop: 12 }}>Your cart is empty</div>
                 <div style={{ fontSize: 14, marginTop: 5, lineHeight: 1.5 }}>Add some langhap-sarap favorites<br />and they&apos;ll show up here.</div>
               </div>
@@ -1103,7 +1107,7 @@ function RestCard({ r, isFav, onOpen, onFav, B, BD }) {
   return (
     <div onClick={onOpen} className="rest-card" style={{ cursor: 'pointer', transition: 'transform .16s ease' }}>
       <div style={{ position: 'relative', height: 168, borderRadius: 14, overflow: 'hidden' }}>
-        <Img src={`${A}/restaurants/${r.id}.webp`} alt={r.name} className="rest-img" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+        <Img src={r.thumb || `${A}/restaurants/${r.id}.webp`} alt={r.name} className="rest-img" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
           fallback={<div className="rest-img" style={{ width: '100%', height: '100%', background: r.grad, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 66 }}>{r.emoji}</div>} />
         <button onClick={e => { e.stopPropagation(); onFav(); }} className="fav-btn" aria-label={isFav ? 'Remove from favourites' : 'Add to favourites'} aria-pressed={isFav}
           style={{ position: 'absolute', top: 12, right: 12, width: 28, height: 28, borderRadius: '50%', background: '#fff', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isFav ? B : '#1c1c22', boxShadow: '0 2px 8px rgba(0,0,0,.15)', transition: 'transform .12s,color .15s' }}>
