@@ -13,7 +13,8 @@ Filipino food delivery app. React 19 + Vite 8. Single-page, no router — screen
 
 ```
 src/
-  App.jsx       # entire app: data, state, all screens and components
+  App.jsx       # state, all screens and components (UI/logic)
+  data.js       # RAW restaurant/menu data + RESTAURANTS/ITEMS derivation
   main.jsx      # React root mount
   App.css       # minimal global overrides
   index.css     # base resets
@@ -22,7 +23,7 @@ public/
   icons.svg
 ```
 
-All UI, state, and data lives in `src/App.jsx`. No separate component files yet.
+All UI, state, and logic live in `src/App.jsx`; all restaurant/menu data lives in `src/data.js`. No separate component files yet.
 
 ## Commands
 
@@ -66,7 +67,7 @@ Single `useReducer` in `App`. State shape:
 
 ## Data
 
-`RAW` array in `App.jsx` holds all restaurant and menu data. Transformed into `RESTAURANTS` (with gradient computed) and a flat `ITEMS` lookup on module load. No network calls — everything is static.
+`RAW` array in `src/data.js` holds all restaurant and menu data. Transformed into `RESTAURANTS` (with gradient computed) and a flat `ITEMS` lookup on module load, both exported and imported by `App.jsx`. No network calls — everything is static.
 
 ## Styling conventions
 
