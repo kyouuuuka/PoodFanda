@@ -1,8 +1,22 @@
 import { useReducer, useRef, useState, useEffect } from 'react';
-import { RESTAURANTS, ITEMS } from './data';
+import { RESTAURANTS, ITEMS, MCDO_FBT, JB_FBT, MI_FBT, CHOWKING_FBT, MCDO_SAUCES, customConfig, customFries, customDrinks, customFbt, registerCustomItem } from './data';
 
 // Asset base — drop images into public/assets/… and they appear automatically.
 const A = '/assets';
+
+// Thumbnails for "frequently bought together" add-ons, matched by name against the
+// real restaurant menu so cart lines show a picture when available.
+const FBT_IMG = (() => {
+  const map = {};
+  [['mcdo', MCDO_FBT], ['jb', JB_FBT], ['inasal', MI_FBT], ['chowking', CHOWKING_FBT]].forEach(([rid, list]) => {
+    const rest = RESTAURANTS.find(r => r.id === rid);
+    if (rest) list.forEach(f => {
+      const hit = rest.menu.find(m => m.name === f.name && m.img);
+      if (hit) map[f.name] = hit.img;
+    });
+  });
+  return map;
+})();
 
 // Empty-cart illustration (foodpanda).
 const EMPTY_CART_IMG = 'https://foodpanda.dhmedia.io/image/bento/production/web/fp/empty-state/illu_cart_empty.svg';
@@ -161,6 +175,14 @@ function reducer(s, a) {
       }
       return { ...s, cart: { ...s.cart, [a.id]: (s.cart[a.id] || 0) + 1 }, cartRid: it.rid };
     }
+    case 'ADD_CUSTOM': {
+      // Customized McDonald's meal + optional add-ons. Synthetic items are already
+      // registered in ITEMS by the caller, so totals/cart rendering just work.
+      const sameRest = !s.cartRid || s.cartRid === a.rid || !Object.keys(s.cart).length;
+      const cart = sameRest ? { ...s.cart } : {};
+      a.lines.forEach(l => { cart[l.id] = (cart[l.id] || 0) + l.qty; });
+      return { ...s, cart, cartRid: a.rid };
+    }
     case 'INC': return { ...s, cart: { ...s.cart, [a.id]: (s.cart[a.id] || 0) + 1 } };
     case 'DEC': {
       const c = { ...s.cart };
@@ -256,6 +278,47 @@ export default function App() {
     }
     dispatch({ type: 'ADD', id });
     toast(it.name.replace(/\s*\(.*?\)/g, '') + ' added');
+  }
+
+  // McDonald's "customize before adding" modal — holds the menu item being customized.
+  const [customItem, setCustomItem] = useState(null);
+
+  // Click handler for menu "+" buttons: open customize modal when the item supports
+  // it (McDo / Jollibee non-solo), else add directly.
+  function onAdd(m) {
+    if (customConfig(m.rid, m.name, m.desc)) setCustomItem(m);
+    else add(m.id);
+  }
+
+  // Build cart lines from the modal selections, then add them.
+  function confirmCustomize({ item, fries, drink, sauces = [], choices = [], fbt, instructions, qty }) {
+    const slug = str => str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const sauceNames = sauces.map(x => x.name).join(', ');
+    const choiceNames = choices.filter(Boolean).map(c => c.name).join(', ');
+    const parts = [];
+    if (choiceNames) parts.push(choiceNames);
+    if (fries) parts.push(fries.name);
+    if (sauceNames) parts.push(sauceNames);
+    if (drink) parts.push(drink.name);
+    const note = instructions.trim();
+    if (note) parts.push(`“${note}”`);
+
+    const extra = (fries ? fries.add : 0) + (drink ? drink.add : 0)
+      + sauces.reduce((sum, x) => sum + x.add, 0)
+      + choices.filter(Boolean).reduce((sum, c) => sum + c.add, 0);
+    const mealId = `${item.id}~${slug(choiceNames + '|' + (fries ? fries.name : '') + '|' + sauceNames + '|' + (drink ? drink.name : '') + '|' + note)}`;
+    registerCustomItem(mealId, { ...item, price: item.price + extra, desc: parts.join(' · ') });
+
+    const lines = [{ id: mealId, qty }];
+    fbt.forEach(f => {
+      const fid = `${item.rid}_fbt_${slug(f.name)}`;
+      registerCustomItem(fid, { name: f.name, price: f.add, rid: item.rid, cat: 'Add-on', desc: '', img: FBT_IMG[f.name] || '' });
+      lines.push({ id: fid, qty: 1 });
+    });
+
+    dispatch({ type: 'ADD_CUSTOM', lines, rid: item.rid });
+    setCustomItem(null);
+    toast(item.name.replace(/\s*\(.*?\)/g, '') + ' added');
   }
 
   function toggleFav(id) {
@@ -775,7 +838,7 @@ export default function App() {
             {/* Body: menu grid + cart sidebar */}
             <div style={{ maxWidth: 1240, margin: '0 auto', padding: compact ? '4px 18px 44px' : '4px 24px 44px', display: 'flex', gap: 28, alignItems: 'flex-start' }}>
               <div className="menu-col" style={{ flex: 1, minWidth: 0 }}>
-                <MenuItems R={R} cart={s.cart} cartRid={s.cartRid} menuQ={s.menuQ} dispatch={dispatch} add={add} B={B} BD={BD} BT={BT} />
+                <MenuItems R={R} cart={s.cart} cartRid={s.cartRid} menuQ={s.menuQ} dispatch={dispatch} onAdd={onAdd} B={B} BD={BD} BT={BT} />
               </div>
 
               {!compact && (
@@ -1068,6 +1131,11 @@ export default function App() {
           )}
         </aside>
 
+        {/* McDonald's customize modal */}
+        {customItem && (
+          <CustomizeModal key={customItem.id} item={customItem} onClose={() => setCustomItem(null)} onConfirm={confirmCustomize} B={B} BT={BT} />
+        )}
+
         {/* New-order modal */}
         {s.pending && (() => {
           const it = ITEMS[s.pending];
@@ -1245,7 +1313,7 @@ function MenuCats({ R }) {
   );
 }
 
-function MenuItems({ R, cart, cartRid, menuQ, dispatch, add, B, BD, BT }) {
+function MenuItems({ R, cart, cartRid, menuQ, dispatch, onAdd, B, BD, BT }) {
   const cats = [];
   R.menu.forEach(m => { if (!cats.includes(m.cat)) cats.push(m.cat); });
   const mq = menuQ.toLowerCase();
@@ -1273,7 +1341,7 @@ function MenuItems({ R, cart, cartRid, menuQ, dispatch, add, B, BD, BT }) {
                     <Img src={m.img} alt={m.name} style={{ width: 92, height: 92, borderRadius: 12, objectFit: 'cover', display: 'block', background: '#f1f1f3' }}
                       fallback={<div style={{ width: 92, height: 92, borderRadius: 12, background: '#f1f1f3' }} />} />
                     {qty === 0 ? (
-                      <button onClick={() => add(m.id)} className="add-btn" aria-label={`Add ${m.name}`}
+                      <button onClick={() => onAdd(m)} className="add-btn" aria-label={`Add ${m.name}`}
                         style={{ position: 'absolute', bottom: -10, right: -8, width: 36, height: 36, borderRadius: '50%', background: '#fff', border: '1.5px solid #ececef', color: '#1c1c22', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, boxShadow: '0 4px 12px rgba(0,0,0,.12)', transition: 'border-color .15s,transform .1s' }}>
                         <svg width="22" height="22" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ fill: 'currentColor' }}><path fillRule="evenodd" clipRule="evenodd" d="M12 5C12.3797 5 12.6935 5.28215 12.7432 5.64823L12.75 5.75V10.85C12.75 11.0709 12.9291 11.25 13.15 11.25H18.25C18.6642 11.25 19 11.5858 19 12C19 12.3797 18.7178 12.6935 18.3518 12.7432L18.25 12.75H13.15C12.9291 12.75 12.75 12.9291 12.75 13.15V18.25C12.75 18.6642 12.4142 19 12 19C11.6203 19 11.3065 18.7178 11.2568 18.3518L11.25 18.25V13.15C11.25 12.9291 11.0709 12.75 10.85 12.75H5.75C5.33579 12.75 5 12.4142 5 12C5 11.6203 5.28215 11.3065 5.64823 11.2568L5.75 11.25H10.85C11.0709 11.25 11.25 11.0709 11.25 10.85V5.75C11.25 5.33579 11.5858 5 12 5Z" /></svg>
                       </button>
@@ -1290,7 +1358,7 @@ function MenuItems({ R, cart, cartRid, menuQ, dispatch, add, B, BD, BT }) {
                 ) : (
                   <div style={{ flex: 'none', display: 'flex', alignItems: 'flex-end' }}>
                     {qty === 0 ? (
-                      <button onClick={() => add(m.id)} className="add-btn" aria-label={`Add ${m.name}`}
+                      <button onClick={() => onAdd(m)} className="add-btn" aria-label={`Add ${m.name}`}
                         style={{ width: 40, height: 40, borderRadius: '50%', background: '#fff', border: '1.5px solid #ececef', color: '#1c1c22', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, boxShadow: '0 2px 8px rgba(0,0,0,.10)', transition: 'border-color .15s,transform .1s' }}>
                         <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ fill: 'currentColor' }}><path fillRule="evenodd" clipRule="evenodd" d="M12 5C12.3797 5 12.6935 5.28215 12.7432 5.64823L12.75 5.75V10.85C12.75 11.0709 12.9291 11.25 13.15 11.25H18.25C18.6642 11.25 19 11.5858 19 12C19 12.3797 18.7178 12.6935 18.3518 12.7432L18.25 12.75H13.15C12.9291 12.75 12.75 12.9291 12.75 13.15V18.25C12.75 18.6642 12.4142 19 12 19C11.6203 19 11.3065 18.7178 11.2568 18.3518L11.25 18.25V13.15C11.25 12.9291 11.0709 12.75 10.85 12.75H5.75C5.33579 12.75 5 12.4142 5 12C5 11.6203 5.28215 11.3065 5.64823 11.2568L5.75 11.25H10.85C11.0709 11.25 11.25 11.0709 11.25 10.85V5.75C11.25 5.33579 11.5858 5 12 5Z" /></svg>
                       </button>
@@ -1312,4 +1380,180 @@ function MenuItems({ R, cart, cartRid, menuQ, dispatch, add, B, BD, BT }) {
       </div>
     );
   });
+}
+
+// Small status pill used in the customize modal section headers.
+function Pill({ text, on, B }) {
+  return <span style={{ fontSize: 11, fontWeight: 800, padding: '3px 9px', borderRadius: 999, letterSpacing: '.3px', textTransform: 'uppercase', background: on ? B : '#e7e7ea', color: on ? '#fff' : '#54545c', flex: 'none' }}>{text}</span>;
+}
+
+// "View N more" / "View less" toggle with a chevron, used by the customize modal.
+function ViewMoreBtn({ open, hidden, onClick }) {
+  return (
+    <button onClick={onClick}
+      style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', background: 'transparent', border: 'none', color: '#1c1c22', font: 'inherit', fontWeight: 600, fontSize: 14, cursor: 'pointer', padding: '12px 0 6px', textAlign: 'left' }}>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}><path d="m6 9 6 6 6-6" /></svg>
+      {open ? 'View less' : `View ${hidden} more`}
+    </button>
+  );
+}
+
+// One required single-choice card (fries / drink / one nugget sauce). sel = index|null.
+// Pass `limit` to collapse long lists behind a "View more" button.
+function ChoiceBlock({ title, opts, sel, onPick, B, BT, limit }) {
+  const priceLabel = add => (add === 0 ? 'Free' : '+ ' + peso(add));
+  const [open, setOpen] = useState(false);
+  const collapsed = limit && !open && !(sel != null && sel >= limit);
+  const shown = collapsed ? opts.slice(0, limit) : opts;
+  const hidden = opts.length - limit;
+  return (
+    <div style={{ background: BT, borderRadius: 14, padding: '16px 16px 6px', marginBottom: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
+        <div>
+          <div style={{ fontSize: 17, fontWeight: 800, letterSpacing: '-.3px' }}>{title}</div>
+          <div style={{ fontSize: 13, color: '#54545c', marginTop: 2 }}>Select 1</div>
+        </div>
+        <Pill text={sel != null ? 'Completed' : 'Required'} on={sel == null} B={B} />
+      </div>
+      <div style={{ marginTop: 10 }}>
+        {shown.map((o, i) => (
+          <label key={o.name} onClick={() => onPick(i)}
+            style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 0', cursor: 'pointer', borderTop: i ? '1px solid rgba(0,0,0,.06)' : 'none' }}>
+            <span style={{ width: 20, height: 20, borderRadius: '50%', border: `2px solid ${sel === i ? B : '#bcbcc6'}`, flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {sel === i && <span style={{ width: 10, height: 10, borderRadius: '50%', background: B }} />}
+            </span>
+            <span style={{ flex: 1, minWidth: 0, fontSize: 14.5, fontWeight: 500 }}>{o.name}</span>
+            <span style={{ fontSize: 14, fontWeight: 600, color: o.add === 0 ? '#1c1c22' : '#54545c', fontVariantNumeric: 'tabular-nums' }}>{priceLabel(o.add)}</span>
+          </label>
+        ))}
+      </div>
+      {limit && opts.length > limit && (
+        <ViewMoreBtn open={!collapsed} hidden={hidden} onClick={() => setOpen(o => !o)} />
+      )}
+    </div>
+  );
+}
+
+// ─── McDonald's customize-before-add modal ───────────────────────────────────
+function CustomizeModal({ item, onClose, onConfirm, B, BT }) {
+  const cfg = customConfig(item.rid, item.name, item.desc) || {};
+  const fbtItems = customFbt(item.rid);
+  const friesOpts = cfg.hasFries ? customFries(item.rid, cfg.size) : [];
+  const drinkOpts = cfg.hasDrink ? customDrinks(item.rid, cfg.size, `${item.name} ${item.desc || ''}`) : [];
+
+  const sauceMax = cfg.sauces || 0;
+  const choiceGroups = cfg.choices || [];   // restaurant-specific required choices (e.g. Chowking "Choice A")
+  const [friesIdx, setFriesIdx] = useState(null);
+  const [drinkIdx, setDrinkIdx] = useState(null);
+  const [sauceSel, setSauceSel] = useState(() => Array(sauceMax).fill(null)); // one pick per card
+  const [choiceSel, setChoiceSel] = useState(() => choiceGroups.map(g => Array(g.count || 1).fill(null)));
+  const [fbt, setFbt] = useState({});       // name -> selected
+  const [fbtOpen, setFbtOpen] = useState(false);
+  const [instructions, setInstructions] = useState('');
+  const [qty, setQty] = useState(1);
+
+  const pickSauce = (card, opt) => setSauceSel(p => p.map((v, idx) => (idx === card ? opt : v)));
+  const pickChoice = (gi, slot, opt) => setChoiceSel(p => p.map((arr, idx) => (idx === gi ? arr.map((v, s) => (s === slot ? opt : v)) : arr)));
+
+  const needFries = friesOpts.length > 0;   // a section only counts if it has options
+  const needDrink = drinkOpts.length > 0;
+  const fries = friesIdx != null ? friesOpts[friesIdx] : null;
+  const drink = drinkIdx != null ? drinkOpts[drinkIdx] : null;
+  const sauces = sauceSel.filter(i => i != null).map(i => MCDO_SAUCES[i]);
+  const choicePicks = choiceGroups.flatMap((g, i) => choiceSel[i].filter(v => v != null).map(v => g.opts[v]));
+  const valid = (!needFries || fries) && (!needDrink || drink)
+    && (!cfg.hasNugget || sauceSel.every(i => i != null))
+    && choiceSel.every(arr => arr.every(v => v != null));
+
+  const fbtList = fbtItems.filter(f => fbt[f.name]);
+  const sauceAdd = sauces.reduce((sum, x) => sum + x.add, 0);
+  const choiceAdd = choicePicks.reduce((sum, c) => sum + (c ? c.add : 0), 0);
+  const total = (item.price + (fries ? fries.add : 0) + (drink ? drink.add : 0) + sauceAdd + choiceAdd) * qty
+    + fbtList.reduce((sum, f) => sum + f.add, 0);
+
+  return (
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 80, background: 'rgba(15,15,20,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 20, width: '100%', maxWidth: 520, maxHeight: '92vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', animation: 'modalIn .25s ease', boxShadow: '0 24px 60px rgba(0,0,0,.32)' }}>
+
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '16px 18px', borderBottom: '1px solid #ececef', flex: 'none' }}>
+          <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, letterSpacing: '-.3px', lineHeight: 1.25 }}>{item.name}</h3>
+          <button onClick={onClose} aria-label="Close" style={{ width: 34, height: 34, borderRadius: '50%', background: '#f1f1f3', border: 'none', cursor: 'pointer', fontSize: 17, color: '#54545c', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}>✕</button>
+        </div>
+
+        {/* Body */}
+        <div style={{ overflowY: 'auto', padding: 18 }}>
+          {item.img && (
+            <Img src={item.img} alt={item.name} style={{ width: '100%', maxHeight: 220, objectFit: 'contain', display: 'block', margin: '0 auto 8px' }} fallback={<div />} />
+          )}
+          <div style={{ fontWeight: 800, fontSize: 17, marginBottom: 16, fontVariantNumeric: 'tabular-nums' }}>{peso(item.price)}</div>
+
+          {choiceGroups.map((g, i) => choiceSel[i].map((sel, slot) => (
+            <ChoiceBlock key={`${g.title}-${slot}`} title={g.count > 1 ? `${g.title} ${slot + 1}/${g.count}` : g.title}
+              opts={g.opts} sel={sel} onPick={o => pickChoice(i, slot, o)} B={B} BT={BT} />
+          )))}
+          {needFries && <ChoiceBlock title="Choose your Fries" opts={friesOpts} sel={friesIdx} onPick={setFriesIdx} B={B} BT={BT} />}
+          {cfg.hasNugget && sauceSel.map((sel, i) => (
+            <ChoiceBlock key={i} title={`Nugget Sauce ${i + 1}/${sauceMax}`} opts={MCDO_SAUCES} sel={sel} onPick={o => pickSauce(i, o)} B={B} BT={BT} />
+          ))}
+          {needDrink && <ChoiceBlock title="Choose your Drink" opts={drinkOpts} sel={drinkIdx} onPick={setDrinkIdx} limit={4} B={B} BT={BT} />}
+
+          {/* Frequently bought together */}
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+              <div>
+                <div style={{ fontSize: 17, fontWeight: 800, letterSpacing: '-.3px' }}>Frequently bought together</div>
+                <div style={{ fontSize: 13, color: '#54545c', marginTop: 2 }}>Other customers also ordered these</div>
+              </div>
+              <Pill text="Optional" on={false} B={B} />
+            </div>
+            <div style={{ marginTop: 8 }}>
+              {(fbtOpen ? fbtItems : fbtItems.slice(0, 3)).map(f => {
+                const on = !!fbt[f.name];
+                return (
+                  <label key={f.name} onClick={() => setFbt(p => ({ ...p, [f.name]: !p[f.name] }))}
+                    style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '9px 0', cursor: 'pointer', borderTop: '1px solid #f1f1f3' }}>
+                    <span style={{ width: 20, height: 20, borderRadius: 6, border: `2px solid ${on ? B : '#bcbcc6'}`, background: on ? B : '#fff', flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {on && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>}
+                    </span>
+                    {FBT_IMG[f.name]
+                      ? <Img src={FBT_IMG[f.name]} alt={f.name} style={{ width: 38, height: 38, borderRadius: 8, objectFit: 'cover', flex: 'none', background: '#f1f1f3' }} fallback={<div style={{ width: 38, height: 38, borderRadius: 8, background: '#f1f1f3' }} />} />
+                      : <div style={{ width: 38, height: 38, borderRadius: 8, background: '#f1f1f3', flex: 'none' }} />}
+                    <span style={{ flex: 1, minWidth: 0, fontSize: 14.5, fontWeight: 500 }}>{f.name}</span>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: '#54545c', fontVariantNumeric: 'tabular-nums' }}>+ {peso(f.add)}</span>
+                  </label>
+                );
+              })}
+              {fbtItems.length > 3 && (
+                <ViewMoreBtn open={fbtOpen} hidden={fbtItems.length - 3} onClick={() => setFbtOpen(o => !o)} />
+              )}
+            </div>
+          </div>
+
+          {/* Special instructions */}
+          <div>
+            <div style={{ fontSize: 17, fontWeight: 800, letterSpacing: '-.3px' }}>Special instructions</div>
+            <div style={{ fontSize: 13, color: '#54545c', margin: '2px 0 10px' }}>Special requests are subject to the restaurant&apos;s approval. Tell us here!</div>
+            <textarea value={instructions} onChange={e => setInstructions(e.target.value)} placeholder="e.g. No mayo" rows={2}
+              style={{ width: '100%', resize: 'vertical', border: '1px solid #d9d9de', borderRadius: 12, padding: '12px 14px', font: 'inherit', fontSize: 14, outline: 'none' }} />
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 18px', borderTop: '1px solid #ececef', flex: 'none' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, border: '1px solid #ececef', borderRadius: 999, padding: '4px 6px', flex: 'none' }}>
+            <button onClick={() => setQty(q => Math.max(1, q - 1))} className="stepper-dec" aria-label="Decrease quantity"
+              style={{ width: 30, height: 30, border: 'none', background: 'transparent', color: B, fontSize: 20, fontWeight: 700, cursor: 'pointer', borderRadius: 9 }}>−</button>
+            <span style={{ minWidth: 18, textAlign: 'center', fontWeight: 800, fontSize: 15, fontVariantNumeric: 'tabular-nums' }}>{qty}</span>
+            <button onClick={() => setQty(q => q + 1)} className="stepper-inc" aria-label="Increase quantity"
+              style={{ width: 30, height: 30, border: 'none', background: 'transparent', color: B, fontSize: 18, fontWeight: 700, cursor: 'pointer', borderRadius: 9 }}>+</button>
+          </div>
+          <button disabled={!valid} onClick={() => onConfirm({ item, fries, drink, sauces, choices: choicePicks, fbt: fbtList, instructions, qty })} className={valid ? 'btn-brand' : ''}
+            style={{ flex: 1, background: valid ? B : '#cfcfd6', color: '#fff', border: 'none', borderRadius: 12, padding: 14, font: 'inherit', fontWeight: 800, fontSize: 15, cursor: valid ? 'pointer' : 'default', boxShadow: valid ? `0 8px 20px ${BG}` : 'none', transition: 'filter .15s,transform .1s' }}>
+            Add to cart · {peso(total)}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
