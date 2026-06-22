@@ -1550,6 +1550,285 @@ const RAW = [
   ]},
 ];
 
+// ─── McDonald's customization catalogs ───────────────────────────────────────
+// Drives the "customize before add to cart" modal for non-solo McDonald's items.
+
+// Master drink list (prices are upcharges from the Small/cheapest baseline).
+const MCDO_DRINKS = [
+  { name: 'Coke', add: 0 }, { name: 'Coke Medium', add: 11 }, { name: 'Coke Large', add: 20 },
+  { name: 'Coke Zero', add: 0 }, { name: 'Coke Zero Medium', add: 11 }, { name: 'Coke Zero Large', add: 20 },
+  { name: 'Sprite', add: 0 }, { name: 'Sprite Medium', add: 11 }, { name: 'Sprite Large', add: 20 },
+  { name: 'Royal', add: 0 }, { name: 'Royal Medium', add: 11 }, { name: 'Royal Large', add: 20 },
+  { name: 'A&W Root Beer', add: 0 }, { name: 'A&W Root Beer Medium', add: 11 }, { name: 'A&W Root Beer Large', add: 20 },
+  { name: 'A&W Root Beer McFloat Medium', add: 29 }, { name: 'A&W Root Beer McFloat Large', add: 47 },
+  { name: 'Coke McFloat with Hot Fudge Medium', add: 41 }, { name: 'Coke McFloat with Hot Fudge Large', add: 54 },
+  { name: 'Coke McFloat Medium', add: 41 }, { name: 'Coke McFloat Large', add: 54 },
+  { name: 'Royal McFloat Medium', add: 41 }, { name: 'Royal McFloat Large', add: 54 },
+  { name: 'Orange Juice', add: 11 }, { name: 'Orange Juice Medium', add: 25 }, { name: 'Orange Juice Large', add: 31 },
+  { name: 'Iced Tea', add: 11 }, { name: 'Iced Tea Medium', add: 25 }, { name: 'Iced Tea Large', add: 31 },
+  { name: 'McCafé Iced Coffee Black Medium', add: 25 }, { name: 'McCafé Iced Coffee Black Large', add: 45 },
+  { name: 'McCafé Iced Coffee Original Medium', add: 35 }, { name: 'McCafé Iced Coffee Original Large', add: 50 },
+  { name: 'McCafé Iced Coffee Original with Vanilla Medium', add: 45 }, { name: 'McCafé Iced Coffee Original with Vanilla Large', add: 60 },
+  { name: 'McCafé Iced Coffee Mocha Medium', add: 45 }, { name: 'McCafé Iced Coffee Mocha Large', add: 60 },
+  { name: 'McCafé Coffee McFloat Medium', add: 53 }, { name: 'McCafé Coffee McFloat Large', add: 76 },
+  { name: 'Large McCafé Premium Roast Coffee', add: 35 },
+  { name: 'McCafé Cereal Milk Premium Roast Coffee Regular', add: 40 }, { name: 'McCafé Cereal Milk Premium Roast Coffee Large', add: 60 },
+  { name: 'McCafé Cereal Milk Iced Coffee Medium', add: 59 }, { name: 'McCafé Cereal Milk Iced Coffee Large', add: 75 },
+  { name: 'McCafé Sea Salt Caramel Iced Coffee Medium', add: 59 }, { name: 'McCafé Sea Salt Caramel Iced Coffee Large', add: 75 },
+];
+
+// Frequently-bought-together add-ons (shown for every non-solo meal).
+const MCDO_FBT = [
+  { name: 'Extra Gravy', add: 11 },
+  { name: 'Burger McDo Solo', add: 52 },
+  { name: 'Hot Fudge Sundae', add: 59 },
+  { name: 'McFlurry® with OREO®', add: 72 },
+  { name: 'Crispy Chicken Sandwich Solo', add: 70 },
+  { name: 'McFlurry® Matcha with OREO®', add: 83 },
+  { name: 'McSpaghetti Solo', add: 79 },
+  { name: 'Hot Caramel Sundae', add: 59 },
+  { name: 'Apple Pie', add: 47 },
+  { name: '1-pc Spicy Chicken McDo', add: 102 },
+];
+
+// Sauce choices for any item containing Chicken McNuggets.
+const MCDO_SAUCES = [
+  { name: 'Big Mac Sauce', add: 5 },
+  { name: 'Cajun Sauce', add: 5 },
+  { name: 'BBQ Sauce', add: 0 },
+  { name: 'Sweet and Sour Sauce', add: 0 },
+];
+
+const SIZE_RANK = { small: 1, medium: 2, large: 3 };
+
+// Size implied by a name ("Large" wins, then "Medium"/"Regular", else "Small").
+function sizeOf(name) {
+  if (/large/i.test(name)) return 'large';
+  if (/medium|regular/i.test(name)) return 'medium';
+  if (/small/i.test(name)) return 'small';
+  return 'small';
+}
+
+// How many nugget sauces a meal includes: 20-pc → 4, 10-pc → 2, else 1.
+function sauceCount(name) {
+  const m = name.match(/(\d+)\s*-?\s*pc/i);
+  const pcs = m ? parseInt(m[1], 10) : 0;
+  return pcs >= 20 ? 4 : pcs >= 10 ? 2 : 1;
+}
+
+// Jollibee uses "Regular / Go Medium / Go Large", where Regular is the base size.
+function jbSizeOf(name) {
+  if (/large/i.test(name)) return 'large';
+  if (/medium/i.test(name)) return 'medium';
+  return 'small';
+}
+
+// Jollibee drinks (Regular is free; specialty drinks come in Regular/Large/Float).
+const JB_DRINKS = [
+  { name: 'Iced Tea Regular', add: 0 }, { name: 'Go Medium Iced Tea', add: 53 }, { name: 'Go Large Iced Tea', add: 59 },
+  { name: 'Coke Regular', add: 0 }, { name: 'Go Medium Coke', add: 37 }, { name: 'Go Large Coke', add: 47 },
+  { name: 'Coke Zero Regular', add: 0 }, { name: 'Go Medium Coke Zero', add: 37 }, { name: 'Go Large Coke Zero', add: 47 },
+  { name: 'Royal Regular', add: 0 }, { name: 'Go Medium Royal', add: 37 }, { name: 'Go Large Royal', add: 47 },
+  { name: 'Sprite Regular', add: 0 }, { name: 'Go Medium Sprite', add: 37 }, { name: 'Go Large Sprite', add: 47 },
+  { name: 'Go Medium Pineapple Juice', add: 53 }, { name: 'Go Large Pineapple Juice', add: 59 },
+  { name: 'Go Medium Minute Maid Orange Juice Drink', add: 53 }, { name: 'Go Large Minute Maid Orange Juice Drink', add: 59 },
+  { name: 'Iced Mocha Regular', add: 53 }, { name: 'Iced Mocha Large', add: 77 }, { name: 'Iced Mocha Float', add: 65 },
+  { name: 'Iced Latte Regular', add: 36 }, { name: 'Iced Latte Large', add: 65 },
+  { name: 'Iced Vanilla Regular', add: 53 }, { name: 'Iced Vanilla Large', add: 77 }, { name: 'Iced Vanilla Float', add: 70 },
+  { name: 'Iced Caramel Regular', add: 65 }, { name: 'Iced Caramel Large', add: 89 }, { name: 'Iced Caramel Float', add: 82 },
+  { name: 'Go Coke Float', add: 47 }, { name: 'Hot Chocolate', add: 43 },
+];
+
+// Jollibee frequently-bought-together add-ons.
+const JB_FBT = [
+  { name: 'Jolly Crispy Fries - Regular', add: 71 },
+  { name: 'Coke Float', add: 83 },
+  { name: 'Chocolate Sundae', add: 65 },
+  { name: 'Extra Rice', add: 47 },
+  { name: 'Peach Mango Pie', add: 57 },
+  { name: 'Regular Fries w/ Coke Float', add: 112 },
+  { name: 'Extra Chickenjoy Gravy', add: 15 },
+  { name: 'Iced Mocha Regular', add: 93 },
+  { name: 'Iced Mocha Float', add: 100 },
+];
+
+// Mang Inasal add-ons (Choice A + frequently-bought-together, merged).
+const MI_FBT = [
+  { name: 'Plain Rice', add: 30 },
+  { name: 'Java Rice', add: 42 },
+  { name: 'Lumpiang Togue 1pc', add: 35 },
+  { name: '2 pcs Lumpiang Togue', add: 65 },
+  { name: 'Peanut Sauce', add: 8 },
+  { name: 'Extra Creamy Halo-Halo 8oz Add-on', add: 46 },
+  { name: 'Crema de Leche Halo-Halo 8oz Add-on', add: 46 },
+  { name: 'Extra Creamy Halo - Halo Small', add: 89 },
+  { name: 'Extra Creamy Halo - Halo Regular', add: 113 },
+  { name: 'Crema de Leche Halo-Halo Small', add: 89 },
+  { name: 'Crema de Leche Halo-Halo Regular', add: 113 },
+  { name: 'Coke Medium', add: 58 },
+  { name: 'Iced Red Gulaman Medium', add: 58 },
+];
+
+// Chowking "Choice A" side, required for non-ala-carte Chao Fan meals.
+const CHOWKING_SIDES = [
+  { name: 'Crispy Fish Fillet', add: 12 },
+  { name: '6PC Crispy Pork Wonton', add: 12 },
+  { name: '4PC Steamed Pork Siomai', add: 0 },
+  { name: '4PC Fried Pork Siomai', add: 0 },
+  { name: '4PC Lumpiang Shanghai', add: 0 },
+];
+
+// Chowking frequently-bought-together add-ons.
+const CHOWKING_FBT = [
+  { name: '3pc Buchi', add: 92 },
+  { name: '6pc Crispy Wonton with Sweet Chili', add: 88 },
+  { name: '6pc Spicy Wonton', add: 88 },
+  { name: 'Seafood Chao Fan', add: 92 },
+  { name: 'Extra Egg Fried Rice', add: 57 },
+];
+
+// When a meal's name/description names a specific drink, restrict the choices to it.
+// Most specific phrase first so e.g. "A&W Root Beer McFloat" beats "A&W Root Beer".
+const DRINK_FAMILIES = [
+  { match: /a&w root beer mcfloat/i, keep: d => /a&w root beer mcfloat/i.test(d) },
+  { match: /a&w root beer/i, keep: d => /a&w root beer/i.test(d) && !/mcfloat/i.test(d) },
+  { match: /coke mcfloat with hot fudge/i, keep: d => /coke mcfloat with hot fudge/i.test(d) },
+  { match: /coke mcfloat/i, keep: d => /coke mcfloat/i.test(d) && !/hot fudge/i.test(d) },
+  { match: /royal mcfloat/i, keep: d => /royal mcfloat/i.test(d) },
+  { match: /coke zero/i, keep: d => /coke zero/i.test(d) },
+  { match: /sprite/i, keep: d => /sprite/i.test(d) },
+  { match: /royal/i, keep: d => /royal/i.test(d) && !/mcfloat/i.test(d) },
+  { match: /iced tea/i, keep: d => /iced tea/i.test(d) },
+  { match: /orange juice/i, keep: d => /orange juice/i.test(d) },
+];
+
+// Per-restaurant customization spec. Each picks its own drinks/fries/fbt/size logic.
+const CUSTOMIZE = {
+  mcdo: {
+    sizeOf,
+    drinks: MCDO_DRINKS,
+    drinkFamilies: DRINK_FAMILIES,
+    fbt: MCDO_FBT,
+    nugget: true,
+    fries: size => {
+      const all = [
+        { name: 'Regular Fries', add: 0, rank: 1 },
+        { name: 'Medium Fries', add: 27, rank: 2 },
+        { name: 'Large Fries', add: 57, rank: 3 },
+      ];
+      const base = size === 'small' ? 0 : size === 'medium' ? 27 : 57;
+      const opts = all.filter(o => o.rank >= (SIZE_RANK[size] || 1)).map(o => ({ name: o.name, add: o.add - base }));
+      opts.push({ name: 'McShaker Fries Medium Cheese', add: 28 });
+      opts.push({ name: 'McShaker Fries Medium BBQ', add: 28 });
+      return opts;
+    },
+  },
+  jb: {
+    sizeOf: jbSizeOf,
+    drinks: JB_DRINKS,
+    drinkFamilies: null,
+    fbt: JB_FBT,
+    nugget: false,
+    fries: size => {
+      const all = [
+        { name: 'Regular Jolly Crispy Fries', add: 0, rank: 1 },
+        { name: 'Medium Jolly Crispy Fries', add: 41, rank: 2 },
+        { name: 'Large Jolly Crispy Fries', add: 69, rank: 3 },
+      ];
+      const base = size === 'small' ? 0 : size === 'medium' ? 41 : 69;
+      return all.filter(o => o.rank >= (SIZE_RANK[size] || 1)).map(o => ({ name: o.name, add: o.add - base }));
+    },
+  },
+  inasal: {
+    sizeOf,
+    drinks: [],            // no drink upsize — FBT + special instructions only
+    drinkFamilies: null,
+    fbt: MI_FBT,
+    nugget: false,
+    fries: () => [],       // no fries upsize
+  },
+  chowking: {
+    sizeOf,
+    drinks: [],
+    drinkFamilies: null,
+    fbt: CHOWKING_FBT,
+    nugget: false,
+    fries: () => [],
+    // Required "Choice A" ulam, only for non-ala-carte Chao Fan meals. Platters list
+    // more ulam in the description ("12pcs of Siomai"), so repeat one pick per serving
+    // (≈ 4pc = 1 ulam) instead of a single Select 1.
+    choices: [
+      {
+        title: 'Choice A',
+        opts: CHOWKING_SIDES,
+        match: n => /chao\s*fan/i.test(n) && !/ala\s*carte/i.test(n),
+        count: (n, d) => {
+          const m = (d || '').match(/(\d+)\s*pcs?/i);
+          return Math.max(1, Math.floor((m ? parseInt(m[1], 10) : 0) / 4));
+        },
+      },
+    ],
+  },
+};
+
+// What the customize modal should offer for a given restaurant's menu item.
+function customConfig(rid, name, desc = '') {
+  const spec = CUSTOMIZE[rid];
+  if (!spec) return null;                     // restaurant has no customization
+  if (/solo/i.test(name)) return null;        // solo items add directly, no modal
+  const size = spec.sizeOf(name);
+  const hasFries = /fries/i.test(name);
+  const hasDrink = /meal|drink|float|combo/i.test(name);
+  const hasNugget = spec.nugget && /nugget/i.test(name);
+  // Resolve any restaurant-specific required choice groups that apply to this item.
+  // `count` lets a group repeat (e.g. one ulam pick per serving in a Chao Fan platter).
+  const choices = (spec.choices || [])
+    .filter(c => c.match(name, desc))
+    .map(c => ({
+      title: c.title,
+      opts: typeof c.opts === 'function' ? c.opts(size) : c.opts,
+      count: c.count ? c.count(name, desc) : 1,
+    }));
+  return { size, hasFries, hasDrink, hasNugget, sauces: hasNugget ? sauceCount(name) : 0, choices };
+}
+
+// Fries upsize choices for a restaurant — only the meal's size and bigger.
+function customFries(rid, size) {
+  const spec = CUSTOMIZE[rid];
+  return spec ? spec.fries(size) : [];
+}
+
+// Drink choices — meal's size and bigger, narrowed to any drink the item text names,
+// re-based so the cheapest (included) option is free.
+function customDrinks(rid, size, text = '') {
+  const spec = CUSTOMIZE[rid];
+  if (!spec) return [];
+  const rank = SIZE_RANK[size] || 1;
+  let list = spec.drinks.filter(d => (SIZE_RANK[spec.sizeOf(d.name)] || 1) >= rank);
+  if (spec.drinkFamilies) {
+    const fam = spec.drinkFamilies.find(f => f.match.test(text));
+    if (fam) {
+      const narrowed = list.filter(d => fam.keep(d.name));
+      if (narrowed.length) list = narrowed;
+    }
+  }
+  const min = list.length ? Math.min(...list.map(d => d.add)) : 0;
+  return list.map(d => ({ name: d.name, add: Math.max(0, d.add - min) }));
+}
+
+// Frequently-bought-together add-ons for a restaurant.
+function customFbt(rid) {
+  return CUSTOMIZE[rid] ? CUSTOMIZE[rid].fbt : [];
+}
+
+// Register a synthetic cart item (customized meal / add-on) in the shared lookup.
+function registerCustomItem(id, item) {
+  if (!ITEMS[id]) ITEMS[id] = { ...item, id };
+  return id;
+}
+
+export { MCDO_FBT, JB_FBT, MI_FBT, CHOWKING_FBT, MCDO_SAUCES, customConfig, customFries, customDrinks, customFbt, registerCustomItem };
+
 const ITEMS = {};
 const RESTAURANTS = RAW.map(r => {
   const grad = mkGrad(r.color);

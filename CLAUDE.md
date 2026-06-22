@@ -69,6 +69,34 @@ Single `useReducer` in `App`. State shape:
 
 `RAW` array in `src/data.js` holds all restaurant and menu data. Transformed into `RESTAURANTS` (with gradient computed) and a flat `ITEMS` lookup on module load, both exported and imported by `App.jsx`. No network calls — everything is static.
 
+## Customize-before-add modal
+
+Some restaurants (currently **McDonald's** `mcdo`, **Jollibee** `jb`, **Mang Inasal** `inasal`, and **Chowking** `chowking`) open a customization modal (`CustomizeModal` in `App.jsx`) before adding an item to the cart. A restaurant can opt into only some sections — e.g. Mang Inasal has empty `drinks`/`fries`, so it shows only frequently-bought-together + special instructions. Sections with no options are hidden and don't block the Add button. Clicking a menu "+" button routes through `onAdd(m)`: if `customConfig(m.rid, m.name)` is truthy it opens the modal, otherwise it adds directly.
+
+Config lives in the `CUSTOMIZE` table in `src/data.js`, one entry per restaurant id. Exported helpers driving the modal:
+
+- `customConfig(rid, name)` — returns `null` for unsupported restaurants and for any item whose name contains **"Solo"** (solo items add directly, no modal). Otherwise returns `{ size, hasFries, hasDrink, hasNugget, sauces }`.
+- `customFries(rid, size)` — fries upsize options.
+- `customDrinks(rid, size, text)` — drink options (`text` is name + desc).
+- `customFbt(rid)` — frequently-bought-together add-ons.
+
+### Rules
+
+- **Non-solo only.** Items with "Solo" in the name skip the modal entirely.
+- **Fries** (shown when name contains "Fries") — **required**, single-select. Upsize only: the meal's included size and bigger, never smaller. Included size is **Free** (re-based to 0); larger sizes cost the difference. McDo also always offers McShaker Medium Cheese/BBQ.
+- **Drink** (shown when name matches `meal|drink|float|combo`) — **required**, single-select. Same size-and-up rule, cheapest shown option re-based to **Free**. If the item name/description names a specific drink (via `drinkFamilies`, e.g. "A&W Root Beer McFloat"), the list is narrowed to that family.
+- **Choice groups** (config `choices: [{ title, match, opts, count }]`, e.g. Chowking "Choice A" shown only for non-ala-carte Chao Fan) — each is a **required** single-select with its own title and static prices (not re-based to free). `match(name, desc)` decides whether it applies. Optional `count(name, desc)` repeats the card N times (titled `Title N/total`, each its own pick) — Chowking reads the description's ulam pieces (≈ 4pc = 1 ulam) so platters ("12pcs of Siomai") ask for one ulam per serving.
+- **Nugget Sauce** (McDo only, name contains "Nugget") — **required**. The card is **repeated once per included sauce** (`sauceCount`: 20-pc → 4, 10-pc → 2, else 1), each titled `Nugget Sauce N/total`, each its own single pick (duplicates allowed across cards).
+- **Frequently bought together** — **optional**, multi-select checkboxes. Shows first 3, then a "View N more" toggle.
+- **Special instructions** — free-text box at the bottom.
+- **Add to cart** stays disabled until every required section is satisfied. Quantity stepper applies to the main meal; each checked add-on is one line.
+
+### Cart integration
+
+Customized meals and add-ons are written into the shared `ITEMS` lookup as **synthetic items** via `registerCustomItem(id, item)`, so `cart` stays `{ [itemId]: quantity }` and all totals/cart/checkout rendering work unchanged. The meal's synthetic price = base + fries + drink + sauces; its chosen options + note are stored in `desc`. Add-ons get ids like `${rid}_fbt_<slug>`. The modal dispatches `ADD_CUSTOM` (merges lines; starts a fresh cart if the cart belongs to another restaurant).
+
+When adding a restaurant to the `CUSTOMIZE` table, give it `sizeOf`, `drinks`, `drinkFamilies` (or `null`), `fbt`, `nugget`, a `fries(size)` function, and optionally `choices` (array of `{ title, match, opts }` for restaurant-specific required picks). Long lists (drinks, FBT) collapse behind the shared `ViewMoreBtn`. Reuse `ChoiceBlock` (single-select, optional `limit` for "view more") for required choices.
+
 ## Styling conventions
 
 - All styles are inline (`style={{ ... }}`), no CSS classes except for hover/active/animation targets
