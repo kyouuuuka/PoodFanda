@@ -129,6 +129,7 @@ const init = {
   pulse: 0,
   pending: null,
   lastOrder: null,
+  user: null,            // signed-in email (null = not signed in)
   favorites: [],
   heroChips: HERO_CHIPS,
   heroPulse: 0,
@@ -198,6 +199,7 @@ function reducer(s, a) {
     }
     case 'CANCEL_NEW': return { ...s, pending: null };
     case 'PLACE_ORDER': return { ...s, screen: 'confirmation', cart: {}, cartRid: null, cartOpen: false, lastOrder: a.order };
+    case 'SET_USER': return { ...s, user: a.email };
     default: return s;
   }
 }
@@ -282,6 +284,7 @@ export default function App() {
 
   // McDonald's "customize before adding" modal — holds the menu item being customized.
   const [customItem, setCustomItem] = useState(null);
+  const [signInOpen, setSignInOpen] = useState(false);
 
   // Click handler for menu "+" buttons: open customize modal when the item supports
   // it (McDo / Jollibee non-solo), else add directly.
@@ -325,6 +328,19 @@ export default function App() {
     const wasFav = s.favorites.includes(id);
     dispatch({ type: 'TOGGLE_FAV', id });
     toast(wasFav ? 'Removed from favorites' : 'Added to favorites');
+  }
+
+  // Step 4 — gate Place Order behind email + OTP sign-in. If not signed in,
+  // open the sign-in modal; placing the order resumes from onSignIn success.
+  function onPlaceOrder() {
+    if (!s.user) { setSignInOpen(true); return; }
+    placeOrder();
+  }
+
+  function onSignIn(email) {
+    dispatch({ type: 'SET_USER', email });
+    setSignInOpen(false);
+    placeOrder();
   }
 
   function placeOrder() {
@@ -984,10 +1000,15 @@ export default function App() {
               </div>
             </div>
 
-            <button onClick={placeOrder} className="btn-brand"
+            <button onClick={onPlaceOrder} className="btn-brand"
               style={{ width: '100%', background: B, color: '#fff', border: 'none', borderRadius: 15, padding: 17, font: 'inherit', fontWeight: 800, fontSize: 16.5, cursor: 'pointer', boxShadow: `0 8px 22px ${BG}`, transition: 'filter .15s,transform .1s' }}>
-              Place Order · {peso(t.total)}
+              {s.user ? 'Place Order' : 'Sign in to confirm'} · {peso(t.total)}
             </button>
+            {s.user && (
+              <div style={{ textAlign: 'center', marginTop: 10, fontSize: 12.5, color: '#8a8a93' }}>
+                Signed in as <b style={{ color: '#54545c' }}>{s.user}</b>
+              </div>
+            )}
           </main>
         )}
 
@@ -1134,6 +1155,11 @@ export default function App() {
         {/* McDonald's customize modal */}
         {customItem && (
           <CustomizeModal key={customItem.id} item={customItem} onClose={() => setCustomItem(null)} onConfirm={confirmCustomize} B={B} BT={BT} />
+        )}
+
+        {/* Sign-in (email + OTP) modal — gates Place Order */}
+        {signInOpen && (
+          <SignInModal onClose={() => setSignInOpen(false)} onSuccess={onSignIn} B={B} BT={BT} />
         )}
 
         {/* New-order modal */}
@@ -1430,6 +1456,97 @@ function ChoiceBlock({ title, opts, sel, onPick, B, BT, limit }) {
       {limit && opts.length > limit && (
         <ViewMoreBtn open={!collapsed} hidden={hidden} onClick={() => setOpen(o => !o)} />
       )}
+    </div>
+  );
+}
+
+// ─── Sign-in (email + OTP) modal — Step 4 gate before Place Order ─────────────
+// No backend: the OTP is generated client-side and shown as a demo hint so the
+// flow can be completed end-to-end. In production, send the code by email.
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function SignInModal({ onClose, onSuccess, B, BT }) {
+  const [phase, setPhase] = useState('email');   // 'email' | 'otp'
+  const [email, setEmail] = useState('');
+  const [code, setCode] = useState('');          // the sent OTP
+  const [entry, setEntry] = useState('');        // what the user types
+  const [error, setError] = useState('');
+
+  const emailOk = EMAIL_RE.test(email.trim());
+
+  function sendCode() {
+    if (!emailOk) { setError('Enter a valid email address.'); return; }
+    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    setCode(otp);
+    setEntry('');
+    setError('');
+    setPhase('otp');
+  }
+
+  function verify() {
+    if (entry.trim() === code) { onSuccess(email.trim()); return; }
+    setError('Incorrect code. Please try again.');
+  }
+
+  return (
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 80, background: 'rgba(15,15,20,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 20, width: '100%', maxWidth: 420, display: 'flex', flexDirection: 'column', overflow: 'hidden', animation: 'modalIn .25s ease', boxShadow: '0 24px 60px rgba(0,0,0,.32)' }}>
+
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '16px 18px', borderBottom: '1px solid #ececef', flex: 'none' }}>
+          <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, letterSpacing: '-.3px' }}>Sign in to confirm</h3>
+          <button onClick={onClose} aria-label="Close" style={{ width: 34, height: 34, borderRadius: '50%', background: '#f1f1f3', border: 'none', cursor: 'pointer', fontSize: 17, color: '#54545c', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}>✕</button>
+        </div>
+
+        {/* Body */}
+        <div style={{ padding: 18 }}>
+          {phase === 'email' ? (
+            <>
+              <p style={{ margin: '0 0 14px', fontSize: 14, color: '#54545c', lineHeight: 1.5 }}>
+                Enter your email and we&apos;ll send a 6-digit code to confirm your order.
+              </p>
+              <label style={{ display: 'block', fontSize: 12.5, fontWeight: 800, color: '#8a8a93', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 6 }}>Email address</label>
+              <input type="email" value={email} autoFocus
+                onChange={e => { setEmail(e.target.value); setError(''); }}
+                onKeyDown={e => { if (e.key === 'Enter' && emailOk) sendCode(); }}
+                placeholder="you@example.com"
+                style={{ width: '100%', boxSizing: 'border-box', padding: '13px 14px', border: `1.5px solid ${error ? '#e5484d' : '#ececef'}`, borderRadius: 13, font: 'inherit', fontSize: 15, outline: 'none' }} />
+              {error && <div style={{ color: '#e5484d', fontSize: 13, marginTop: 7 }}>{error}</div>}
+              <button onClick={sendCode} disabled={!emailOk} className="btn-brand"
+                style={{ width: '100%', marginTop: 16, background: emailOk ? B : '#e7e7ea', color: emailOk ? '#fff' : '#a5a5ad', border: 'none', borderRadius: 14, padding: 15, font: 'inherit', fontWeight: 800, fontSize: 15.5, cursor: emailOk ? 'pointer' : 'not-allowed', transition: 'filter .15s,transform .1s' }}>
+                Send code
+              </button>
+            </>
+          ) : (
+            <>
+              <p style={{ margin: '0 0 14px', fontSize: 14, color: '#54545c', lineHeight: 1.5 }}>
+                We sent a 6-digit code to <b style={{ color: '#1c1c22' }}>{email.trim()}</b>. Enter it below.
+              </p>
+              {/* Demo hint — no real email is sent in this prototype */}
+              <div style={{ background: BT, border: `1px dashed ${B}`, borderRadius: 12, padding: '9px 12px', fontSize: 13, color: '#54545c', marginBottom: 14 }}>
+                Demo code: <b style={{ color: B, letterSpacing: 2, fontVariantNumeric: 'tabular-nums' }}>{code}</b>
+              </div>
+              <label style={{ display: 'block', fontSize: 12.5, fontWeight: 800, color: '#8a8a93', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 6 }}>Verification code</label>
+              <input inputMode="numeric" value={entry} autoFocus
+                onChange={e => { setEntry(e.target.value.replace(/\D/g, '').slice(0, 6)); setError(''); }}
+                onKeyDown={e => { if (e.key === 'Enter' && entry.length === 6) verify(); }}
+                placeholder="••••••"
+                style={{ width: '100%', boxSizing: 'border-box', padding: '13px 14px', border: `1.5px solid ${error ? '#e5484d' : '#ececef'}`, borderRadius: 13, font: 'inherit', fontSize: 22, fontWeight: 800, letterSpacing: 8, textAlign: 'center', outline: 'none', fontVariantNumeric: 'tabular-nums' }} />
+              {error && <div style={{ color: '#e5484d', fontSize: 13, marginTop: 7 }}>{error}</div>}
+              <button onClick={verify} disabled={entry.length !== 6} className="btn-brand"
+                style={{ width: '100%', marginTop: 16, background: entry.length === 6 ? B : '#e7e7ea', color: entry.length === 6 ? '#fff' : '#a5a5ad', border: 'none', borderRadius: 14, padding: 15, font: 'inherit', fontWeight: 800, fontSize: 15.5, cursor: entry.length === 6 ? 'pointer' : 'not-allowed', transition: 'filter .15s,transform .1s' }}>
+                Verify &amp; continue
+              </button>
+              <div style={{ textAlign: 'center', marginTop: 12, fontSize: 13, color: '#8a8a93' }}>
+                Didn&apos;t get it?{' '}
+                <button onClick={sendCode} style={{ background: 'none', border: 'none', color: B, fontWeight: 700, cursor: 'pointer', font: 'inherit', fontSize: 13, padding: 0 }}>Resend code</button>
+                {' · '}
+                <button onClick={() => { setPhase('email'); setError(''); }} style={{ background: 'none', border: 'none', color: B, fontWeight: 700, cursor: 'pointer', font: 'inherit', fontSize: 13, padding: 0 }}>Change email</button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
