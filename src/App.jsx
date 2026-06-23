@@ -599,7 +599,7 @@ export default function App() {
               </div>
               <div style={{ maxWidth: 1240, margin: '0 auto', padding: narrow ? '20px 22px 28px' : '24px 22px 40px', position: 'relative' }}>
                 <div style={{ marginLeft: compact ? 0 : 266 }}>
-                  <h1 style={{ margin: 0, color: '#fff', fontSize: narrow ? 27 : 34, fontWeight: 800, letterSpacing: '-.8px' }}>Good Afternoon</h1>
+                  <h2 style={{ margin: 0, color: '#fff', fontSize: narrow ? 27 : 34, fontWeight: 800, letterSpacing: '-.8px' }}>Good Afternoon</h2>
                   <p style={{ margin: '6px 0 0', color: 'rgba(255,255,255,.95)', fontSize: 18, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 7 }}>Ready for something you&apos;ll love? <span style={{ opacity: .8, fontSize: 15 }}>ⓘ</span></p>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginTop: 22, flexWrap: 'wrap' }}>
                     <button onClick={() => dispatch({ type: 'SHUFFLE_HERO' })} className="hero-chip" aria-label="Show me something new"
@@ -739,6 +739,32 @@ export default function App() {
                     ))}
                   </div>
                 )}
+              </section>
+
+              {/* About — SEO content */}
+              <section id="about-poodfanda" style={{ marginTop: 56, padding: narrow ? '28px 22px' : '40px 36px', background: '#fff', borderRadius: 20, border: '1px solid #ececef' }}>
+                <h1 style={{ margin: 0, fontSize: narrow ? 26 : 32, fontWeight: 800, letterSpacing: '-.8px', color: B }}>Poodfanda — Filipino Food Delivery</h1>
+                <p style={{ margin: '14px 0 0', fontSize: 16, lineHeight: 1.6, color: '#3a3a42', maxWidth: 760 }}>
+                  <strong>Poodfanda</strong> is a Filipino food delivery app where you can order from your
+                  favourite local restaurants and have your meal delivered fast. Browse top brands like
+                  McDonald&apos;s, Jollibee, Mang Inasal and Chowking, customise your order, and check out in
+                  seconds — all on Poodfanda.
+                </p>
+                <h2 style={{ margin: '28px 0 10px', fontSize: 21, fontWeight: 800, letterSpacing: '-.4px' }}>Why order on Poodfanda?</h2>
+                <div style={{ display: 'grid', gridTemplateColumns: narrow ? '1fr' : 'repeat(3,1fr)', gap: 16 }}>
+                  <div>
+                    <h3 style={{ margin: '0 0 6px', fontSize: 16, fontWeight: 800 }}>Top Filipino restaurants</h3>
+                    <p style={{ margin: 0, fontSize: 14.5, lineHeight: 1.55, color: '#54545c' }}>Order from the biggest local brands and neighbourhood favourites in one place.</p>
+                  </div>
+                  <div>
+                    <h3 style={{ margin: '0 0 6px', fontSize: 16, fontWeight: 800 }}>Fast delivery</h3>
+                    <p style={{ margin: 0, fontSize: 14.5, lineHeight: 1.55, color: '#54545c' }}>Get your food delivered quickly with live order tracking on Poodfanda.</p>
+                  </div>
+                  <div>
+                    <h3 style={{ margin: '0 0 6px', fontSize: 16, fontWeight: 800 }}>Easy checkout</h3>
+                    <p style={{ margin: 0, fontSize: 14.5, lineHeight: 1.55, color: '#54545c' }}>Pay with GCash, card or cash on delivery and customise meals before you order.</p>
+                  </div>
+                </div>
               </section>
             </div>
           </main>
